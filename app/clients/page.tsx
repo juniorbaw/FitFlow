@@ -214,10 +214,10 @@ export default function ClientsPage() {
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">IC</span>
+                <span className="text-white font-bold text-2xl">FF</span>
               </div>
               <div>
-                <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">InstaCoach Pro</span>
+                <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">FitFlow</span>
                 <p className="text-xs text-gray-500">Gestion Clients</p>
               </div>
             </Link>
