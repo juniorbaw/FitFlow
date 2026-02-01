@@ -93,10 +93,8 @@ try {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   
   const hasSupabase = pkg.dependencies && pkg.dependencies['@supabase/supabase-js'];
-  const hasNextAuthHelpers = pkg.dependencies && pkg.dependencies['@supabase/auth-helpers-nextjs'];
   
   console.log(`   ${hasSupabase ? '✅' : '❌'} @supabase/supabase-js`);
-  console.log(`   ${hasNextAuthHelpers ? '✅' : '❌'} @supabase/auth-helpers-nextjs`);
 } catch (err) {
   console.log('   ❌ Erreur:', err.message);
 }
