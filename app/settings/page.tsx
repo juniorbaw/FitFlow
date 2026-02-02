@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase'
+import { connectInstagram } from '@/lib/api'
 import Link from 'next/link'
 
 export default function SettingsPage() {
@@ -348,7 +349,10 @@ export default function SettingsPage() {
                       <p className="text-gray-600 mb-6 max-w-md mx-auto">
                         Link your Instagram Business account to start automating engagement and booking clients.
                       </p>
-                      <Button className="bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700">
+                      <Button 
+                        onClick={() => user?.id && connectInstagram(user.id)}
+                        className="bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700"
+                      >
                         Connect Instagram →
                       </Button>
                       <p className="text-xs text-gray-500 mt-4">Requires Instagram Business or Creator account</p>
