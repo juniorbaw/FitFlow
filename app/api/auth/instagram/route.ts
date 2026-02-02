@@ -1,35 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import crypto from 'crypto'
 
 const INSTAGRAM_APP_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://fit-flow-gamma.vercel.app'
-
-// Store for temporary state (in production, use Redis)
-const stateStore = new Map<string, { userId: string; timestamp: number }>()
+const SECRET_KEY = 'fitflow-instagram-oauth-secret'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current user
+    // Get current user from session
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      console.error('Auth error:', userError)
+      console.error('❌ Auth error:', userError)
       return NextResponse.redirect(new URL('/login', APP_URL))
     }
 
-    // Generate state for CSRF protection
-    const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    stateStore.set(state, { userId: user.id, timestamp: Date.now() })
+    console.log(`✅ User authenticated: ${user.id}`)
 
-    // Clean up old states after 15 minutes
-    setTimeout(() => {
-      const now = Date.now()
-      for (const [key, value] of stateStore.entries()) {
-        if (now - value.timestamp > 15 * 60 * 1000) {
-          stateStore.delete(key)
-        }
-      }
-    }, 0)
+    // Create state with user_id encoded (simple CSRF protection)
+    // Format: userId.timestamp.hash
+    const timestamp = Math.floor(Date.now() / 1000)
+    const signature = crypto
+      .createHmac('sha256', SECRET_KEY)
+      .update(`${user.id}${timestamp}`)
+      .digest('hex')
+      .substring(0, 16)
+    
+    const state = `${user.id}.${timestamp}.${signature}`
 
     // Build Instagram OAuth URL
     const params = new URLSearchParams({
@@ -42,21 +40,52 @@ export async function GET(request: NextRequest) {
 
     const instagramAuthUrl = `https://api.instagram.com/oauth/authorize?${params.toString()}`
 
-    console.log(`📱 Redirecting user ${user.id} to Instagram OAuth`)
+    console.log(`📱 Redirecting to Instagram OAuth...`)
+    console.log(`🔐 State: ${state}`)
 
     // Redirect to Instagram OAuth
     return NextResponse.redirect(instagramAuthUrl)
 
   } catch (error: any) {
-    console.error('Instagram auth route error:', error)
-    return NextResponse.redirect(new URL(`/settings?error=instagram_error`, APP_URL))
+    console.error('❌ Instagram auth route error:', error)
+    return NextResponse.redirect(new URL(`/settings?error=${encodeURIComponent(error.message)}`, APP_URL))
   }
 }
 
-export function getState(state: string): { userId: string; timestamp: number } | null {
-  const stateData = stateStore.get(state)
-  if (stateData) {
-    stateStore.delete(state) // One-time use
+export function verifyState(state: string): string | null {
+  try {
+    const [userId, timestamp, signature] = state.split('.')
+    
+    if (!userId || !timestamp || !signature) {
+      console.error('❌ Invalid state format')
+      return null
+    }
+
+    // Verify signature
+    const ts = parseInt(timestamp)
+    const now = Math.floor(Date.now() / 1000)
+    
+    // Allow 10 minute window
+    if (now - ts > 600) {
+      console.error('❌ State expired')
+      return null
+    }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', SECRET_KEY)
+      .update(`${userId}${timestamp}`)
+      .digest('hex')
+      .substring(0, 16)
+
+    if (signature !== expectedSignature) {
+      console.error('❌ Invalid signature')
+      return null
+    }
+
+    console.log(`✅ State verified for user: ${userId}`)
+    return userId
+  } catch (error: any) {
+    console.error('❌ State verification error:', error)
+    return null
   }
-  return stateData || null
 }
