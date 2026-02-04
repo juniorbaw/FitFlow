@@ -12,7 +12,7 @@ export default function LandingPage() {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">C</span>
             </div>
-            <span className="font-bold text-xl">ClientWin</span>
+            <span className="font-bold text-xl">FitFlow</span>
           </div>
           
           <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ export default function LandingPage() {
         </h1>
         
         <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-          ClientWin automatise vos DM Instagram pour convertir vos commentaires
+          FitFlow automatise vos DM Instagram pour convertir vos commentaires
           en clients. Gagnez 10h/semaine et 10 RDV/mois supplémentaires.
         </p>
         
@@ -99,7 +99,7 @@ export default function LandingPage() {
             <div className="text-4xl mb-4">🚀</div>
             <h3 className="text-xl font-semibold mb-2">3. Magie opère</h3>
             <p className="text-gray-600">
-              ClientWin répond automatiquement et book des RDV via Calendly.
+              FitFlow répond automatiquement et book des RDV via Calendly.
             </p>
           </Card>
         </div>
@@ -118,7 +118,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          © 2025 ClientWin. Tous droits réservés.
+          © 2025 FitFlow. Tous droits réservés.
         </div>
       </footer>
     </div>
