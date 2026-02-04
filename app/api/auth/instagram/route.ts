@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
 import crypto from 'crypto'
 
 const INSTAGRAM_APP_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID
@@ -8,26 +7,23 @@ const SECRET_KEY = 'fitflow-instagram-oauth-secret'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current user from session
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    const userId = request.nextUrl.searchParams.get('user_id')
 
-    if (userError || !user) {
-      console.error('❌ Auth error:', userError)
+    if (!userId) {
+      console.error('❌ No user_id param')
       return NextResponse.redirect(new URL('/login', APP_URL))
     }
 
-    console.log(`✅ User authenticated: ${user.id}`)
-
-    // Create state with user_id encoded (simple CSRF protection)
+    // Create state with user_id encoded (CSRF protection)
     // Format: userId.timestamp.hash
     const timestamp = Math.floor(Date.now() / 1000)
     const signature = crypto
       .createHmac('sha256', SECRET_KEY)
-      .update(`${user.id}${timestamp}`)
+      .update(`${userId}${timestamp}`)
       .digest('hex')
       .substring(0, 16)
-    
-    const state = `${user.id}.${timestamp}.${signature}`
+
+    const state = `${userId}.${timestamp}.${signature}`
 
     // Build Instagram OAuth URL
     const params = new URLSearchParams({

@@ -51,6 +51,18 @@ export default function SettingsPage() {
 
   useEffect(() => {
     checkUser()
+
+    // Detect success/error from Instagram OAuth callback URL params
+    const params = new URLSearchParams(window.location.search)
+    const success = params.get('success')
+    const error = params.get('error')
+    if (success === 'instagram_connected') {
+      setInstagram(prev => ({ ...prev, connected: true }))
+      alert('Instagram connecté avec succès! ✅')
+    }
+    if (error) {
+      alert('Erreur de connexion Instagram: ' + error)
+    }
   }, [])
 
   const checkUser = async () => {
@@ -91,6 +103,21 @@ export default function SettingsPage() {
       })
     }
 
+    // Load Instagram connection status
+    const { data: igAccount } = await supabase
+      .from('instagram_accounts')
+      .select('username, followers_count')
+      .eq('user_id', user.id)
+      .single()
+
+    if (igAccount) {
+      setInstagram({
+        connected: true,
+        username: '@' + igAccount.username,
+        followers: igAccount.followers_count || 0
+      })
+    }
+
     setLoading(false)
   }
 
@@ -101,6 +128,14 @@ export default function SettingsPage() {
     await new Promise(resolve => setTimeout(resolve, 1000))
     alert('Profile updated successfully! ✅')
     setSaving(false)
+  }
+
+  const handleConnectInstagram = () => {
+    if (!user?.id) {
+      alert('❌ You must be logged in to connect Instagram')
+      return
+    }
+    connectInstagram(user.id)
   }
 
   if (loading) {
@@ -340,7 +375,7 @@ export default function SettingsPage() {
                         Disconnect Instagram Account
                       </Button>
                     </div>
-                  {instagram.connected ? (
+                  ) : (
                     <div className="text-center py-12">
                       <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white text-5xl mx-auto mb-6">
                         📸
@@ -349,8 +384,8 @@ export default function SettingsPage() {
                       <p className="text-gray-600 mb-6 max-w-md mx-auto">
                         Link your Instagram Business account to start automating engagement and booking clients.
                       </p>
-                      <Button 
-                        onClick={() => user?.id && connectInstagram(user.id)}
+                      <Button
+                        onClick={handleConnectInstagram}
                         className="bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700"
                       >
                         Connect Instagram →
