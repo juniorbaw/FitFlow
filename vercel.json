@@ -1,16 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/scrape",
-      "schedule": "0 */2 * * *"
-    },
-    {
       "path": "/api/cron/daily-report",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/reset-daily-counts",
-      "schedule": "0 0 * * *"
     }
   ]
 }
