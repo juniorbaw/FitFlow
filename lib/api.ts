@@ -37,7 +37,7 @@ export async function sendDM(leadId: string, userId: string, customMessage?: str
 
 // Instagram
 export async function connectInstagram(userId: string) {
-  window.location.href = `${API_BASE}/api/auth/instagram`;
+  window.location.href = `${API_BASE}/api/instagram/connect?user_id=${userId}`;
 }
 
 export async function refreshComments(userId: string) {
