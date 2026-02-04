@@ -340,7 +340,7 @@ export default function SettingsPage() {
                         Disconnect Instagram Account
                       </Button>
                     </div>
-                  ) : (
+                  {instagram.connected ? (
                     <div className="text-center py-12">
                       <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white text-5xl mx-auto mb-6">
                         📸
