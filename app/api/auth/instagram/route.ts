@@ -14,6 +14,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', APP_URL))
     }
 
+    if (!INSTAGRAM_APP_ID) {
+      console.error('❌ INSTAGRAM_APP_ID not configured')
+      return NextResponse.redirect(new URL('/settings?error=app_not_configured', APP_URL))
+    }
+
     // Create state with user_id encoded (CSRF protection)
     // Format: userId.timestamp.hash
     const timestamp = Math.floor(Date.now() / 1000)
@@ -24,11 +29,12 @@ export async function GET(request: NextRequest) {
       .substring(0, 16)
 
     const state = `${userId}.${timestamp}.${signature}`
+    const redirectUri = `${APP_URL}/api/auth/instagram/callback`
 
     // Build Instagram OAuth URL
     const params = new URLSearchParams({
-      client_id: INSTAGRAM_APP_ID!,
-      redirect_uri: `${APP_URL}/api/auth/instagram/callback`,
+      client_id: INSTAGRAM_APP_ID,
+      redirect_uri: redirectUri,
       scope: 'user_profile,instagram_business_basic,instagram_business_content_publish',
       response_type: 'code',
       state
@@ -36,8 +42,11 @@ export async function GET(request: NextRequest) {
 
     const instagramAuthUrl = `https://api.instagram.com/oauth/authorize?${params.toString()}`
 
-    console.log(`📱 Redirecting to Instagram OAuth...`)
-    console.log(`🔐 State: ${state}`)
+    console.log(`📱 Instagram OAuth Request:`)
+    console.log(`  ├─ App ID: ${INSTAGRAM_APP_ID}`)
+    console.log(`  ├─ Redirect URI: ${redirectUri}`)
+    console.log(`  ├─ State: ${state}`)
+    console.log(`  └─ Auth URL: ${instagramAuthUrl.substring(0, 100)}...`)
 
     // Redirect to Instagram OAuth
     return NextResponse.redirect(instagramAuthUrl)
