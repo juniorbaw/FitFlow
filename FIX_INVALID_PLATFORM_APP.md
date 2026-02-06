@@ -1,53 +1,97 @@
-# 🔧 Fix: "Invalid platform app" Error
+# � ERREUR: "Invalid platform app" - DIAGNOSTIC ET SOLUTION
 
-Cette erreur signifie que votre application Facebook n'a pas correctement configuré Instagram Basic Display API.
+## ❌ Erreur reçue
+```
+Requête non valide: Les paramètres de demandes ne sont pas valides : Invalid platform app
+```
+
+## 🔍 Cause
+L'App ID `4318616691715057` **n'a PAS le produit Instagram Graph API correctement configuré**.
 
 ---
 
-## Solution rapide
+## ✅ SOLUTION IMMÉDIATE
 
-### Étape 1: Accéder à Meta Developer Console
+### Étape 1: Allez vérifier votre app
+**URL:** https://developers.facebook.com/apps/4318616691715057/
 
-Allez sur: https://developers.facebook.com/apps/4318616691715057
+### Étape 2: Vérifiez que Instagram Graph API est installé
 
-### Étape 2: Vérifier les produits installés
+**Menu gauche → Products (Produits)**
 
-1. Dans le menu de gauche, cliquez sur **"Tableau de bord"** ou **"Dashboard"**
-2. Regardez la section **"Produits"** ou **"Products"**
-3. Cherchez **"Instagram Basic Display"**
+**Cas A: Instagram n'est PAS dans la liste**
+- Cliquez **"Add Product"** ou **"+ Produit"**
+- Cherchez **"Instagram Graph API"** (PAS "Instagram Basic Display")
+- Cliquez **"Add"** ou **"Ajouter"**
+- Attendez 2-3 minutes que l'installation finisse
 
-### Étape 3: Installer Instagram Basic Display (si absent)
+**Cas B: Instagram EST dans la liste**
+- Cliquez dessus
+- Allez à **Settings** ou **Configuration**
+- Vérifiez:
+  - ✅ **Valid OAuth Redirect URIs**: `https://fit-flow-gamma.vercel.app/api/auth/instagram/callback`
+  - ✅ **Scopes activés**: `user_profile`, `instagram_business_basic`, `instagram_business_content_publish`
 
-**Si vous ne voyez PAS "Instagram Basic Display" dans vos produits:**
+### Étape 3: Vérifiez les Roles
 
-1. Cliquez sur **"+ Ajouter des produits"** ou **"+ Add Products"**
-2. Trouvez **"Instagram Basic Display"**
-3. Cliquez sur **"Configurer"** ou **"Set Up"**
+**Settings → Basic → Roles**
+- Vous devez être **Admin** ou **Tester** (ou l'app en Live)
 
-### Étape 4: Créer l'app Instagram (CRUCIAL)
+### Étape 4: Attendez et testez
 
-**Navigation**: Instagram Basic Display → Paramètres de base
+Attendez 2-3 minutes, puis:
+```bash
+git push
+# Attendez 5 min que Vercel redéploie
+# Allez à https://fit-flow-gamma.vercel.app/settings
+# Cliquez "Connect Instagram"
+```
 
-1. Vous devriez voir une section **"Instagram App ID"** et **"Instagram App Secret"**
-2. **Si ces champs sont VIDES**, cliquez sur **"Créer une app"** ou **"Create New App"**
-3. Remplissez le formulaire:
-   - **Display Name**: ClientWin Bot (ou un nom de votre choix)
-   - **Privacy Policy URL**: `https://interventions-enemies-malpractice-night.trycloudflare.com/privacy`
-   - **Terms of Service URL**: `https://interventions-enemies-malpractice-night.trycloudflare.com/terms`
-4. Cliquez sur **"Créer"**
+---
 
-### Étape 5: Récupérer le VRAI Instagram App ID
+## ⚠️ Si l'app est vraiment cassée
 
-Après avoir créé l'app Instagram:
+Si après ces vérifications ça marche toujours pas, l'app peut être **corrompue ou supprimée**.
 
-1. Vous verrez maintenant **"Instagram App ID"** et **"Instagram App Secret"**
-2. **COPIEZ l'Instagram App ID** (il est différent de votre Facebook App ID !)
+### Option: Créer une NOUVELLE app
 
-### Étape 6: Mettre à jour votre .env.local
+1. **Allez à:** https://developers.facebook.com/apps/
+2. **Cliquez:** "Create App" ou "Créer une app"
+3. **Type:** "Consumer"
+4. **Nom:** "FitFlow Instagram OAuth" ou autre
+5. **Créez l'app**
+6. **Ajoutez le produit "Instagram Graph API"**
+7. **Configurez les Redirect URIs et Scopes**
+8. **Notez le nouvel App ID et App Secret**
+9. **Mettez à jour `.env.local` et Vercel** avec les nouvelles valeurs
+10. **Testez**
 
-Ouvrez `/Users/souleyjr/Documents/MesProjets/clientwin/.env.local`
+---
 
-Remplacez:
+## 📋 CHECKLIST pour l'app existante
+
+- [ ] J'ai vérifié: https://developers.facebook.com/apps/4318616691715057/
+- [ ] Instagram Graph API est dans Products
+- [ ] Settings → Configuration contient le Redirect URI
+- [ ] Scopes sont activés
+- [ ] Je suis Admin ou Tester
+- [ ] J'ai attendu 2-3 min après modifications
+
+---
+
+## 💡 Commandes de test
+
+```bash
+cd "/Users/souleyjr/Desktop/FitFlow Launch"
+
+# Vérifier l'App ID
+grep NEXT_PUBLIC_INSTAGRAM_APP_ID .env.local
+
+# Tester localement
+npm run dev
+# Allez à http://localhost:3000/settings
+# Cliquez "Connect Instagram"
+```
 ```env
 INSTAGRAM_APP_ID=4318616691715057
 INSTAGRAM_APP_SECRET=a667e928daee99ec432b7a829394dc6a
