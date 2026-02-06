@@ -31,16 +31,16 @@ export async function GET(request: NextRequest) {
     const state = `${userId}.${timestamp}.${signature}`
     const redirectUri = `${APP_URL}/api/auth/instagram/callback`
 
-    // Build Instagram OAuth URL
+    // Build Instagram OAuth URL (using Instagram Business API)
     const params = new URLSearchParams({
       client_id: INSTAGRAM_APP_ID,
       redirect_uri: redirectUri,
-      scope: 'user_profile,instagram_business_basic,instagram_business_content_publish',
+      scope: 'instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights',
       response_type: 'code',
       state
     })
 
-    const instagramAuthUrl = `https://api.instagram.com/oauth/authorize?${params.toString()}`
+    const instagramAuthUrl = `https://www.instagram.com/oauth/authorize?${params.toString()}`
 
     console.log(`📱 Instagram OAuth Request:`)
     console.log(`  ├─ App ID: ${INSTAGRAM_APP_ID}`)

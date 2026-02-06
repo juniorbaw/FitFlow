@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     console.log(`  ├─ Redirect URI: ${redirectUri}`)
     console.log(`  ├─ App ID: ${process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID}`)
     
-    const tokenResponse = await fetch('https://graph.instagram.com/v18.0/oauth/access_token', {
+    const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
