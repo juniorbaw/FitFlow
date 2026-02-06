@@ -31,9 +31,9 @@ export async function GET(request: NextRequest) {
     const state = `${userId}.${timestamp}.${signature}`
     const redirectUri = `${APP_URL}/api/auth/callback`
 
-    // Build Instagram OAuth URL (using Instagram Business API)
-    // IMPORTANT: Use instagram.com/oauth/authorize (NOT facebook.com/dialog/oauth)
-    const instagramAuthUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${INSTAGRAM_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement&state=${state}`
+    // Build Facebook OAuth URL (Meta Business)
+    // IMPORTANT: Use facebook.com/v18.0/dialog/oauth (NOT instagram.com/oauth/authorize)
+    const instagramAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${INSTAGRAM_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement&state=${state}`
 
     console.log(`📱 Instagram OAuth Request:`)
     console.log(`  ├─ App ID: ${INSTAGRAM_APP_ID}`)
