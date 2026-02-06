@@ -81,13 +81,14 @@ export default function SettingsPage() {
     })
 
     // Load integrations and automation settings
-    const { data: profileData } = await supabase
-      .from('profiles')
+    // ✅ FIX: Utiliser 'users' au lieu de 'profiles' (table n'existe pas)
+    const { data: profileData, error: profileError } = await supabase
+      .from('users')
       .select('ghl_api_key, auto_send_enabled, daily_dm_limit')
       .eq('id', user.id)
       .single()
 
-    if (profileData) {
+    if (!profileError && profileData) {
       setIntegrations({
         ghl_api_key: profileData.ghl_api_key || '',
         webhook_url: `${window.location.origin}/api/webhooks/scrape`
@@ -97,20 +98,22 @@ export default function SettingsPage() {
         daily_dm_limit: profileData.daily_dm_limit || 20
       })
     } else {
+      // Table doesn't exist or no data - use defaults
       setIntegrations({
-        ...integrations,
+        ghl_api_key: '',
         webhook_url: `${window.location.origin}/api/webhooks/scrape`
       })
     }
 
     // Load Instagram connection status
-    const { data: igAccount } = await supabase
+    // ✅ FIX: Gérer l'erreur si la table n'existe pas
+    const { data: igAccount, error: igError } = await supabase
       .from('instagram_accounts')
       .select('username, followers_count')
       .eq('user_id', user.id)
       .single()
 
-    if (igAccount) {
+    if (!igError && igAccount) {
       setInstagram({
         connected: true,
         username: '@' + igAccount.username,
@@ -614,7 +617,7 @@ export default function SettingsPage() {
                       <Button 
                         onClick={async () => {
                           const { error } = await supabase
-                            .from('profiles')
+                            .from('users')
                             .update({ ghl_api_key: integrations.ghl_api_key })
                             .eq('id', user?.id)
                           
@@ -706,7 +709,7 @@ export default function SettingsPage() {
                       <Button 
                         onClick={async () => {
                           const { error } = await supabase
-                            .from('profiles')
+                            .from('users')
                             .update({
                               auto_send_enabled: automation.auto_send_enabled,
                               daily_dm_limit: automation.daily_dm_limit

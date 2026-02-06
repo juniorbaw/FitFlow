@@ -33,16 +33,16 @@ export async function GET(request: NextRequest) {
 
     // Build Facebook OAuth URL (Meta Business)
     // IMPORTANT: Use facebook.com/v18.0/dialog/oauth (NOT instagram.com/oauth/authorize)
-    const instagramAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${INSTAGRAM_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement&state=${state}`
+    const appId = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID
+    const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement&response_type=code`
 
     console.log(`📱 Instagram OAuth Request:`)
-    console.log(`  ├─ App ID: ${INSTAGRAM_APP_ID}`)
+    console.log(`  ├─ App ID: ${appId}`)
     console.log(`  ├─ Redirect URI: ${redirectUri}`)
-    console.log(`  ├─ State: ${state}`)
-    console.log(`  └─ Auth URL: ${instagramAuthUrl.substring(0, 100)}...`)
+    console.log(`  ├─ Auth URL: ${authUrl.substring(0, 100)}...`)
 
     // Redirect to Instagram OAuth
-    return NextResponse.redirect(instagramAuthUrl)
+    return NextResponse.redirect(authUrl)
 
   } catch (error: any) {
     console.error('❌ Instagram auth route error:', error)

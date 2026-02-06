@@ -22,13 +22,14 @@ export async function GET(request: NextRequest) {
 
   try {
     // Exchange code for access token
+    // ✅ FIX: Utiliser NEXT_PUBLIC_INSTAGRAM_APP_ID pour cohérence
     const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: process.env.INSTAGRAM_APP_ID!,
+        client_id: process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID!,
         client_secret: process.env.INSTAGRAM_APP_SECRET!,
         grant_type: 'authorization_code',
         redirect_uri: `${baseUrl}/api/auth/callback`,

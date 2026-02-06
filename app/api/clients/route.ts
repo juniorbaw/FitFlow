@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { validateClientData } from '@/lib/validation';
+import { errorResponse, Errors, createLogger } from '@/lib/errors';
+
+const logger = createLogger('clients-api');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

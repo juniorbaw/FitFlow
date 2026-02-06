@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { scoreWithContext } from '@/lib/lead-scoring-advanced'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -11,11 +12,19 @@ interface AnalysisResult {
 
 export async function POST(request: NextRequest) {
   try {
-    const { comment_text, post_caption, instagram_username } = await request.json();
+    const { comment_text, post_caption, instagram_username, follower_count, is_verified, previous_interactions } = await request.json();
 
     if (!comment_text) {
       return NextResponse.json({ error: 'comment_text required' }, { status: 400 });
     }
+
+    // ✅ NOUVELLE FEATURE: Advanced AI Scoring en parallèle avec Gemini
+    const advancedScore = scoreWithContext({
+      comment: comment_text,
+      followerCount: follower_count,
+      isVerified: is_verified,
+      previousInteractions: previous_interactions
+    });
 
     const prompt = `Tu es un expert en qualification de leads pour coachs fitness français.
 
@@ -78,14 +87,26 @@ Le DM suggéré doit:
 
     const analysis: AnalysisResult = JSON.parse(cleanJson);
 
+    // ✅ Combiner les résultats Gemini + Advanced Scoring
     return NextResponse.json({
       success: true,
       analysis: {
+        // Gemini analysis (legacy format)
         score: Math.min(10, Math.max(1, analysis.score)),
         intent: analysis.intent,
         reasoning: analysis.reasoning,
         dm_suggested: analysis.dm_suggested,
       },
+      // ✅ NOUVEAU: Advanced AI Scoring
+      advanced_score: {
+        score: advancedScore.score,
+        tier: advancedScore.tier,
+        priority: advancedScore.priority,
+        confidence: advancedScore.confidence,
+        factors: advancedScore.factors,
+        reasoning: advancedScore.reasoning,
+        next_action: advancedScore.nextAction
+      }
     });
   } catch (error: any) {
     console.error('Gemini analysis error:', error);
