@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
     console.log(`  ├─ Redirect URI: ${redirectUri}`)
     console.log(`  ├─ App ID: ${process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID}`)
     
+    // Use api.instagram.com endpoint (NOT graph.instagram.com for token exchange)
     const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
