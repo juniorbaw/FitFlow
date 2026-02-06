@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       .substring(0, 16)
 
     const state = `${userId}.${timestamp}.${signature}`
-    const redirectUri = `${APP_URL}/api/auth/instagram/callback`
+    const redirectUri = `${APP_URL}/api/auth/callback`
 
     // Build Instagram OAuth URL (using Instagram Business API)
     // IMPORTANT: Use instagram.com/oauth/authorize (NOT facebook.com/dialog/oauth)
