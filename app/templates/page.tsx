@@ -36,7 +36,7 @@ export default function TemplatesPage() {
     if (!user) return
 
     const { data, error } = await supabase
-      .from('message_templates')
+      .from('templates')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
@@ -56,14 +56,13 @@ export default function TemplatesPage() {
       .filter(k => k.length > 0)
 
     const { error } = await supabase
-      .from('message_templates')
+      .from('templates')
       .insert({
         user_id: user.id,
         name: formData.name,
-        message_content: formData.message_content,
+        message: formData.message_content,
         trigger_keywords: keywords,
-        include_calendly: formData.include_calendly,
-        is_active: true
+        include_calendly: formData.include_calendly
       })
 
     if (!error) {
@@ -76,7 +75,7 @@ export default function TemplatesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer ce template ?')) return
-    const { error } = await supabase.from('message_templates').delete().eq('id', id)
+    const { error } = await supabase.from('templates').delete().eq('id', id)
     if (!error) {
       alert('Template supprimé')
       loadTemplates()
@@ -168,7 +167,7 @@ export default function TemplatesPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-bold text-lg mb-2">{template.name}</h3>
-                      <p className="text-gray-700 mb-3 whitespace-pre-wrap">{template.message_content}</p>
+                      <p className="text-gray-700 mb-3 whitespace-pre-wrap">{template.message}</p>
                       {template.trigger_keywords && template.trigger_keywords.length > 0 && (
                         <div className="flex gap-2 mb-2">
                           {template.trigger_keywords.map((kw: string, i: number) => (

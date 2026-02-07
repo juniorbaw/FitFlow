@@ -38,7 +38,7 @@ export default function CampaignsPage() {
     if (!user) return
 
     const { data } = await supabase
-      .from('message_templates')
+      .from('templates')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
