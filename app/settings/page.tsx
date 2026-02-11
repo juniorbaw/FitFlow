@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Copy, Check, ExternalLink, Loader2 } from 'lucide-react'
+import { Copy, Check, ExternalLink, Loader2, Instagram } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function SettingsPage() {
@@ -104,6 +104,23 @@ export default function SettingsPage() {
     }
   }
 
+  const handleConnectInstagram = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?redirectTo=/settings`,
+          scopes: 'instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_show_list,pages_read_engagement',
+        },
+      })
+
+      if (error) throw error
+    } catch (error: any) {
+      console.error('Instagram connection error:', error)
+      alert('Erreur lors de la connexion Instagram')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
@@ -187,6 +204,43 @@ export default function SettingsPage() {
           </Button>
         </Card>
 
+        {/* Instagram (OPTIONNEL) */}
+        <Card className="p-6 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] mb-6">
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            <Instagram className="w-5 h-5 text-[#FF5C00]" />
+            Connexion Instagram
+          </h2>
+          <p className="text-gray-400 text-sm mb-6">Optionnel • Nécessaire pour l'automatisation des DMs</p>
+          
+          {coach?.instagram_username ? (
+            <div className="flex items-center gap-3 p-4 bg-[rgba(0,210,106,0.1)] border border-[rgba(0,210,106,0.2)] rounded-lg">
+              <div className="flex-1">
+                <p className="text-white font-semibold">@{coach.instagram_username}</p>
+                <p className="text-green-400 text-sm">✓ Connecté</p>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="bg-[rgba(255,92,0,0.05)] border border-[rgba(255,92,0,0.15)] rounded-lg p-4 mb-4">
+                <p className="text-sm text-gray-300 mb-2">
+                  <strong className="text-white">Pourquoi connecter Instagram ?</strong>
+                </p>
+                <ul className="text-xs text-gray-400 space-y-1">
+                  <li>• Détecter automatiquement les commentaires</li>
+                  <li>• Envoyer des DMs personnalisés via ManyChat</li>
+                  <li>• Tracker les performances de vos posts</li>
+                </ul>
+              </div>
+              <Button
+                onClick={handleConnectInstagram}
+                className="bg-gradient-to-r from-[#FF5C00] to-[#FF8A00] hover:from-[#FF6D1A] hover:to-[#FF9B1A] text-white font-semibold px-6 py-3 rounded-full"
+              >
+                Connecter Instagram →
+              </Button>
+            </div>
+          )}
+        </Card>
+
         {/* Abonnement */}
         <Card className="p-6 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] mb-6">
           <h2 className="text-xl font-bold text-white mb-6">Abonnement</h2>
@@ -223,17 +277,6 @@ export default function SettingsPage() {
           <h2 className="text-xl font-bold text-white mb-6">Intégrations</h2>
           
           <div className="space-y-6">
-            {/* Instagram */}
-            <div>
-              <label className="text-white font-semibold mb-2 block">Instagram connecté</label>
-              <div className="flex items-center gap-3 p-4 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg">
-                <div className="flex-1">
-                  <p className="text-white">@{coach?.instagram_username || 'Non connecté'}</p>
-                  <p className="text-gray-400 text-sm">ID: {coach?.instagram_id || '-'}</p>
-                </div>
-              </div>
-            </div>
-
             {/* Webhook Token */}
             <div>
               <label className="text-white font-semibold mb-2 block">Webhook Token (Make.com)</label>
