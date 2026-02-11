@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react'
+
+const ORANGE = "#FF5C00"
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -20,16 +22,10 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
-
       router.push('/dashboard')
     } catch (error: any) {
-      console.error('Login error:', error)
       setError(error.message || 'Erreur lors de la connexion')
     } finally {
       setLoading(false)
@@ -37,99 +33,127 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FF5C00]/5 via-transparent to-[#3B82F6]/5"></div>
-      <div className="absolute top-20 left-20 w-96 h-96 bg-[#FF5C00]/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#3B82F6]/10 rounded-full blur-3xl"></div>
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 32, position: "relative", overflow: "hidden" }}>
+      
+      {/* Background gradients */}
+      <div style={{ position: "absolute", top: "10%", left: "10%", width: 500, height: 500, background: `${ORANGE}08`, borderRadius: "50%", filter: "blur(120px)" }}></div>
+      <div style={{ position: "absolute", bottom: "10%", right: "10%", width: 500, height: 500, background: "#3B82F608", borderRadius: "50%", filter: "blur(120px)" }}></div>
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-white mb-3 tracking-tight">
-            Bienvenue sur <span className="text-[#FF5C00]">FitFlow</span>
-          </h1>
-          <p className="text-gray-400 text-lg">Connectez-vous pour accéder à votre dashboard</p>
+      <div style={{ width: "100%", maxWidth: 480, position: "relative", zIndex: 1 }}>
+        
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: -1, marginBottom: 12 }}>
+            Fit<span style={{ color: ORANGE }}>Flow</span>
+          </div>
+          <div style={{ fontSize: 15, color: "#888" }}>
+            Connectez-vous à votre dashboard
+          </div>
         </div>
 
-        <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] rounded-2xl p-8 shadow-2xl">
+        {/* Card */}
+        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 24, padding: 48, backdropFilter: "blur(20px)" }}>
+          
+          <div style={{ marginBottom: 32 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, marginBottom: 8 }}>
+              Bon retour ! 👋
+            </h1>
+            <p style={{ fontSize: 14, color: "#888" }}>
+              Connectez-vous pour accéder à vos leads et analytics
+            </p>
+          </div>
+
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-shake">
-              <p className="text-red-400 text-sm font-semibold">{error}</p>
+            <div style={{ background: "rgba(255,77,77,0.1)", border: "1px solid rgba(255,77,77,0.2)", borderRadius: 12, padding: 16, marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: "#ff6b6b", fontWeight: 600 }}>{error}</div>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-white font-semibold mb-2 text-sm">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="coach@fitflow.com"
-                required
-                className="w-full px-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FF5C00] focus:ring-2 focus:ring-[#FF5C00]/20 transition-all"
-              />
+          <form onSubmit={handleLogin} style={{ marginBottom: 24 }}>
+            
+            {/* Email */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>
+                Email
+              </label>
+              <div style={{ position: "relative" }}>
+                <Mail style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="coach@fitflow.com"
+                  required
+                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s" }}
+                  onFocus={(e) => e.target.style.borderColor = ORANGE}
+                  onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-white font-semibold mb-2 text-sm">Mot de passe</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FF5C00] focus:ring-2 focus:ring-[#FF5C00]/20 transition-all"
-              />
+            {/* Password */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>
+                Mot de passe
+              </label>
+              <div style={{ position: "relative" }}>
+                <Lock style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s" }}
+                  onFocus={(e) => e.target.style.borderColor = ORANGE}
+                  onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+                />
+              </div>
             </div>
 
-            <Button
+            {/* Submit */}
+            <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-[#FF5C00] to-[#FF8A00] hover:from-[#FF6D1A] hover:to-[#FF9B1A] text-white font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#FF5C00]/20"
+              style={{ width: "100%", padding: 16, background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 8px 24px ${ORANGE}30`, transition: "transform 0.2s", opacity: loading ? 0.7 : 1 }}
+              onMouseEnter={(e) => !loading && (e.currentTarget.style.transform = "scale(1.02)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
               {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <>
+                  <div style={{ width: 16, height: 16, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }}></div>
                   Connexion...
-                </div>
+                </>
               ) : (
-                'Se connecter'
+                <>
+                  Se connecter <ArrowRight style={{ width: 18, height: 18 }} />
+                </>
               )}
-            </Button>
+            </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <Link href="/forgot-password" className="text-sm text-gray-400 hover:text-[#FF5C00] transition-colors">
-              Mot de passe oublié ?
-            </Link>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.08)]">
-            <p className="text-center text-gray-400 text-sm">
+          {/* Divider */}
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24 }}>
+            <div style={{ textAlign: "center", fontSize: 13, color: "#888" }}>
               Pas encore de compte ?{' '}
-              <Link href="/signup" className="text-[#FF5C00] hover:text-[#FF6D1A] font-bold transition-colors">
+              <Link href="/signup" style={{ color: ORANGE, fontWeight: 700, textDecoration: "none" }}>
                 Créer un compte →
               </Link>
-            </p>
+            </div>
           </div>
         </div>
 
-        <div className="text-center mt-6">
-          <Link href="/" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">
-            ← Retour à l&apos;accueil
+        {/* Back link */}
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <Link href="/" style={{ fontSize: 13, color: "#666", textDecoration: "none", transition: "color 0.2s" }}>
+            ← Retour à l'accueil
           </Link>
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
-        }
-        .animate-shake {
-          animation: shake 0.3s ease-in-out;
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
