@@ -6,8 +6,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 });
 
 const PRICE_IDS = {
-  starter: process.env.STRIPE_PRODUCT_STARTER || process.env.STRIPE_PRICE_STARTER || 'prod_TyPu3MklJdRMpw',
-  pro: process.env.STRIPE_PRODUCT_PRO || process.env.STRIPE_PRICE_PRO || 'prod_TyQ2uyeVIWNanX',
+  starter: 'price_1T0T4G7hDRiRaxtlqjTdXrnG',
+  pro: 'price_1T0TCs7hDRiRaxtlBshj4vHL',
 };
 
 export async function POST(request: NextRequest) {
