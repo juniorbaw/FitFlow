@@ -11,6 +11,13 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: 'FitFlow - Automatisez vos leads Instagram',
   description: 'Le système d\'automatisation lead generation pour coachs fitness Instagram',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  themeColor: '#FF5C00',
 }
 
 export default function RootLayout({
@@ -20,7 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${dmSans.variable} font-sans antialiased`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      </head>
+      <body className={`${dmSans.variable} font-sans antialiased`} style={{ margin: 0, padding: 0, width: '100%', overflowX: 'hidden' }}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

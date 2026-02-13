@@ -33,13 +33,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 32, position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(12px, 3vw, 16px)", position: "relative", overflow: "hidden", width: "100%", maxWidth: "100vw" }}>
       
       {/* Background gradients */}
-      <div style={{ position: "absolute", top: "10%", left: "10%", width: 500, height: 500, background: `${ORANGE}08`, borderRadius: "50%", filter: "blur(120px)" }}></div>
-      <div style={{ position: "absolute", bottom: "10%", right: "10%", width: 500, height: 500, background: "#3B82F608", borderRadius: "50%", filter: "blur(120px)" }}></div>
+      <div style={{ position: "absolute", top: "10%", left: "10%", width: "min(500px, 80vw)", height: "min(500px, 80vw)", background: `${ORANGE}08`, borderRadius: "50%", filter: "blur(120px)" }}></div>
+      <div style={{ position: "absolute", bottom: "10%", right: "10%", width: "min(500px, 80vw)", height: "min(500px, 80vw)", background: "#3B82F608", borderRadius: "50%", filter: "blur(120px)" }}></div>
 
-      <div style={{ width: "100%", maxWidth: 480, position: "relative", zIndex: 1 }}>
+      <div style={{ width: "100%", maxWidth: "min(480px, 100%)", position: "relative", zIndex: 1 }}>
         
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -52,7 +52,7 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 24, padding: 48, backdropFilter: "blur(20px)" }}>
+        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "clamp(16px, 4vw, 20px)", padding: "clamp(20px, 5vw, 48px)", backdropFilter: "blur(20px)", width: "100%", boxSizing: "border-box" }}>
           
           <div style={{ marginBottom: 32 }}>
             <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, marginBottom: 8 }}>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="coach@fitflow.com"
                   required
-                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s" }}
+                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s", boxSizing: "border-box" }}
                   onFocus={(e) => e.target.style.borderColor = ORANGE}
                   onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
                 />
@@ -104,7 +104,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s" }}
+                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s", boxSizing: "border-box" }}
                   onFocus={(e) => e.target.style.borderColor = ORANGE}
                   onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
                 />
@@ -115,7 +115,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              style={{ width: "100%", padding: 16, background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 8px 24px ${ORANGE}30`, transition: "transform 0.2s", opacity: loading ? 0.7 : 1 }}
+              style={{ width: "100%", padding: 16, background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 8px 24px ${ORANGE}30`, transition: "transform 0.2s", opacity: loading ? 0.7 : 1, boxSizing: "border-box" }}
               onMouseEnter={(e) => !loading && (e.currentTarget.style.transform = "scale(1.02)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >

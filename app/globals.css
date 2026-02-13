@@ -7,3 +7,64 @@
     --primary: #FF5C00;
   }
 }
+
+/* RESPONSIVE MOBILE FIXES - GLOBAL */
+* {
+  box-sizing: border-box !important;
+  -webkit-box-sizing: border-box !important;
+  -moz-box-sizing: border-box !important;
+}
+
+html {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+}
+
+body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Fix pour les inputs sur mobile */
+input,
+textarea,
+button,
+select {
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  max-width: 100% !important;
+}
+
+/* Empêcher le zoom sur focus sur iOS */
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Empêche le zoom auto sur iOS */
+  }
+}
+
+/* Fix pour les containers qui dépassent */
+div,
+section,
+main,
+header,
+footer {
+  max-width: 100vw !important;
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

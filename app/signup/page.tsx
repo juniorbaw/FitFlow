@@ -83,13 +83,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 32, position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(12px, 3vw, 16px)", position: "relative", overflow: "hidden", width: "100%", maxWidth: "100vw" }}>
       
       {/* Background */}
-      <div style={{ position: "absolute", top: "10%", left: "10%", width: 500, height: 500, background: `${ORANGE}08`, borderRadius: "50%", filter: "blur(120px)" }}></div>
-      <div style={{ position: "absolute", bottom: "10%", right: "10%", width: 500, height: 500, background: "#3B82F608", borderRadius: "50%", filter: "blur(120px)" }}></div>
+      <div style={{ position: "absolute", top: "10%", left: "10%", width: "min(500px, 80vw)", height: "min(500px, 80vw)", background: `${ORANGE}08`, borderRadius: "50%", filter: "blur(120px)" }}></div>
+      <div style={{ position: "absolute", bottom: "10%", right: "10%", width: "min(500px, 80vw)", height: "min(500px, 80vw)", background: "#3B82F608", borderRadius: "50%", filter: "blur(120px)" }}></div>
 
-      <div style={{ width: "100%", maxWidth: 640, position: "relative", zIndex: 1 }}>
+      <div style={{ width: "100%", maxWidth: "min(640px, 100%)", position: "relative", zIndex: 1 }}>
         
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
@@ -111,7 +111,7 @@ export default function SignupPage() {
         </div>
 
         {/* Card */}
-        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 24, padding: 48, backdropFilter: "blur(20px)" }}>
+        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "clamp(16px, 4vw, 20px)", padding: "clamp(20px, 5vw, 48px)", backdropFilter: "blur(20px)", width: "100%", boxSizing: "border-box" }}>
           
           {step === 1 && (
             <>
@@ -136,14 +136,14 @@ export default function SignupPage() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>Nom complet</label>
                     <div style={{ position: "relative" }}>
                       <User style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                      <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="John Doe" required style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+                      <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="John Doe" required style={{ width: "100%", padding: "14px 16px 14px 48px", boxSizing: "border-box", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
                     </div>
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>Business</label>
                     <div style={{ position: "relative" }}>
                       <Briefcase style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                      <input type="text" value={formData.businessName} onChange={(e) => setFormData({ ...formData, businessName: e.target.value })} placeholder="FitCoach Pro" style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+                      <input type="text" value={formData.businessName} onChange={(e) => setFormData({ ...formData, businessName: e.target.value })} placeholder="FitCoach Pro" style={{ width: "100%", padding: "14px 16px 14px 48px", boxSizing: "border-box", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
                     </div>
                   </div>
                 </div>
@@ -152,7 +152,7 @@ export default function SignupPage() {
                   <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>Email</label>
                   <div style={{ position: "relative" }}>
                     <Mail style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                    <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="coach@fitflow.com" required style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+                    <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="coach@fitflow.com" required style={{ width: "100%", padding: "14px 16px 14px 48px", boxSizing: "border-box", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
                   </div>
                 </div>
 
@@ -161,14 +161,14 @@ export default function SignupPage() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>Mot de passe</label>
                     <div style={{ position: "relative" }}>
                       <Lock style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                      <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" required style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+                      <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" required style={{ width: "100%", padding: "14px 16px 14px 48px", boxSizing: "border-box", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
                     </div>
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>Confirmer</label>
                     <div style={{ position: "relative" }}>
                       <Lock style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                      <input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} placeholder="••••••••" required style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+                      <input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} placeholder="••••••••" required style={{ width: "100%", padding: "14px 16px 14px 48px", boxSizing: "border-box", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} onFocus={(e) => e.target.style.borderColor = ORANGE} onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
                     </div>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ export default function SignupPage() {
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading} style={{ width: "100%", padding: 16, background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 8px 24px ${ORANGE}30`, opacity: loading ? 0.7 : 1 }}>
+                <button type="submit" disabled={loading} style={{ width: "100%", padding: 16, background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, boxSizing: "border-box", border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 8px 24px ${ORANGE}30`, opacity: loading ? 0.7 : 1 }}>
                   {loading ? 'Création du compte...' : <><Sparkles style={{ width: 18, height: 18 }} /> Créer mon compte <ArrowRight style={{ width: 18, height: 18 }} /></>}
                 </button>
               </form>
@@ -226,7 +226,7 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <button onClick={handleStripeCheckout} disabled={loading} style={{ width: "100%", padding: 16, background: "#635BFF", border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 24px #635BFF30", opacity: loading ? 0.7 : 1 }}>
+              <button onClick={handleStripeCheckout} disabled={loading} style={{ width: "100%", padding: 16, background: "#635BFF", boxSizing: "border-box", border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 24px #635BFF30", opacity: loading ? 0.7 : 1 }}>
                 {loading ? 'Redirection...' : <>Payer avec Stripe <ArrowRight style={{ width: 18, height: 18 }} /></>}
               </button>
 

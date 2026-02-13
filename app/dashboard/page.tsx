@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
+import { createClient } from '@/lib/supabase/client'
+import InstagramOnboarding from './components/InstagramOnboarding'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -120,6 +122,44 @@ function CustomTooltip({ active, payload, label }: any) {
 export default function FitFlowDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [leadFilter, setLeadFilter] = useState("all")
+  const [showInstagramOnboarding, setShowInstagramOnboarding] = useState(false)
+  const [coach, setCoach] = useState<any>(null)
+  const supabase = createClient()
+
+  useEffect(() => {
+    checkInstagramConnection()
+  }, [])
+
+  const checkInstagramConnection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: coachData } = await supabase
+        .from('coaches')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      setCoach(coachData)
+
+      // Show Instagram onboarding if not connected yet
+      if (coachData && !coachData.instagram_username) {
+        // Check if user has dismissed the modal before
+        const dismissed = localStorage.getItem('instagram_onboarding_dismissed')
+        if (!dismissed) {
+          setTimeout(() => setShowInstagramOnboarding(true), 2000) // Show after 2 seconds
+        }
+      }
+    } catch (error) {
+      console.error('Error checking Instagram connection:', error)
+    }
+  }
+
+  const handleSkipInstagram = () => {
+    localStorage.setItem('instagram_onboarding_dismissed', 'true')
+    setShowInstagramOnboarding(false)
+  }
 
   const filteredLeads = useMemo(() => {
     if (leadFilter === "all") return recentLeads
@@ -134,8 +174,16 @@ export default function FitFlowDashboard() {
   ]
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
-      <div style={{ padding: "16px 32px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <>
+      {showInstagramOnboarding && (
+        <InstagramOnboarding 
+          onClose={() => setShowInstagramOnboarding(false)}
+          onSkip={handleSkipInstagram}
+        />
+      )}
+      
+      <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", width: "100%", maxWidth: "100vw", overflowX: "hidden" }}>
+      <div style={{ padding: "16px clamp(16px, 4vw, 32px)", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5 }}>Fit<span style={{ color: ORANGE }}>Flow</span></div>
           <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
@@ -154,7 +202,7 @@ export default function FitFlowDashboard() {
         </div>
       </div>
 
-      <div style={{ padding: "32px", maxWidth: 1400, margin: "0 auto" }}>
+      <div style={{ padding: "clamp(16px, 4vw, 32px)", maxWidth: "1400px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
         {activeTab === "overview" && (
           <>
             <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
@@ -346,5 +394,6 @@ export default function FitFlowDashboard() {
         )}
       </div>
     </div>
+    </>
   )
 }
