@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from "react"
+import Link from "next/link"
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
 
 const ORANGE = "#FF5C00"
@@ -135,6 +136,42 @@ export default function FitFlowDashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+      
+      {/* Header avec logo cliquable */}
+      <div style={{ padding: "16px 32px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 16 }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none", cursor: "pointer" }}>
+          <div style={{ 
+            width: 40, 
+            height: 40, 
+            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 900,
+            fontSize: 18,
+            color: "white"
+          }}>
+            FF
+          </div>
+          <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5, color: "white" }}>
+            Fit<span style={{ color: ORANGE }}>Flow</span>
+          </div>
+        </Link>
+        <div style={{ 
+          background: "rgba(255,92,0,0.15)", 
+          border: `1px solid ${ORANGE}40`,
+          borderRadius: 6,
+          padding: "4px 12px",
+          fontSize: 12,
+          fontWeight: 700,
+          color: ORANGE
+        }}>
+          MODE DÉMO
+        </div>
+      </div>
+
+      <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       <div style={{ padding: "16px 32px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5 }}>Fit<span style={{ color: ORANGE }}>Flow</span></div>
@@ -345,6 +382,7 @@ export default function FitFlowDashboard() {
           </>
         )}
       </div>
+    </div>
     </div>
   )
 }
