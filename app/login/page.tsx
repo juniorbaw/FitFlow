@@ -32,6 +32,26 @@ export default function LoginPage() {
     }
   }
 
+  const handleFacebookLogin = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'email,public_profile,instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_show_list,pages_read_engagement',
+        },
+      })
+
+      if (error) throw error
+    } catch (error: any) {
+      setError(error.message || 'Erreur lors de la connexion Facebook')
+      setLoading(false)
+    }
+  }
+
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(12px, 3vw, 16px)", position: "relative", overflow: "hidden", width: "100%", maxWidth: "100vw" }}>
       
@@ -131,6 +151,45 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Divider OR */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "24px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }}></div>
+            <span style={{ color: "#666", fontSize: 13, fontWeight: 600 }}>OU</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }}></div>
+          </div>
+
+          {/* Facebook Login Button */}
+          <button
+            onClick={handleFacebookLogin}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: 16,
+              background: "#1877F2",
+              border: "none",
+              borderRadius: 12,
+              color: "white",
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              transition: "all 0.2s",
+              opacity: loading ? 0.7 : 1,
+              boxSizing: "border-box",
+              marginBottom: 24
+            }}
+            onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#166FE5")}
+            onMouseLeave={(e) => e.currentTarget.style.background = "#1877F2"}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            {loading ? "Connexion..." : "Se connecter avec Facebook"}
+          </button>
 
           {/* Divider */}
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24 }}>
