@@ -127,16 +127,16 @@ export default function HomePage() {
           {/* Badge de preuve sociale */}
           <div style={{ 
             display: "inline-block", 
-            background: "rgba(255, 92, 0, 0.1)", 
-            border: "1px solid rgba(255, 92, 0, 0.3)",
+            background: "rgba(139, 92, 246, 0.1)", 
+            border: "1px solid rgba(139, 92, 246, 0.3)",
             padding: "8px 20px", 
             borderRadius: 50, 
             fontSize: 13, 
             fontWeight: 700,
-            color: ORANGE,
+            color: "#8B5CF6",
             marginBottom: 24
           }}>
-            🔥 Rejoignez 500+ coachs qui automatisent leur croissance
+            ✨ Programme Bêta - Places limitées aux 50 premiers testeurs
           </div>
 
           <h1 style={{ fontSize: 64, fontWeight: 900, letterSpacing: -2, lineHeight: 1.1, marginBottom: 24 }}>
