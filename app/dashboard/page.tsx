@@ -8,6 +8,7 @@ import UserMenu from '@/components/UserMenu'
 import NotificationCenter from '@/components/NotificationCenter'
 import ExportButton from '@/components/ExportButton'
 import Link from 'next/link'
+import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -198,7 +199,7 @@ export default function FitFlowDashboard() {
   const tabs = [
     { id: "overview", label: "Vue d'ensemble", icon: "📊" },
     { id: "leads", label: "Leads", icon: "👥" },
-    { id: "posts", label: "Posts", icon: "📸" },
+    { id: "content", label: "Content AI", icon: "🎨" },
     { id: "revenue", label: "Revenue", icon: "💰" },
   ]
 
@@ -402,37 +403,7 @@ export default function FitFlowDashboard() {
           </>
         )}
 
-        {activeTab === "posts" && (
-          <>
-            <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginBottom: 24 }}>Performance des posts</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
-              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Leads par post</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={postPerformance} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis type="number" stroke="#555" fontSize={12} />
-                    <YAxis dataKey="post" type="category" stroke="#555" fontSize={11} width={120} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="leads" name="Leads" fill={ORANGE} radius={[0,4,4,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Revenue par post</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={postPerformance} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis type="number" stroke="#555" fontSize={12} />
-                    <YAxis dataKey="post" type="category" stroke="#555" fontSize={11} width={120} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="revenue" name="Revenue (€)" fill={GREEN} radius={[0,4,4,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </>
-        )}
+        {activeTab === "content" && <ContentAnalyzerTab />}
 
         {activeTab === "revenue" && (
           <>
