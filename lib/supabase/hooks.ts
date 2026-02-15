@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './client'
+import { SCHEMA, Coach, Lead, Conversation, Message, Feedback } from './schema'
 import type { Lead, Conversation, Message, Coach, Feedback } from './client'
 
 // Hook pour récupérer le coach connecté
