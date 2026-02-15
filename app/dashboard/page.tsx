@@ -9,6 +9,7 @@ import NotificationCenter from '@/components/NotificationCenter'
 import ExportButton from '@/components/ExportButton'
 import Link from 'next/link'
 import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
+import { RevenueTab } from './components/tabs/RevenueTab'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -405,49 +406,7 @@ export default function FitFlowDashboard() {
 
         {activeTab === "content" && <ContentAnalyzerTab />}
 
-        {activeTab === "revenue" && (
-          <>
-            <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginBottom: 24 }}>Revenue & Croissance</h2>
-            <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
-              <StatCard label="Revenue ce mois" value="3 200€" change="+38%" icon="💰" color={ORANGE} />
-              <StatCard label="Revenue moyen / lead" value="178€" change="+12%" icon="📈" color={GREEN} />
-              <StatCard label="Coût par lead" value="0.47€" change="-15%" icon="⚡" color={BLUE} />
-              <StatCard label="ROI" value="680%" change="+52%" icon="🚀" color={ORANGE} />
-            </div>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24, marginBottom: 32 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Évolution du revenue</div>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={revenueData}>
-                  <defs>
-                    <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={ORANGE} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={ORANGE} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="week" stroke="#555" fontSize={12} />
-                  <YAxis stroke="#555" fontSize={12} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="revenue" name="Revenue (€)" stroke={ORANGE} fill="url(#revenueGrad)" strokeWidth={3} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Leads vs Revenue</div>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="week" stroke="#555" fontSize={12} />
-                  <YAxis yAxisId="left" stroke="#555" fontSize={12} />
-                  <YAxis yAxisId="right" orientation="right" stroke="#555" fontSize={12} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line yAxisId="left" type="monotone" dataKey="leads" name="Leads" stroke={BLUE} strokeWidth={2} dot={{ r: 4 }} />
-                  <Line yAxisId="right" type="monotone" dataKey="revenue" name="Revenue (€)" stroke={ORANGE} strokeWidth={2} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </>
-        )}
+        {activeTab === "revenue" && <RevenueTab />}
       </div>
     </div>
     </>
