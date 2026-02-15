@@ -128,30 +128,11 @@ export default function FitFlowDashboard() {
   const [leadFilter, setLeadFilter] = useState("all")
   const [showInstagramOnboarding, setShowInstagramOnboarding] = useState(false)
   const [coach, setCoach] = useState<any>(null)
-  const [realLeads, setRealLeads] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   useEffect(() => {
     checkInstagramConnection()
-    fetchRealData()
   }, [])
-
-  const fetchRealData = async () => {
-    try {
-      const { data: leadsData } = await supabase
-        .from('leads')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20)
-      
-      setRealLeads(leadsData || [])
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching leads:', error)
-      setLoading(false)
-    }
-  }
 
   const checkInstagramConnection = async () => {
     try {
@@ -185,15 +166,9 @@ export default function FitFlowDashboard() {
   }
 
   const filteredLeads = useMemo(() => {
-    const dataToFilter = realLeads.length > 0 ? realLeads : recentLeads
-    if (leadFilter === "all") return dataToFilter
-    return dataToFilter.filter(l => {
-      if (!l.ai_score) return leadFilter === "low"
-      if (l.ai_score >= 9) return leadFilter === "vip"
-      if (l.ai_score >= 7) return leadFilter === "standard"
-      return leadFilter === "low"
-    })
-  }, [leadFilter, realLeads])
+    if (leadFilter === "all") return recentLeads
+    return recentLeads.filter(l => l.category === leadFilter)
+  }, [leadFilter])
 
   const tabs = [
     { id: "overview", label: "Vue d'ensemble", icon: "📊" },
