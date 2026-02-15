@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { APP_CONFIG, SUPABASE_CONFIG } from '@/lib/config';
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  SUPABASE_CONFIG.URL,
+  SUPABASE_CONFIG.SERVICE_ROLE_KEY
 );
 
 export async function GET(request: NextRequest) {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
     for (const user of users || []) {
       // Call the comments endpoint for each user
       const commentsResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/instagram/comments?user_id=${user.id}`
+        APP_CONFIG.api.instagram.comments(user.id)
       );
       const commentsData = await commentsResponse.json();
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 
         // Analyze with AI
         const analyzeResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_APP_URL}/api/ai/analyze`,
+          APP_CONFIG.api.ai.analyze(),
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { APP_CONFIG, INSTAGRAM_CONFIG, SUPABASE_CONFIG } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
@@ -8,16 +9,16 @@ export async function GET(request: NextRequest) {
   const errorReason = request.nextUrl.searchParams.get('error_reason');
   const errorDescription = request.nextUrl.searchParams.get('error_description');
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://fit-flow-gamma.vercel.app';
+  const baseUrl = APP_CONFIG.APP_URL;
 
   // Handle errors from Instagram
   if (error) {
     console.error('Instagram OAuth error:', { error, errorReason, errorDescription });
-    return NextResponse.redirect(`${baseUrl}/settings?error=${encodeURIComponent(errorDescription || error)}`);
+    return NextResponse.redirect(`${baseUrl}/dashboard?error=${encodeURIComponent(errorDescription || error)}`);
   }
 
   if (!code) {
-    return NextResponse.redirect(`${baseUrl}/settings?error=no_code_received`);
+    return NextResponse.redirect(`${baseUrl}/dashboard?error=no_code_received`);
   }
 
   try {
@@ -29,10 +30,10 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID!,
-        client_secret: process.env.INSTAGRAM_APP_SECRET!,
+        client_id: INSTAGRAM_CONFIG.APP_ID,
+        client_secret: INSTAGRAM_CONFIG.APP_SECRET,
         grant_type: 'authorization_code',
-        redirect_uri: `${baseUrl}/api/auth/callback`,
+        redirect_uri: APP_CONFIG.callbacks.auth(),
         code: code,
       }),
     });
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     if (tokenData.error_message) {
       console.error('Token exchange error:', tokenData);
-      return NextResponse.redirect(`${baseUrl}/settings?error=${encodeURIComponent(tokenData.error_message)}`);
+      return NextResponse.redirect(`${baseUrl}/dashboard?error=${encodeURIComponent(tokenData.error_message)}`);
     }
 
     // Success! We have the token
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     // Get long-lived token (optional but recommended)
     const longLivedResponse = await fetch(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_APP_SECRET}&access_token=${tokenData.access_token}`
+      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CONFIG.APP_SECRET}&access_token=${tokenData.access_token}`
     );
     const longLivedData = await longLivedResponse.json();
 
@@ -63,8 +64,8 @@ export async function GET(request: NextRequest) {
     if (state && state !== 'default') {
       try {
         const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
+          SUPABASE_CONFIG.URL,
+          SUPABASE_CONFIG.SERVICE_ROLE_KEY
         );
 
         await supabase
@@ -83,11 +84,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Redirect with success
-    return NextResponse.redirect(`${baseUrl}/settings?instagram_connected=true&ig_user_id=${instagramUserId}`);
+    // Redirect with success → DASHBOARD
+    return NextResponse.redirect(`${baseUrl}/dashboard?instagram_connected=true&ig_user_id=${instagramUserId}`);
 
   } catch (error) {
     console.error('Instagram OAuth error:', error);
-    return NextResponse.redirect(`${baseUrl}/settings?error=oauth_failed`);
+    return NextResponse.redirect(`${baseUrl}/dashboard?error=oauth_failed`);
   }
 }

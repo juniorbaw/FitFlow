@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
 const INSTAGRAM_APP_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://fit-flow-gamma.vercel.app'
+import { APP_CONFIG, INSTAGRAM_CONFIG } from '@/lib/config'
 const SECRET_KEY = 'fitflow-instagram-oauth-secret'
 
 export async function GET(request: NextRequest) {

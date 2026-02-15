@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { APP_CONFIG, INSTAGRAM_CONFIG } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get('user_id');
   
-  // ✅ FIX: Utiliser NEXT_PUBLIC_INSTAGRAM_APP_ID (cohérent avec autres fichiers)
-  const INSTAGRAM_APP_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID;
-  const REDIRECT_URI = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`;
+  const INSTAGRAM_APP_ID = INSTAGRAM_CONFIG.APP_ID;
+  const REDIRECT_URI = APP_CONFIG.callbacks.auth();
   
   if (!INSTAGRAM_APP_ID) {
     console.error('❌ NEXT_PUBLIC_INSTAGRAM_APP_ID not configured');

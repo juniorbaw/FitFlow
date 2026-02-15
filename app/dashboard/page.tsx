@@ -4,6 +4,10 @@ import { useState, useMemo, useEffect } from "react"
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
 import { createClient } from '@/lib/supabase/client'
 import InstagramOnboarding from './components/InstagramOnboarding'
+import UserMenu from '@/components/UserMenu'
+import NotificationCenter from '@/components/NotificationCenter'
+import ExportButton from '@/components/ExportButton'
+import Link from 'next/link'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -185,7 +189,9 @@ export default function FitFlowDashboard() {
       <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", width: "100%", maxWidth: "100vw", overflowX: "hidden" }}>
       <div style={{ padding: "16px clamp(16px, 4vw, 32px)", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5 }}>Fit<span style={{ color: ORANGE }}>Flow</span></div>
+          <Link href="/" style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5, textDecoration: "none", color: "inherit", cursor: "pointer", transition: "opacity 0.2s" }} onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.opacity = "0.7"} onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.opacity = "1"}>
+            Fit<span style={{ color: ORANGE }}>Flow</span>
+          </Link>
           <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
             {tabs.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: activeTab === tab.id ? "rgba(255,92,0,0.15)" : "transparent", color: activeTab === tab.id ? ORANGE : "#888", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 }}>
@@ -195,10 +201,64 @@ export default function FitFlowDashboard() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Link href="/dashboard/templates" style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: "rgba(139,92,246,0.1)",
+              border: "1px solid rgba(139,92,246,0.2)",
+              color: "#8B5CF6",
+              padding: "8px 16px",
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+            }}>
+              💬 Templates
+            </button>
+          </Link>
+          <Link href="/dashboard/analytics" style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: "rgba(255,92,0,0.1)",
+              border: "1px solid rgba(255,92,0,0.2)",
+              color: ORANGE,
+              padding: "8px 16px",
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+            }}>
+              📊 Analytics
+            </button>
+          </Link>
+          <ExportButton type="leads" />
+          <button
+            onClick={() => window.location.href = '/how-it-works'}
+            style={{
+              background: "rgba(59,130,246,0.1)",
+              border: "1px solid rgba(59,130,246,0.2)",
+              color: BLUE,
+              padding: "8px 16px",
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+            }}
+          >
+            ❓ Guide
+          </button>
           <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,210,106,0.1)", border: "1px solid rgba(0,210,106,0.2)", padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, color: GREEN }}>
             <span style={{ width: 7, height: 7, background: GREEN, borderRadius: "50%" }}></span>Système actif
           </div>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #FF5C00, #FF8A00)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14 }}>C</div>
+          <NotificationCenter />
+          <UserMenu />
         </div>
       </div>
 

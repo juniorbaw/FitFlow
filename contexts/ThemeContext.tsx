@@ -12,7 +12,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark')
+  const [theme, setTheme] = useState<Theme>('light') // MODE JOUR PAR DÉFAUT
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -20,6 +20,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const savedTheme = localStorage.getItem('theme') as Theme | null
     if (savedTheme) {
       setTheme(savedTheme)
+    } else {
+      setTheme('light') // Par défaut = jour
     }
   }, [])
 
@@ -27,11 +29,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return
 
     const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
+    // Utiliser data-theme pour correspondre avec globals.css
+    root.setAttribute('data-theme', theme)
 
     localStorage.setItem('theme', theme)
   }, [theme, mounted])
@@ -41,7 +40,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   if (!mounted) {
-    return <div className="bg-[#0a0a0a]">{children}</div>
+    return <div className="bg-white">{children}</div>
   }
 
   return (

@@ -104,7 +104,7 @@ export async function GET() {
           <p>
             Vous pouvez vous reconnecter à tout moment.
           </p>
-          <a href="https://fit-flow-gamma.vercel.app">Retour à l'accueil</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://fit-flow-gamma.vercel.app'}">Retour à l'accueil</a>
         </div>
       </body>
     </html>

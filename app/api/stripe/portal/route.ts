@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
+import { APP_CONFIG, STRIPE_CONFIG } from '@/lib/config'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(STRIPE_CONFIG.SECRET_KEY, {
   apiVersion: '2026-01-28.clover',
 })
 
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Créer une session du portail client Stripe
     const session = await stripe.billingPortal.sessions.create({
       customer: coach.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings`,
+      return_url: `${APP_CONFIG.APP_URL}/settings`,
     })
 
     return NextResponse.json({ url: session.url })

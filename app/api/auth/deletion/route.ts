@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { APP_CONFIG } from '@/lib/config'
 
 // Meta appelle cette route quand un utilisateur demande la suppression de ses données
 export async function POST(req: NextRequest) {
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     const confirmationCode = `${userId}_${Date.now()}_deleted`
 
     return NextResponse.json({
-      url: `https://fit-flow-gamma.vercel.app/api/auth/deletion?id=${confirmationCode}`,
+      url: APP_CONFIG.api.auth.deletion(confirmationCode),
       confirmation_code: confirmationCode,
     })
 
@@ -171,7 +172,7 @@ export async function GET(req: NextRequest) {
             Merci d'avoir utilisé FitFlow. Vous pouvez vous réinscrire à tout moment.
           </p>
           
-          <a href="https://fit-flow-gamma.vercel.app">Retour à l'accueil</a>
+          <a href="${APP_CONFIG.APP_URL}">Retour à l'accueil</a>
         </div>
       </body>
     </html>

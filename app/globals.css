@@ -8,6 +8,118 @@
   }
 }
 
+/* MODE JOUR (par défaut) */
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7fa;
+  --bg-card: #ffffff;
+  --bg-hover: #f8f9fb;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.06);
+  --orange: #FF5C00;
+  --green: #00D26A;
+  --blue: #3B82F6;
+  --red: #FF3B30;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --shadow-lg: rgba(0, 0, 0, 0.12);
+}
+
+/* MODE NUIT */
+:root[data-theme="dark"] {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #121212;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --text-primary: #fafafa;
+  --text-secondary: #999999;
+  --border: rgba(255, 255, 255, 0.08);
+  --orange: #FF5C00;
+  --shadow: rgba(0, 0, 0, 0.3);
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(17, 25, 40, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+  
+  /* Neumorphism */
+  --neuro-light: rgba(255, 255, 255, 0.05);
+  --neuro-dark: rgba(0, 0, 0, 0.3);
+}
+
+/* MODE JOUR (variables communes) */
+:root[data-theme="light"] {
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: rgba(31, 38, 135, 0.15);
+  
+  /* Neumorphism */
+  --neuro-light: rgba(255, 255, 255, 0.9);
+  --neuro-dark: rgba(0, 0, 0, 0.05);
+}
+
+/* Animations fluides */
+:root {
+  --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --transition-fast: 150ms var(--ease-smooth);
+  --transition-base: 250ms var(--ease-smooth);
+  --transition-slow: 400ms var(--ease-smooth);
+}
+
+/* Utility classes */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
+}
+
+.neuro {
+  background: var(--bg-secondary);
+  box-shadow: 
+    8px 8px 16px var(--neuro-dark),
+    -8px -8px 16px var(--neuro-light);
+}
+
+.neuro-inset {
+  background: var(--bg-secondary);
+  box-shadow: 
+    inset 4px 4px 8px var(--neuro-dark),
+    inset -4px -4px 8px var(--neuro-light);
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    rgba(255, 92, 0, 0.1) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* === GLOBAL THEME STYLES === */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* === ANIMATIONS THÈME === */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
 /* RESPONSIVE MOBILE FIXES - GLOBAL */
 * {
   box-sizing: border-box !important;
