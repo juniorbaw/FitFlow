@@ -245,23 +245,6 @@ export default function FitFlowDashboard() {
               💬 Templates
             </button>
           </Link>
-          <Link href="/dashboard/analytics" style={{ textDecoration: 'none' }}>
-            <button style={{
-              background: "rgba(255,92,0,0.1)",
-              border: "1px solid rgba(255,92,0,0.2)",
-              color: ORANGE,
-              padding: "8px 16px",
-              borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 6
-            }}>
-              📊 Analytics
-            </button>
-          </Link>
           <ExportButton type="leads" />
           <button
             onClick={() => window.location.href = '/how-it-works'}
