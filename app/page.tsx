@@ -134,9 +134,10 @@ export default function HomePage() {
             fontSize: 13, 
             fontWeight: 700,
             color: "#8B5CF6",
-            marginBottom: 24
+            marginBottom: 24,
+            marginTop: 24
           }}>
-            ✨ Programme Bêta - Places limitées aux 50 premiers testeurs
+            ✨ Bêta Privée - Places limitées
           </div>
 
           <h1 style={{ fontSize: 64, fontWeight: 900, letterSpacing: -2, lineHeight: 1.1, marginBottom: 24 }}>
