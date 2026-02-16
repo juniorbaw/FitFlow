@@ -292,7 +292,7 @@ export default function FitFlowDashboard() {
                 <div style={{ fontSize: 15, fontWeight: 700 }}>Derniers leads</div>
                 <button onClick={() => setActiveTab("leads")} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", color: ORANGE, padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Voir tout →</button>
               </div>
-              {recentLeads.slice(0, 4).map(lead => (
+              {realLeads.slice(0, 4).map((lead: any) => (
                 <div key={lead.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", gap: 16 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</div>
