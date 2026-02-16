@@ -17,57 +17,7 @@ const RED = "#FF4D4D"
 const YELLOW = "#FFB800"
 const BLUE = "#3B82F6"
 
-const weeklyLeads = [
-  { day: "Lun", leads: 12, vip: 3, standard: 5, low: 4 },
-  { day: "Mar", leads: 18, vip: 5, standard: 8, low: 5 },
-  { day: "Mer", leads: 15, vip: 4, standard: 6, low: 5 },
-  { day: "Jeu", leads: 22, vip: 7, standard: 9, low: 6 },
-  { day: "Ven", leads: 28, vip: 9, standard: 12, low: 7 },
-  { day: "Sam", leads: 35, vip: 12, standard: 14, low: 9 },
-  { day: "Dim", leads: 20, vip: 6, standard: 8, low: 6 },
-]
-
-const revenueData = [
-  { week: "S1", revenue: 890, leads: 45 },
-  { week: "S2", revenue: 1240, leads: 62 },
-  { week: "S3", revenue: 1680, leads: 78 },
-  { week: "S4", revenue: 2150, leads: 95 },
-  { week: "S5", revenue: 2890, leads: 112 },
-  { week: "S6", revenue: 3200, leads: 128 },
-]
-
-const postPerformance = [
-  { post: "Transformation 30j", leads: 45, score: 8.2, conversions: 12, revenue: 2400 },
-  { post: "Meal prep lundi", leads: 32, score: 7.1, conversions: 6, revenue: 1200 },
-  { post: "Avant/Après client", leads: 58, score: 9.1, conversions: 18, revenue: 3600 },
-  { post: "Tips nutrition", leads: 28, score: 6.8, conversions: 4, revenue: 800 },
-  { post: "Workout HIIT", leads: 38, score: 7.8, conversions: 9, revenue: 1800 },
-]
-
-const recentLeads = [
-  { id: 1, username: "@marie_fit92", comment: "Combien coûte ton programme ? Je veux commencer !", score: 10, category: "vip", time: "il y a 3 min", status: "dm_sent", post: "Transformation 30j" },
-  { id: 2, username: "@lucas_sport", comment: "Comment tu structures tes séances ?", score: 8, category: "standard", time: "il y a 12 min", status: "dm_sent", post: "Workout HIIT" },
-  { id: 3, username: "@sophie.wellness", comment: "Trop inspirant ! Tu proposes du coaching en ligne ?", score: 9, category: "vip", time: "il y a 25 min", status: "converted", post: "Avant/Après client" },
-  { id: 4, username: "@alex_muscu", comment: "Super post 💪🔥", score: 4, category: "low", time: "il y a 38 min", status: "ignored", post: "Tips nutrition" },
-  { id: 5, username: "@emma.health", comment: "J'aimerais bien avoir un programme comme ça", score: 7, category: "standard", time: "il y a 1h", status: "dm_sent", post: "Transformation 30j" },
-  { id: 6, username: "@thomas_coach", comment: "Tu prends encore des clients ? Budget 200€/mois", score: 10, category: "vip", time: "il y a 1h", status: "converted", post: "Avant/Après client" },
-  { id: 7, username: "@julie_yoga", comment: "Merci pour les tips !", score: 5, category: "low", time: "il y a 2h", status: "ignored", post: "Meal prep lundi" },
-  { id: 8, username: "@nico.training", comment: "C'est quoi ton offre coaching perso ?", score: 9, category: "vip", time: "il y a 2h", status: "dm_sent", post: "Workout HIIT" },
-]
-
-const pieData = [
-  { name: "VIP (9-10)", value: 28, color: ORANGE },
-  { name: "Standard (7-8)", value: 42, color: BLUE },
-  { name: "Low (1-6)", value: 30, color: "#444" },
-]
-
-const conversionFunnel = [
-  { stage: "Commentaires", count: 150 },
-  { stage: "Leads détectés", count: 95 },
-  { stage: "DMs envoyés", count: 67 },
-  { stage: "Réponses", count: 41 },
-  { stage: "Convertis", count: 18 },
-]
+// ALL FAKE DATA REMOVED - Using real Supabase data only
 
 function StatCard({ label, value, change, icon, color = "white" }: any) {
   const isPositive = change && change.startsWith("+")
@@ -187,9 +137,8 @@ export default function FitFlowDashboard() {
   }
 
   const filteredLeads = useMemo(() => {
-    const dataToFilter = realLeads.length > 0 ? realLeads : recentLeads
-    if (leadFilter === "all") return dataToFilter
-    return dataToFilter.filter(l => {
+    if (leadFilter === "all") return realLeads
+    return realLeads.filter(l => {
       if (!l.ai_score) return leadFilter === "low"
       if (l.ai_score >= 9) return leadFilter === "vip"
       if (l.ai_score >= 7) return leadFilter === "standard"
@@ -286,7 +235,7 @@ export default function FitFlowDashboard() {
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Leads par jour</div>
                 <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={weeklyLeads} barGap={2}>
+                  <BarChart data={[]} barGap={2}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                     <XAxis dataKey="day" stroke="#555" fontSize={12} />
                     <YAxis stroke="#555" fontSize={12} />
@@ -301,14 +250,13 @@ export default function FitFlowDashboard() {
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Répartition des leads</div>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value">
-                      {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                    <Pie data={[]} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value">
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-                  {pieData.map((d, i) => (
+                  {[].map((d: any, i: number) => (
                     <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ width: 10, height: 10, borderRadius: 3, background: d.color }}></span>
@@ -323,10 +271,10 @@ export default function FitFlowDashboard() {
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24, marginBottom: 32 }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Funnel de conversion</div>
               <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
-                {conversionFunnel.map((step, i) => {
-                  const maxCount = conversionFunnel[0].count
-                  const height = (step.count / maxCount) * 160
-                  const rate = i > 0 ? ((step.count / conversionFunnel[i-1].count) * 100).toFixed(0) : 100
+                {[].map((step: any, i: number) => {
+                  const maxCount = 1
+                  const height = 0
+                  const rate = 0
                   return (
                     <div key={i} style={{ flex: 1, textAlign: "center" }}>
                       {i > 0 && <div style={{ fontSize: 11, color: GREEN, fontWeight: 700, marginBottom: 6 }}>{rate}%</div>}
