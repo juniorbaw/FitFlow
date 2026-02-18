@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 export default function TemplatesPage() {
   const router = useRouter()
@@ -27,11 +27,13 @@ export default function TemplatesPage() {
   }, [])
 
   const checkUser = async () => {
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) router.push('/login')
   }
 
   const loadTemplates = async () => {
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -47,6 +49,7 @@ export default function TemplatesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -75,6 +78,7 @@ export default function TemplatesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer ce template ?')) return
+    const supabase = createClient()
     const { error } = await supabase.from('templates').delete().eq('id', id)
     if (!error) {
       alert('Template supprimé')

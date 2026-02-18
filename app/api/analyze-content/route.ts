@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-
 export async function POST(request: NextRequest) {
   try {
     const { content } = await request.json()
@@ -11,7 +9,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+    // Vérifier que la clé API existe
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY is not set')
+      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
     const prompt = `Tu es un expert en marketing Instagram spécialisé dans le fitness coaching.
 
@@ -56,8 +61,9 @@ Retourne UNIQUEMENT le JSON, rien d'autre.`
     return NextResponse.json(analysis)
   } catch (error: any) {
     console.error('Gemini API error:', error)
+    console.error('Error details:', error.message, error.stack)
     return NextResponse.json(
-      { error: 'Erreur lors de l\'analyse. Réessayez.' },
+      { error: `Erreur: ${error.message || 'Erreur inconnue'}` },
       { status: 500 }
     )
   }
