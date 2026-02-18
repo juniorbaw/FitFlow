@@ -82,12 +82,26 @@ export function OverviewTab() {
 
   const repliedCount = leads.filter(l => l.status === 'replied' || l.status === 'converted').length
 
-  const funnelData = [
+  const funnelData = isDemoMode ? [
+    { step: 'Commentaires', count: 84, width: 100 },
+    { step: 'Leads qualifiés', count: 47, width: 80 },
+    { step: 'DMs envoyés', count: 28, width: 60 },
+    { step: 'Réponses', count: 19, width: 40 },
+    { step: 'Conversions', count: 12, width: 20 },
+  ] : [
     { step: 'Commentaires', count: totalLeads + 37, width: 100 },
     { step: 'Leads qualifiés', count: totalLeads, width: totalLeads > 0 ? 80 : 0 },
     { step: 'DMs envoyés', count: dmsSent, width: dmsSent > 0 ? 60 : 0 },
     { step: 'Réponses', count: repliedCount, width: repliedCount > 0 ? 40 : 0 },
     { step: 'Conversions', count: conversions, width: conversions > 0 ? 20 : 0 },
+  ]
+  
+  const demoLeads = [
+    { id: '1', username: 'sarah_fitgirl', ai_score: 9.2, category: 'vip', status: 'converted', comment_text: '🔥 Trop motivant ! Comment tu fais pour être aussi régulier ?', created_at: new Date(Date.now() - 3600000).toISOString() },
+    { id: '2', username: 'coach_alex', ai_score: 8.5, category: 'standard', status: 'replied', comment_text: 'Incroyable transformation ! Tu proposes des coachings perso ?', created_at: new Date(Date.now() - 7200000).toISOString() },
+    { id: '3', username: 'fitness_marie', ai_score: 9.0, category: 'vip', status: 'dm_sent', comment_text: 'Ça m\'inspire grave ! Besoin de tes conseils nutrition 💪', created_at: new Date(Date.now() - 10800000).toISOString() },
+    { id: '4', username: 'tom_sportif', ai_score: 7.8, category: 'standard', status: 'dm_sent', comment_text: 'Top ! Tu as un programme pour débutants ?', created_at: new Date(Date.now() - 14400000).toISOString() },
+    { id: '5', username: 'julie_running', ai_score: 8.2, category: 'standard', status: 'pending', comment_text: 'Bravo pour cette régularité 👏 Quel est ton secret ?', created_at: new Date(Date.now() - 18000000).toISOString() },
   ]
 
   if (loading) {
@@ -99,58 +113,69 @@ export function OverviewTab() {
     )
   }
 
-  // Si pas de données, afficher un empty state propre
-  if (totalLeads === 0) {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <StatCard label="Leads cette semaine" value={0} icon={MessageSquare} />
-          <StatCard label="Score moyen" value="—" icon={Target} />
-          <StatCard label="DMs envoyés" value={0} icon={Send} />
-          <StatCard label="Conversions" value={0} icon={TrendingUp} />
-          <StatCard label="Revenue estimé" value="0€" icon={DollarSign} />
-        </div>
-        <Card className="p-12 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)] text-center">
-          <div className="text-6xl mb-4">🚀</div>
-          <h3 className="text-xl font-semibold text-white mb-2">Aucun lead pour l'instant</h3>
-          <p className="text-[#888] max-w-md mx-auto">
-            Vos premiers leads apparaîtront ici dès que l'automatisation Instagram sera active.
-            Publiez un post et regardez les commentaires se transformer en leads qualifiés.
-          </p>
-        </Card>
-      </div>
-    )
+  // Mode Démo : afficher des données exemples si aucun lead
+  const isDemoMode = totalLeads === 0
+  
+  // Données de démonstration
+  const demoData = isDemoMode ? {
+    totalLeads: 47,
+    avgScore: '8.2',
+    dmsSent: 28,
+    conversions: 12,
+    revenue: 2840,
+    dailyData: [
+      { date: 'Lun', VIP: 3, Standard: 5, Low: 2 },
+      { date: 'Mar', VIP: 5, Standard: 7, Low: 3 },
+      { date: 'Mer', VIP: 4, Standard: 6, Low: 4 },
+      { date: 'Jeu', VIP: 6, Standard: 8, Low: 2 },
+      { date: 'Ven', VIP: 7, Standard: 9, Low: 3 },
+      { date: 'Sam', VIP: 5, Standard: 6, Low: 5 },
+      { date: 'Dim', VIP: 4, Standard: 5, Low: 3 }
+    ],
+    pieData: [
+      { name: 'VIP (9-10)', value: 18, color: '#FF5C00' },
+      { name: 'Standard (7-8)', value: 23, color: '#3B82F6' },
+      { name: 'Low (<7)', value: 6, color: '#888888' }
+    ]
+  } : {
+    totalLeads,
+    avgScore,
+    dmsSent,
+    conversions,
+    revenue,
+    dailyData: dailyData,
+    pieData: pieData
   }
-
+  
   return (
     <div className="space-y-6">
-      {/* Stat Cards */}
+      {/* Banner Mode Démo */}
+      {isDemoMode && (
+        <Card className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">📊</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-orange-300">Mode Aperçu - Données de démonstration</h3>
+              <p className="text-sm text-orange-200/80">
+                Connectez votre compte Instagram pour voir vos vraies statistiques. Les données ci-dessous sont des exemples réalistes.
+              </p>
+            </div>
+            <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold text-sm transition-colors">
+              Connecter Instagram
+            </button>
+          </div>
+        </Card>
+      )}
+      
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard
-          label="Leads cette semaine"
-          value={totalLeads}
-          icon={MessageSquare}
-        />
-        <StatCard
-          label="Score moyen"
-          value={`${avgScore}/10`}
-          icon={Target}
-        />
-        <StatCard
-          label="DMs envoyés"
-          value={dmsSent}
-          icon={Send}
-        />
-        <StatCard
-          label="Conversions"
-          value={conversions}
-          icon={TrendingUp}
-        />
-        <StatCard
-          label="Revenue estimé"
-          value={`${revenue}€`}
-          icon={DollarSign}
-        />
+        <StatCard label="Leads cette semaine" value={demoData.totalLeads} icon={MessageSquare} />
+        <StatCard label="Score moyen" value={`${demoData.avgScore}/10`} icon={Target} />
+        <StatCard label="DMs envoyés" value={demoData.dmsSent} icon={Send} />
+        <StatCard label="Conversions" value={demoData.conversions} icon={TrendingUp} />
+        <StatCard label="Revenue estimé" value={`${demoData.revenue.toLocaleString('fr-FR')}€`} icon={DollarSign} />
       </div>
 
       {/* Charts Row */}
@@ -159,7 +184,7 @@ export function OverviewTab() {
         <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
           <h3 className="text-lg font-semibold text-white mb-4">Leads par jour</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dailyData}>
+            <BarChart data={demoData.dailyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis dataKey="date" stroke="#888" />
               <YAxis stroke="#888" />
@@ -185,7 +210,7 @@ export function OverviewTab() {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={pieData}
+                data={demoData.pieData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -194,7 +219,7 @@ export function OverviewTab() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {pieData.map((entry, index) => (
+                {demoData.pieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -240,7 +265,7 @@ export function OverviewTab() {
       <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
         <h3 className="text-lg font-semibold text-white mb-4">5 derniers leads</h3>
         <div className="space-y-3">
-          {leads.slice(0, 5).map((lead) => (
+          {(isDemoMode ? demoLeads : leads.slice(0, 5)).map((lead) => (
             <div
               key={lead.id}
               className="flex items-center justify-between p-4 rounded-lg bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.05)] transition-all cursor-pointer"
