@@ -11,6 +11,9 @@ import Link from 'next/link'
 import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
 import { RevenueTab } from './components/tabs/RevenueTab'
 import { AutoDMTab } from './components/tabs/AutoDMTab'
+import { VideoAnalyzerTab } from './components/tabs/VideoAnalyzerTab'
+import { CompetitorSpyTab } from './components/tabs/CompetitorSpyTab'
+import { SmartCalendarTab } from './components/tabs/SmartCalendarTab'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -161,6 +164,9 @@ export default function FitFlowDashboard() {
     { id: "leads", label: "Leads", icon: "👥" },
     { id: "autodm", label: "Auto-DM", icon: "🤖" },
     { id: "content", label: "Content AI", icon: "🎨" },
+    { id: "video", label: "Video Analyzer", icon: "🎥" },
+    { id: "competitor", label: "Competitor Spy", icon: "🔍" },
+    { id: "calendar", label: "Smart Calendar", icon: "📅" },
     { id: "revenue", label: "Revenue", icon: "💰" },
   ]
 
@@ -385,6 +391,12 @@ export default function FitFlowDashboard() {
         {activeTab === "autodm" && <AutoDMTab />}
 
         {activeTab === "content" && <ContentAnalyzerTab />}
+
+        {activeTab === "video" && <VideoAnalyzerTab />}
+
+        {activeTab === "competitor" && <CompetitorSpyTab />}
+
+        {activeTab === "calendar" && <SmartCalendarTab />}
 
         {activeTab === "revenue" && <RevenueTab />}
       </div>
