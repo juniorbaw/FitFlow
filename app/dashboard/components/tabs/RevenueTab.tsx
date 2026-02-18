@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DollarSign, TrendingUp, TrendingDown, Target, Plus, Edit2, Trash2, Calendar, Check, X } from 'lucide-react'
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { StatCard } from '@/components/ui/stat-card'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { mockDailyStats, mockLeads } from '@/lib/mock-data'
+import { createClient } from '@/lib/supabase/client'
 
 interface RevenueEntry {
   id: string
@@ -20,75 +20,148 @@ interface RevenueEntry {
 }
 
 export function RevenueTab() {
-  // Mock manual revenue entries
-  const [manualRevenues, setManualRevenues] = useState<RevenueEntry[]>([
-    {
-      id: '1',
-      amount: 297,
-      date: new Date(Date.now() - 86400000 * 2),
-      source: 'manual',
-      description: 'Programme 12 semaines - Client Instagram direct'
-    },
-    {
-      id: '2',
-      amount: 497,
-      date: new Date(Date.now() - 86400000 * 5),
-      source: 'manual',
-      description: 'Coaching premium 3 mois'
-    }
-  ])
-
+  const [leads, setLeads] = useState<any[]>([])
+  const [dailyStats, setDailyStats] = useState<any[]>([])
+  const [manualRevenues, setManualRevenues] = useState<RevenueEntry[]>([])
+  const [loading, setLoading] = useState(true)
   const [isAddingRevenue, setIsAddingRevenue] = useState(false)
   const [newAmount, setNewAmount] = useState('')
   const [newDescription, setNewDescription] = useState('')
+  const supabase = createClient()
 
-  // Calculate revenue metrics
-  const fitflowRevenue = mockLeads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      // Fetch leads
+      const { data: leadsData } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      // Fetch daily stats
+      const { data: statsData } = await supabase
+        .from('daily_stats')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(7)
+
+      // Fetch manual revenues
+      const { data: revenuesData } = await supabase
+        .from('manual_revenues')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      setLeads(leadsData || [])
+      setDailyStats(statsData || [])
+      setManualRevenues((revenuesData || []).map(r => ({
+        id: r.id,
+        amount: r.amount,
+        date: new Date(r.created_at),
+        source: 'manual' as const,
+        description: r.description
+      })))
+    } catch (error) {
+      console.error('Error fetching revenue data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Calculate revenue metrics from REAL data
+  const fitflowRevenue = leads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
   const manualRevenueTotal = manualRevenues.reduce((sum, entry) => sum + entry.amount, 0)
   const totalRevenue = fitflowRevenue + manualRevenueTotal
   
-  const conversions = mockLeads.filter(l => l.status === 'converted').length
+  const conversions = leads.filter(l => l.status === 'converted').length
   const totalConversions = conversions + manualRevenues.length
   
-  const revenuePerLead = totalConversions > 0 ? (totalRevenue / totalConversions).toFixed(0) : 0
+  const revenuePerLead = totalConversions > 0 ? (totalRevenue / totalConversions).toFixed(0) : '0'
   const costPerLead = 15 // Example cost
-  const roi = ((totalRevenue - (costPerLead * mockLeads.length)) / (costPerLead * mockLeads.length) * 100).toFixed(0)
+  const totalLeads = leads.length
+  const roi = totalLeads > 0 && (costPerLead * totalLeads) > 0
+    ? ((totalRevenue - (costPerLead * totalLeads)) / (costPerLead * totalLeads) * 100).toFixed(0)
+    : '0'
 
-  // Prepare data for 6 weeks
-  const weeklyData = Array.from({ length: 6 }, (_, i) => {
-    const weekRevenue = Math.floor(Math.random() * 3000) + 1000
-    return {
-      week: `S${i + 1}`,
-      revenue: weekRevenue,
-    }
-  })
+  // Prepare weekly data from real daily_stats
+  const weeklyData = dailyStats.length > 0
+    ? dailyStats.slice(0, 6).reverse().map((stat, i) => ({
+        week: `S${i + 1}`,
+        revenue: stat.revenue || 0,
+      }))
+    : []
 
-  // Dual axis data (leads vs revenue)
-  const dualAxisData = mockDailyStats.map(stat => ({
+  // Dual axis data (leads vs revenue) from real data
+  const dualAxisData = dailyStats.map(stat => ({
     date: new Date(stat.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
-    leads: stat.total_leads,
-    revenue: stat.revenue,
+    leads: stat.total_leads || 0,
+    revenue: stat.revenue || 0,
   }))
 
-  const handleAddRevenue = () => {
+  const handleAddRevenue = async () => {
     if (!newAmount || parseFloat(newAmount) <= 0) return
 
-    const newEntry: RevenueEntry = {
-      id: Date.now().toString(),
-      amount: parseFloat(newAmount),
-      date: new Date(),
-      source: 'manual',
-      description: newDescription || 'Revenu ajouté manuellement'
-    }
+    try {
+      // Get current coach
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-    setManualRevenues([newEntry, ...manualRevenues])
-    setNewAmount('')
-    setNewDescription('')
-    setIsAddingRevenue(false)
+      const { data: coach } = await supabase
+        .from('coaches')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!coach) return
+
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('manual_revenues')
+        .insert({
+          coach_id: coach.id,
+          amount: parseFloat(newAmount),
+          description: newDescription || 'Revenu manuel'
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Update local state
+      const newEntry: RevenueEntry = {
+        id: data.id,
+        amount: parseFloat(newAmount),
+        date: new Date(),
+        source: 'manual',
+        description: newDescription || 'Revenu manuel'
+      }
+
+      setManualRevenues([newEntry, ...manualRevenues])
+      setNewAmount('')
+      setNewDescription('')
+      setIsAddingRevenue(false)
+    } catch (error) {
+      console.error('Error adding revenue:', error)
+      alert('Erreur lors de l\'ajout du revenu')
+    }
   }
 
-  const handleDeleteRevenue = (id: string) => {
-    setManualRevenues(manualRevenues.filter(entry => entry.id !== id))
+  const handleDeleteRevenue = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('manual_revenues')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      setManualRevenues(manualRevenues.filter(entry => entry.id !== id))
+    } catch (error) {
+      console.error('Error deleting revenue:', error)
+      alert('Erreur lors de la suppression')
+    }
   }
 
   return (
@@ -222,7 +295,7 @@ export function RevenueTab() {
         {/* Revenue List */}
         <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
           {/* FitFlow automated revenues */}
-          {mockLeads.filter(l => l.status === 'converted' && l.revenue).map((lead) => (
+          {leads.filter(l => l.status === 'converted' && l.revenue).map((lead) => (
             <div
               key={lead.id}
               className="flex items-center justify-between p-4 rounded-lg bg-[rgba(255,92,0,0.05)] border border-[rgba(255,92,0,0.2)]"

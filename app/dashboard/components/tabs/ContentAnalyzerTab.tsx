@@ -40,38 +40,27 @@ export function ContentAnalyzerTab() {
     if (!postContent.trim()) return
 
     setAnalyzing(true)
+    setAnalysis(null)
     
-    // Simulate AI analysis (replace with real API call)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Mock analysis result
-    const mockAnalysis: ContentAnalysis = {
-      score: 85,
-      verdict: 'excellent',
-      strengths: [
-        'Call-to-action clair et engageant',
-        'Utilisation stratégique des émojis 🔥',
-        'Ton personnel et authentique',
-        'Question qui encourage l\'interaction'
-      ],
-      weaknesses: [
-        'Manque de hashtags pertinents',
-        'Texte un peu long (risque de scroll)',
-        'Pas de mention de ta story ou bio'
-      ],
-      suggestions: [
-        'Ajoute 3-5 hashtags ciblés : #CoachingFitness #TransformationPhysique #MusculationFrance',
-        'Raccourcis à 120-150 caractères pour plus d\'impact',
-        'Termine avec "Lien en bio 👆" pour diriger vers ton offre',
-        'Pose une question précise : "Quel est TON objectif pour 2026 ?"'
-      ],
-      bestTimeToPost: 'Aujourd\'hui 18h30 - 19h30',
-      estimatedReach: '2 500 - 4 200 personnes',
-      engagementPotential: 'high'
+    try {
+      const response = await fetch('/api/analyze-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: postContent })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur API')
+      }
+
+      const data = await response.json()
+      setAnalysis(data)
+    } catch (error) {
+      console.error('Analysis error:', error)
+      alert('Erreur lors de l\'analyse. Vérifiez votre connexion et réessayez.')
+    } finally {
+      setAnalyzing(false)
     }
-    
-    setAnalysis(mockAnalysis)
-    setAnalyzing(false)
   }
 
   const getVerdictColor = (verdict: string) => {

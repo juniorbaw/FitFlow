@@ -146,6 +146,15 @@ export default function FitFlowDashboard() {
     })
   }, [leadFilter, realLeads])
 
+  // Calculate REAL stats from REAL data
+  const totalLeads = realLeads.length
+  const avgScore = totalLeads > 0 
+    ? (realLeads.reduce((sum, lead) => sum + (lead.ai_score || 0), 0) / totalLeads).toFixed(1) 
+    : '0'
+  const dmsSent = realLeads.filter(l => l.status === 'dm_sent' || l.status === 'converted' || l.status === 'replied').length
+  const conversions = realLeads.filter(l => l.status === 'converted').length
+  const revenue = realLeads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
+
   const tabs = [
     { id: "overview", label: "Vue d'ensemble", icon: "📊" },
     { id: "leads", label: "Leads", icon: "👥" },
@@ -225,11 +234,11 @@ export default function FitFlowDashboard() {
         {activeTab === "overview" && (
           <>
             <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
-              <StatCard label="Leads cette semaine" value="150" change="+23%" icon="👥" color={ORANGE} />
-              <StatCard label="Score moyen" value="7.4" change="+0.8" icon="🎯" color={BLUE} />
-              <StatCard label="DMs envoyés" value="67" change="+31%" icon="✉️" />
-              <StatCard label="Conversions" value="18" change="+44%" icon="🏆" color={GREEN} />
-              <StatCard label="Revenue estimé" value="3 200€" change="+38%" icon="💰" color={ORANGE} />
+              <StatCard label="Leads cette semaine" value={totalLeads} icon="👥" color={ORANGE} />
+              <StatCard label="Score moyen" value={avgScore} icon="🎯" color={BLUE} />
+              <StatCard label="DMs envoyés" value={dmsSent} icon="✉️" />
+              <StatCard label="Conversions" value={conversions} icon="🏆" color={GREEN} />
+              <StatCard label="Revenue estimé" value={`${revenue}€`} icon="💰" color={ORANGE} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 32 }}>
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
@@ -296,11 +305,11 @@ export default function FitFlowDashboard() {
                 <div key={lead.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", gap: 16 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</div>
-                    <div style={{ fontSize: 12, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment}</div>
+                    <div style={{ fontSize: 12, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment_text || lead.comment || '—'}</div>
                   </div>
-                  <ScoreBadge score={lead.score} />
+                  <ScoreBadge score={lead.ai_score || 0} />
                   <StatusBadge status={lead.status} />
-                  <span style={{ fontSize: 12, color: "#555", minWidth: 80, textAlign: "right" }}>{lead.time}</span>
+                  <span style={{ fontSize: 12, color: "#555", minWidth: 80, textAlign: "right" }}>{new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               ))}
             </div>
@@ -324,11 +333,11 @@ export default function FitFlowDashboard() {
               {filteredLeads.map(lead => (
                 <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "16px 24px", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.04)", transition: "background 0.2s", cursor: "pointer" }}>
                   <span style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</span>
-                  <span style={{ fontSize: 13, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment}</span>
-                  <ScoreBadge score={lead.score} />
-                  <span style={{ fontSize: 12, color: "#666" }}>{lead.post.slice(0, 12)}...</span>
+                  <span style={{ fontSize: 13, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment_text || lead.comment || '—'}</span>
+                  <ScoreBadge score={lead.ai_score || 0} />
+                  <span style={{ fontSize: 12, color: "#666" }}>{lead.post_url?.slice(0, 12) || lead.post_id?.slice(0, 12) || '—'}...</span>
                   <StatusBadge status={lead.status} />
-                  <span style={{ fontSize: 12, color: "#555", textAlign: "right" }}>{lead.time}</span>
+                  <span style={{ fontSize: 12, color: "#555", textAlign: "right" }}>{new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               ))}
             </div>
