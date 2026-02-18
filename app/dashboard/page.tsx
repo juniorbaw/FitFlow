@@ -10,6 +10,7 @@ import ExportButton from '@/components/ExportButton'
 import Link from 'next/link'
 import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
 import { RevenueTab } from './components/tabs/RevenueTab'
+import { AutoDMTab } from './components/tabs/AutoDMTab'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -158,12 +159,20 @@ export default function FitFlowDashboard() {
   const tabs = [
     { id: "overview", label: "Vue d'ensemble", icon: "📊" },
     { id: "leads", label: "Leads", icon: "👥" },
+    { id: "autodm", label: "Auto-DM", icon: "🤖" },
     { id: "content", label: "Content AI", icon: "🎨" },
     { id: "revenue", label: "Revenue", icon: "💰" },
   ]
 
   return (
     <>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
+      
       {showInstagramOnboarding && (
         <InstagramOnboarding 
           onClose={() => setShowInstagramOnboarding(false)}
@@ -186,7 +195,39 @@ export default function FitFlowDashboard() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <Link href="/dashboard/templates" style={{ textDecoration: 'none' }}>
+          {coach && !coach.instagram_username ? (
+            <button
+              onClick={() => setShowInstagramOnboarding(true)}
+              style={{
+                background: "linear-gradient(135deg, #E1306C, #FD1D1D, #F77737)",
+                border: "none",
+                color: "white",
+                padding: "10px 20px",
+                borderRadius: 12,
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: "0 4px 16px rgba(225, 48, 108, 0.3)",
+                animation: "pulse 2s infinite"
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              Connecter Instagram
+            </button>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,210,106,0.1)", border: "1px solid rgba(0,210,106,0.2)", padding: "8px 16px", borderRadius: 12, fontSize: 13, fontWeight: 600, color: GREEN }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              @{coach.instagram_username}
+            </div>
+          )}
+          <Link href="/templates" style={{ textDecoration: 'none' }}>
             <button style={{
               background: "rgba(139,92,246,0.1)",
               border: "1px solid rgba(139,92,246,0.2)",
@@ -222,9 +263,6 @@ export default function FitFlowDashboard() {
           >
             ❓ Guide
           </button>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,210,106,0.1)", border: "1px solid rgba(0,210,106,0.2)", padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, color: GREEN }}>
-            <span style={{ width: 7, height: 7, background: GREEN, borderRadius: "50%" }}></span>Système actif
-          </div>
           <NotificationCenter />
           <UserMenu />
         </div>
@@ -343,6 +381,8 @@ export default function FitFlowDashboard() {
             </div>
           </>
         )}
+
+        {activeTab === "autodm" && <AutoDMTab />}
 
         {activeTab === "content" && <ContentAnalyzerTab />}
 
