@@ -170,28 +170,23 @@ export function RevenueTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Revenue total"
-          value={`${totalRevenue}€`}
+          value={`${totalRevenue.toLocaleString('fr-FR')}€`}
           icon={DollarSign}
-          change={25}
-          changeLabel="vs mois dernier"
         />
         <StatCard
           label="Revenue / client"
           value={`${revenuePerLead}€`}
           icon={TrendingUp}
-          change={12}
         />
         <StatCard
           label="Clients totaux"
           value={`${totalConversions}`}
           icon={Target}
-          change={8}
         />
         <StatCard
           label="ROI"
           value={`${roi}%`}
-          icon={Target}
-          change={Number(roi)}
+          icon={TrendingUp}
         />
       </div>
 
