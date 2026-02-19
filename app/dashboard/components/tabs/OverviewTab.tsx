@@ -1,20 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageSquare, Target, Send, TrendingUp, DollarSign } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
-import { StatCard } from '@/components/ui/stat-card'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
 
-const categoryColors = {
-  vip: '#FF5C00',
-  standard: '#3B82F6',
-  low: '#888888',
-}
+const ORANGE = "#FF5C00"
+const GREEN = "#00D26A"
+const BLUE = "#3B82F6"
+const YELLOW = "#FFB800"
 
 export function OverviewTab() {
+  const [activeTab, setActiveTab] = useState("overview")
   const [leads, setLeads] = useState<any[]>([])
   const [dailyStats, setDailyStats] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,23 +21,17 @@ export function OverviewTab() {
 
   const fetchData = async () => {
     try {
-      // Fetch real leads from Supabase
-      const { data: leadsData, error: leadsError } = await supabase
+      const { data: leadsData } = await supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50)
 
-      if (leadsError) console.error('Leads error:', leadsError)
-      
-      // Fetch daily stats from Supabase
-      const { data: statsData, error: statsError } = await supabase
+      const { data: statsData } = await supabase
         .from('daily_stats')
         .select('*')
         .order('date', { ascending: false })
         .limit(7)
-
-      if (statsError) console.error('Stats error:', statsError)
 
       setLeads(leadsData || [])
       setDailyStats(statsData || [])
@@ -53,246 +42,258 @@ export function OverviewTab() {
     }
   }
 
-  // Calculate REAL stats from REAL data
   const totalLeads = leads.length
-  const avgScore = totalLeads > 0 
-    ? (leads.reduce((sum, lead) => sum + (lead.ai_score || 0), 0) / totalLeads).toFixed(1) 
+  const avgScore = totalLeads > 0
+    ? (leads.reduce((sum, l) => sum + (l.ai_score || 0), 0) / totalLeads).toFixed(1)
     : '0'
-  const dmsSent = leads.filter(l => l.status === 'dm_sent' || l.status === 'converted' || l.status === 'replied').length
+  const dmsSent = leads.filter(l => ['dm_sent', 'converted', 'replied'].includes(l.status)).length
   const conversions = leads.filter(l => l.status === 'converted').length
-  const revenue = leads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
+  const revenue = leads.reduce((sum, l) => sum + (l.revenue || 0), 0)
 
-  // Prepare chart data from real daily_stats
-  const dailyData = dailyStats.map(stat => ({
-    date: new Date(stat.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
-    VIP: stat.vip_leads || 0,
-    Standard: stat.standard_leads || 0,
-    Low: (stat.total_leads || 0) - (stat.vip_leads || 0) - (stat.standard_leads || 0),
-  }))
+  const isDemoMode = totalLeads === 0
 
-  const vipCount = leads.filter(l => (l.ai_score || 0) >= 9).length
-  const standardCount = leads.filter(l => (l.ai_score || 0) >= 7 && (l.ai_score || 0) < 9).length
-  const lowCount = leads.filter(l => (l.ai_score || 0) < 7).length
+  const displayLeads = isDemoMode
+    ? [
+        { id: '1', username: 'fitgirl_23', ai_score: 9, status: 'converted', comment_text: 'Trop bien ! Tu proposes des programmes perso ?', created_at: new Date(Date.now() - 3600000).toISOString() },
+        { id: '2', username: 'muscle_tom', ai_score: 9, status: 'dm_sent', comment_text: 'Wow ces résultats 💪 comment je fais pour commencer ?', created_at: new Date(Date.now() - 7200000).toISOString() },
+        { id: '3', username: 'yoga_sarah', ai_score: 8, status: 'replied', comment_text: 'Super contenu ! Tu coaches aussi pour la souplesse ?', created_at: new Date(Date.now() - 10800000).toISOString() },
+        { id: '4', username: 'run_alex', ai_score: 8, status: 'dm_sent', comment_text: 'Je veux perdre 10kg, tu peux m\'aider ?', created_at: new Date(Date.now() - 14400000).toISOString() },
+        { id: '5', username: 'noob_123', ai_score: 3, status: 'ignored', comment_text: 'Pas mal 👍', created_at: new Date(Date.now() - 18000000).toISOString() },
+      ]
+    : leads.slice(0, 5)
 
-  const pieData = [
-    { name: 'VIP (9-10)', value: vipCount, color: categoryColors.vip },
-    { name: 'Standard (7-8)', value: standardCount, color: categoryColors.standard },
-    { name: 'Low (<7)', value: lowCount, color: categoryColors.low },
-  ]
+  const stats = isDemoMode
+    ? [
+        { label: "Leads cette semaine", value: "47", change: "+23%", icon: "👥", color: ORANGE },
+        { label: "Score moyen", value: "8.2", change: "+0.6", icon: "🎯", color: BLUE },
+        { label: "DMs envoyés", value: "34", change: "+31%", icon: "✉️", color: "#fff" },
+        { label: "Conversions", value: "12", change: "+44%", icon: "🏆", color: GREEN },
+        { label: "Revenue estimé", value: "2 940€", change: "+38%", icon: "💰", color: ORANGE },
+      ]
+    : [
+        { label: "Leads cette semaine", value: String(totalLeads), change: "", icon: "👥", color: ORANGE },
+        { label: "Score moyen", value: `${avgScore}/10`, change: "", icon: "🎯", color: BLUE },
+        { label: "DMs envoyés", value: String(dmsSent), change: "", icon: "✉️", color: "#fff" },
+        { label: "Conversions", value: String(conversions), change: "", icon: "🏆", color: GREEN },
+        { label: "Revenue estimé", value: `${revenue.toLocaleString('fr-FR')}€`, change: "", icon: "💰", color: ORANGE },
+      ]
 
-  const repliedCount = leads.filter(l => l.status === 'replied' || l.status === 'converted').length
+  const chartBars = isDemoMode
+    ? [22, 35, 28, 45, 52, 38, 60]
+    : dailyStats.slice().reverse().map(s => s.total_leads || 0)
 
-  const funnelData = isDemoMode ? [
-    { step: 'Commentaires', count: 84, width: 100 },
-    { step: 'Leads qualifiés', count: 47, width: 80 },
-    { step: 'DMs envoyés', count: 28, width: 60 },
-    { step: 'Réponses', count: 19, width: 40 },
-    { step: 'Conversions', count: 12, width: 20 },
-  ] : [
-    { step: 'Commentaires', count: totalLeads + 37, width: 100 },
-    { step: 'Leads qualifiés', count: totalLeads, width: totalLeads > 0 ? 80 : 0 },
-    { step: 'DMs envoyés', count: dmsSent, width: dmsSent > 0 ? 60 : 0 },
-    { step: 'Réponses', count: repliedCount, width: repliedCount > 0 ? 40 : 0 },
-    { step: 'Conversions', count: conversions, width: conversions > 0 ? 20 : 0 },
-  ]
-  
-  const demoLeads = [
-    { id: '1', username: 'sarah_fitgirl', ai_score: 9.2, category: 'vip', status: 'converted', comment_text: '🔥 Trop motivant ! Comment tu fais pour être aussi régulier ?', created_at: new Date(Date.now() - 3600000).toISOString() },
-    { id: '2', username: 'coach_alex', ai_score: 8.5, category: 'standard', status: 'replied', comment_text: 'Incroyable transformation ! Tu proposes des coachings perso ?', created_at: new Date(Date.now() - 7200000).toISOString() },
-    { id: '3', username: 'fitness_marie', ai_score: 9.0, category: 'vip', status: 'dm_sent', comment_text: 'Ça m\'inspire grave ! Besoin de tes conseils nutrition 💪', created_at: new Date(Date.now() - 10800000).toISOString() },
-    { id: '4', username: 'tom_sportif', ai_score: 7.8, category: 'standard', status: 'dm_sent', comment_text: 'Top ! Tu as un programme pour débutants ?', created_at: new Date(Date.now() - 14400000).toISOString() },
-    { id: '5', username: 'julie_running', ai_score: 8.2, category: 'standard', status: 'pending', comment_text: 'Bravo pour cette régularité 👏 Quel est ton secret ?', created_at: new Date(Date.now() - 18000000).toISOString() },
-  ]
+  const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+
+  const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+    dm_sent: { label: "DM envoyé", color: BLUE, bg: "rgba(59,130,246,0.1)" },
+    converted: { label: "Converti ✓", color: GREEN, bg: "rgba(0,210,106,0.12)" },
+    replied: { label: "Répondu", color: GREEN, bg: "rgba(0,210,106,0.08)" },
+    ignored: { label: "Ignoré", color: "#555", bg: "rgba(255,255,255,0.04)" },
+    pending: { label: "En attente", color: YELLOW, bg: "rgba(255,184,0,0.1)" },
+  }
+
+  const scoreBadge = (score: number) => {
+    if (score >= 9) return { label: "VIP", color: ORANGE, bg: "rgba(255,92,0,0.12)" }
+    if (score >= 7) return { label: "Standard", color: BLUE, bg: "rgba(59,130,246,0.12)" }
+    return { label: "Low", color: "#666", bg: "rgba(255,255,255,0.04)" }
+  }
+
+  const vipCount = isDemoMode ? 14 : leads.filter(l => (l.ai_score || 0) >= 9).length
+  const standardCount = isDemoMode ? 21 : leads.filter(l => (l.ai_score || 0) >= 7 && (l.ai_score || 0) < 9).length
+  const lowCount = isDemoMode ? 12 : leads.filter(l => (l.ai_score || 0) < 7).length
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-[#FF5C00] border-t-transparent rounded-full animate-spin"></div>
-        <span className="ml-3 text-[#888]">Chargement des données...</span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 256 }}>
+        <div style={{ width: 32, height: 32, border: `2px solid ${ORANGE}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }}></div>
+        <span style={{ marginLeft: 12, color: "#888" }}>Chargement...</span>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
-  // Mode Démo : afficher des données exemples si aucun lead
-  const isDemoMode = totalLeads === 0
-  
-  // Données de démonstration
-  const demoData = isDemoMode ? {
-    totalLeads: 47,
-    avgScore: '8.2',
-    dmsSent: 28,
-    conversions: 12,
-    revenue: 2840,
-    dailyData: [
-      { date: 'Lun', VIP: 3, Standard: 5, Low: 2 },
-      { date: 'Mar', VIP: 5, Standard: 7, Low: 3 },
-      { date: 'Mer', VIP: 4, Standard: 6, Low: 4 },
-      { date: 'Jeu', VIP: 6, Standard: 8, Low: 2 },
-      { date: 'Ven', VIP: 7, Standard: 9, Low: 3 },
-      { date: 'Sam', VIP: 5, Standard: 6, Low: 5 },
-      { date: 'Dim', VIP: 4, Standard: 5, Low: 3 }
-    ],
-    pieData: [
-      { name: 'VIP (9-10)', value: 18, color: '#FF5C00' },
-      { name: 'Standard (7-8)', value: 23, color: '#3B82F6' },
-      { name: 'Low (<7)', value: 6, color: '#888888' }
-    ]
-  } : {
-    totalLeads,
-    avgScore,
-    dmsSent,
-    conversions,
-    revenue,
-    dailyData: dailyData,
-    pieData: pieData
-  }
-  
   return (
-    <div className="space-y-6">
-      {/* Banner Mode Démo */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+
+      {/* Mode démo banner */}
       {isDemoMode && (
-        <Card className="p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-xl">📊</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-orange-300">Mode Aperçu - Données de démonstration</h3>
-              <p className="text-sm text-orange-200/80">
-                Connectez votre compte Instagram pour voir vos vraies statistiques. Les données ci-dessous sont des exemples réalistes.
-              </p>
-            </div>
-            <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold text-sm transition-colors">
-              Connecter Instagram
-            </button>
+        <div style={{
+          background: "rgba(255,92,0,0.08)", border: "1px solid rgba(255,92,0,0.2)",
+          borderRadius: 16, padding: "14px 20px",
+          display: "flex", alignItems: "center", gap: 12
+        }}>
+          <span style={{ fontSize: 20 }}>📊</span>
+          <div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: ORANGE }}>Mode Aperçu — </span>
+            <span style={{ fontSize: 14, color: "#aaa" }}>Données de démonstration. Connectez Instagram pour voir vos vraies données.</span>
           </div>
-        </Card>
+        </div>
       )}
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard label="Leads cette semaine" value={demoData.totalLeads} icon={MessageSquare} />
-        <StatCard label="Score moyen" value={`${demoData.avgScore}/10`} icon={Target} />
-        <StatCard label="DMs envoyés" value={demoData.dmsSent} icon={Send} />
-        <StatCard label="Conversions" value={demoData.conversions} icon={TrendingUp} />
-        <StatCard label="Revenue estimé" value={`${demoData.revenue.toLocaleString('fr-FR')}€`} icon={DollarSign} />
+
+      {/* STAT CARDS */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14 }}>
+        {stats.map((s, i) => (
+          <div key={i} style={{
+            background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 16, padding: "22px 20px"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 14 }}>
+              <span style={{ fontSize: 12, color: "#666", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</span>
+              <span style={{ fontSize: 18 }}>{s.icon}</span>
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 800, color: s.color, letterSpacing: -0.5 }}>{s.value}</div>
+            {s.change && (
+              <div style={{
+                marginTop: 8, fontSize: 12, fontWeight: 700,
+                color: s.change.startsWith("+") ? GREEN : "#FF4D4D",
+                display: "flex", alignItems: "center", gap: 4
+              }}>
+                {s.change.startsWith("+") ? "↑" : "↓"} {s.change}
+                <span style={{ color: "#555", fontWeight: 500 }}>vs sem. dernière</span>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* CHARTS ROW */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
         {/* Bar Chart */}
-        <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
-          <h3 className="text-lg font-semibold text-white mb-4">Leads par jour</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={demoData.dailyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="date" stroke="#888" />
-              <YAxis stroke="#888" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'rgba(10,10,10,0.95)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Legend />
-              <Bar dataKey="VIP" stackId="a" fill={categoryColors.vip} />
-              <Bar dataKey="Standard" stackId="a" fill={categoryColors.standard} />
-              <Bar dataKey="Low" stackId="a" fill={categoryColors.low} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+        <div style={{
+          background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: 16, padding: 24
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 24 }}>Leads par jour</div>
+          <div style={{ display: "flex", alignItems: "flex-end", height: 180, gap: 8, padding: "0 8px" }}>
+            {chartBars.map((h, i) => (
+              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#888" }}>{h}</span>
+                <div style={{
+                  width: "100%", height: `${Math.max((h / Math.max(...chartBars, 1)) * 160, 4)}px`,
+                  background: `linear-gradient(180deg, ${ORANGE}, ${ORANGE}25)`,
+                  borderRadius: "6px 6px 2px 2px",
+                  transition: "height 0.5s"
+                }} />
+                <span style={{ fontSize: 11, color: "#555" }}>{days[i] || ''}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* Pie Chart */}
-        <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
-          <h3 className="text-lg font-semibold text-white mb-4">Répartition par catégorie</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={demoData.pieData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {demoData.pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'rgba(10,10,10,0.95)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
+        {/* Donut Chart */}
+        <div style={{
+          background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: 16, padding: 24
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 24 }}>Répartition des leads</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="60" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="20" />
+              <circle cx="80" cy="80" r="60" fill="none" stroke={ORANGE} strokeWidth="20"
+                strokeDasharray="113 264" strokeDashoffset="0" transform="rotate(-90 80 80)" />
+              <circle cx="80" cy="80" r="60" fill="none" stroke={BLUE} strokeWidth="20"
+                strokeDasharray="94 283" strokeDashoffset="-113" transform="rotate(-90 80 80)" />
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#444" strokeWidth="20"
+                strokeDasharray="70 307" strokeDashoffset="-207" transform="rotate(-90 80 80)" />
+              <text x="80" y="76" textAnchor="middle" fill="white" fontSize="24" fontWeight="800">{isDemoMode ? 47 : totalLeads}</text>
+              <text x="80" y="94" textAnchor="middle" fill="#666" fontSize="11">leads</text>
+            </svg>
+          </div>
+          {[
+            { label: "VIP (9-10)", pct: isDemoMode ? "30%" : `${totalLeads > 0 ? Math.round(vipCount / totalLeads * 100) : 0}%`, color: ORANGE },
+            { label: "Standard (7-8)", pct: isDemoMode ? "45%" : `${totalLeads > 0 ? Math.round(standardCount / totalLeads * 100) : 0}%`, color: BLUE },
+            { label: "Low (<7)", pct: isDemoMode ? "25%" : `${totalLeads > 0 ? Math.round(lowCount / totalLeads * 100) : 0}%`, color: "#555" },
+          ].map((d, i) => (
+            <div key={i} style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              padding: "8px 0", borderTop: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: d.color, display: "inline-block" }} />
+                <span style={{ fontSize: 13, color: "#aaa" }}>{d.label}</span>
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>{d.pct}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Funnel */}
-      <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
-        <h3 className="text-lg font-semibold text-white mb-6">Funnel de conversion</h3>
-        <div className="space-y-4">
-          {funnelData.map((item, index) => (
-            <div key={item.step} className="flex items-center gap-4">
-              <div className="w-32 text-sm text-[#888]">{item.step}</div>
-              <div className="flex-1">
-                <div
-                  className="h-12 rounded-lg bg-gradient-to-r from-[#FF5C00] to-[#FF8A3D] flex items-center justify-between px-4 transition-all"
-                  style={{ width: `${item.width}%` }}
-                >
-                  <span className="text-white font-semibold">{item.count}</span>
-                  {index < funnelData.length - 1 && (
-                    <span className="text-white/70 text-sm">
-                      {((funnelData[index + 1].count / item.count) * 100).toFixed(0)}%
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* RECENT LEADS */}
+      <div style={{
+        background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: 16, padding: 24
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div style={{ fontSize: 15, fontWeight: 700 }}>Derniers leads</div>
+          <button style={{
+            background: "none", border: "1px solid rgba(255,255,255,0.08)",
+            color: ORANGE, padding: "6px 14px", borderRadius: 8,
+            fontSize: 12, fontWeight: 600, cursor: "pointer"
+          }}>Voir tout →</button>
         </div>
-      </Card>
 
-      {/* Recent Leads */}
-      <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
-        <h3 className="text-lg font-semibold text-white mb-4">5 derniers leads</h3>
-        <div className="space-y-3">
-          {(isDemoMode ? demoLeads : leads.slice(0, 5)).map((lead) => (
-            <div
-              key={lead.id}
-              className="flex items-center justify-between p-4 rounded-lg bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.05)] transition-all cursor-pointer"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-semibold text-white">@{lead.username}</span>
-                  <Badge variant={lead.category === 'vip' ? 'orange' : lead.category === 'standard' ? 'blue' : 'gray'}>
-                    Score {lead.ai_score || 0}
-                  </Badge>
-                  <Badge variant={
-                    lead.status === 'converted' ? 'green' :
-                    lead.status === 'replied' ? 'blue' :
-                    lead.status === 'dm_sent' ? 'yellow' : 'gray'
-                  }>
-                    {lead.status}
-                  </Badge>
-                </div>
-                <p className="text-sm text-[#888] line-clamp-1">{lead.comment_text || lead.comment || '—'}</p>
-              </div>
-              <div className="text-sm text-[#555]">
-                {new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          ))}
+        {/* Header */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "140px 1fr 100px 110px 70px",
+          padding: "8px 16px", fontSize: 11, fontWeight: 700, color: "#444",
+          textTransform: "uppercase", letterSpacing: 1, marginBottom: 4
+        }}>
+          <span>Lead</span>
+          <span>Commentaire</span>
+          <span>Score</span>
+          <span style={{ textAlign: "center" }}>Statut</span>
+          <span style={{ textAlign: "right" }}>Heure</span>
         </div>
-      </Card>
+
+        {displayLeads.map((lead, i) => {
+          const badge = scoreBadge(lead.ai_score || lead.score || 0)
+          const st = statusMap[lead.status] || statusMap['pending']
+          return (
+            <div key={lead.id} style={{
+              display: "grid", gridTemplateColumns: "140px 1fr 100px 110px 70px",
+              padding: "14px 16px", alignItems: "center",
+              borderRadius: 10, cursor: "pointer",
+              background: i % 2 === 0 ? "rgba(255,255,255,0.01)" : "transparent",
+              transition: "background 0.15s"
+            }}>
+              <span style={{ fontWeight: 700, fontSize: 14 }}>@{lead.username}</span>
+              <span style={{
+                fontSize: 13, color: "#777",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                paddingRight: 16
+              }}>{lead.comment_text || lead.comment || '—'}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{
+                  background: badge.bg, color: badge.color,
+                  padding: "3px 8px", borderRadius: 6,
+                  fontSize: 10, fontWeight: 800
+                }}>{badge.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: badge.color }}>{lead.ai_score || lead.score || 0}/10</span>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <span style={{
+                  background: st.bg, color: st.color,
+                  padding: "4px 12px", borderRadius: 20,
+                  fontSize: 11, fontWeight: 700
+                }}>{st.label}</span>
+              </div>
+              <span style={{ fontSize: 12, color: "#555", textAlign: "right" }}>
+                {new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )
+        })}
+
+        {displayLeads.length === 0 && (
+          <div style={{ textAlign: "center", padding: "48px 0" }}>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>🚀</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Aucun lead pour l'instant</h3>
+            <p style={{ fontSize: 14, color: "#666", maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
+              Vos premiers leads apparaîtront ici dès que l'automatisation Instagram sera active.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

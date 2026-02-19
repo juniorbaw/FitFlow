@@ -2,579 +2,463 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Check, ArrowRight, Zap, TrendingUp, Users, BarChart3, Sparkles, X, Play } from 'lucide-react'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
 const BLUE = "#3B82F6"
 
-const stats = [
-  { value: "3-5", label: "Nouveaux clients/semaine", icon: "👥" },
-  { value: "30 sec", label: "Temps de réponse", icon: "⚡" },
-  { value: "85%", label: "Taux de réponse", icon: "📈" },
-  { value: "24/7", label: "Automatisation", icon: "🤖" },
-]
-
 const features = [
-  { icon: "🤖", title: "IA Gemini Ultra", desc: "Analyse sémantique avancée pour détecter l'intention d'achat réelle" },
-  { icon: "⚡", title: "Réponse Instantanée", desc: "Vos prospects reçoivent un DM personnalisé en moins de 30 secondes" },
-  { icon: "🎯", title: "Lead Scoring 1-10", desc: "Priorise automatiquement les prospects les plus chauds pour maximiser vos conversions" },
-  { icon: "📊", title: "Analytics Temps Réel", desc: "Tableau de bord avec métriques essentielles : leads, conversions, revenus" },
-  { icon: "💬", title: "Templates Personnalisés", desc: "Messages adaptatifs selon le profil et l'engagement du prospect" },
-  { icon: "🔒", title: "100% Conforme", desc: "Utilise uniquement l'API officielle Instagram - Votre compte est protégé" },
+  { icon: "🤖", title: "IA de Scoring", desc: "Chaque commentaire est analysé et noté de 1 à 10 selon l'intention d'achat réelle." },
+  { icon: "⚡", title: "DM en 30 Secondes", desc: "Les prospects chauds reçoivent un message personnalisé instantanément." },
+  { icon: "🎯", title: "Leads Qualifiés", desc: "Fini le tri manuel. L'IA priorise les prospects les plus susceptibles de convertir." },
+  { icon: "📊", title: "Dashboard Temps Réel", desc: "Suivez vos leads, conversions et revenus dans un tableau de bord clair." },
+  { icon: "💬", title: "Messages Adaptatifs", desc: "Chaque DM est personnalisé selon le profil et le commentaire du prospect." },
+  { icon: "🔒", title: "100% Conforme", desc: "API officielle Instagram. Votre compte est protégé, aucun risque de ban." },
 ]
 
-const socialProof = [
-  { text: "Configuration en 10 minutes chrono", icon: "⏱️" },
-  { text: "Aucune carte bancaire requise", icon: "💳" },
-  { text: "Support 7j/7 en français", icon: "🇫🇷" },
-  { text: "Garantie satisfait ou remboursé 30 jours", icon: "✅" },
+const steps = [
+  { num: "01", title: "Un prospect commente", desc: "Quelqu'un commente votre post Instagram avec une intention d'achat.", visual: "💬" },
+  { num: "02", title: "L'IA analyse et score", desc: "En moins de 5 secondes, le commentaire est scoré de 1 à 10 par notre IA.", visual: "🧠" },
+  { num: "03", title: "DM personnalisé envoyé", desc: "Si le score est ≥ 7, un DM sur-mesure est envoyé automatiquement.", visual: "🚀" },
 ]
 
-const objections = [
-  {
-    q: "Est-ce conforme aux règles Instagram ?",
-    a: "Absolument ! FitFlow utilise uniquement l'API officielle Instagram approuvée par Meta. Votre compte est 100% sécurisé et nous respectons toutes les guidelines."
-  },
-  {
-    q: "Combien de temps avant les premiers résultats ?",
-    a: "La plupart de nos utilisateurs génèrent leurs premiers leads qualifiés dans les 24-48h. Les premiers clients payants arrivent généralement sous 7-10 jours."
-  },
-  {
-    q: "Dois-je avoir des compétences techniques ?",
-    a: "Zéro compétence requise ! Notre setup guidé prend 10 minutes. Si vous savez poster sur Instagram, vous savez utiliser FitFlow."
-  },
-  {
-    q: "Combien de temps dois-je y consacrer ?",
-    a: "5-10 minutes par jour maximum pour vérifier vos nouveaux leads. Tout le reste (détection, scoring, messages) est automatisé 24/7."
-  },
-  {
-    q: "L'essai est-il vraiment gratuit ?",
-    a: "Oui ! 14 jours complets, toutes les fonctionnalités, aucune carte bancaire. Vous pouvez annuler en 1 clic à tout moment."
-  },
-  {
-    q: "Que se passe-t-il avec mes données ?",
-    a: "Vos données sont hébergées sur Supabase (infrastructure ultra-sécurisée). Nous ne vendons JAMAIS vos informations. Conformité RGPD totale."
-  }
+const comparisons = [
+  { label: "Temps de réponse", before: "2-24h", after: "30 sec", gain: "×48" },
+  { label: "Qualification", before: "Au feeling", after: "Score IA 1-10", gain: "+40%" },
+  { label: "Disponibilité", before: "8h/jour", after: "24/7", gain: "×3" },
+  { label: "Temps/semaine", before: "10-15h", after: "30 min", gain: "-95%" },
 ]
 
-const comparisonData = [
-  { feature: "Réponse manuelle Instagram", manual: "2-24h", fitflow: "30 secondes", multiplier: "48x plus rapide" },
-  { feature: "Qualification des leads", manual: "Aléatoire", fitflow: "Score IA 1-10", multiplier: "+40% conversion" },
-  { feature: "Disponibilité", manual: "8h/jour", fitflow: "24/7 automatique", multiplier: "3x plus de leads" },
-  { feature: "Temps/semaine", manual: "10-15h", fitflow: "30 min", multiplier: "95% de temps gagné" },
+const faqs = [
+  { q: "Est-ce conforme aux règles Instagram ?", a: "Oui. FitFlow utilise uniquement l'API officielle approuvée par Meta. Votre compte est 100% sécurisé." },
+  { q: "Combien de temps avant les premiers résultats ?", a: "La plupart des utilisateurs génèrent leurs premiers leads qualifiés en 24-48h. Les premiers clients payants sous 7-10 jours." },
+  { q: "Dois-je avoir des compétences techniques ?", a: "Zéro. Notre setup guidé prend 10 minutes. Si vous savez poster sur Instagram, vous savez utiliser FitFlow." },
+  { q: "L'essai est-il vraiment gratuit ?", a: "Oui ! 14 jours complets, toutes les fonctionnalités, aucune carte bancaire requise." },
+  { q: "Combien de temps dois-je y consacrer ?", a: "5-10 minutes par jour maximum pour vérifier vos leads. Tout le reste est automatisé." },
 ]
 
-export default function HomePage() {
-  const [showPopup, setShowPopup] = useState(false)
-  const [email, setEmail] = useState('')
+const plans = [
+  { name: "Starter", price: "29", features: ["50 leads/mois", "Score IA basique", "5 Auto-DMs/jour", "Dashboard"], cta: "Commencer", popular: false, href: "/signup" },
+  { name: "Pro", price: "47", features: ["Leads illimités", "Score IA avancé", "50 Auto-DMs/jour", "Content AI", "Templates personnalisés", "Support prioritaire"], cta: "Essai Gratuit 14j", popular: true, href: "/signup" },
+  { name: "Elite", price: "97", features: ["Tout le plan Pro", "100 Auto-DMs/jour", "Analytics avancés", "Account manager dédié", "Setup personnalisé"], cta: "Nous contacter", popular: false, href: "/contact" },
+]
+
+export default function FitFlowLanding() {
+  const [scrolled, setScrolled] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
-    // Popup d'exit intent (quand souris sort de la page)
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !showPopup) {
-        setShowPopup(true)
-      }
+    const handleScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    if (count < 30000) {
+      const timer = setTimeout(() => setCount((c) => Math.min(c + 600, 30000)), 20)
+      return () => clearTimeout(timer)
     }
-    document.addEventListener('mouseleave', handleMouseLeave)
-    return () => document.removeEventListener('mouseleave', handleMouseLeave)
-  }, [showPopup])
+  }, [count])
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
-      {/* HEADER STICKY */}
-      <div style={{ padding: "16px 32px", borderBottom: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 50, background: "rgba(10,10,10,0.95)" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>
-            Fit<span style={{ color: ORANGE }}>Flow</span>
-          </div>
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <Link href="/demo-video" style={{ color: "#888", fontSize: 14, fontWeight: 600, textDecoration: "none", transition: "color 0.2s" }}>
-              🎥 Voir la démo
-            </Link>
-            <Link href="/pricing" style={{ color: "#888", fontSize: 14, fontWeight: 600, textDecoration: "none", transition: "color 0.2s" }}>
-              Tarifs
-            </Link>
-            <Link href="/login" style={{ color: "#888", fontSize: 14, fontWeight: 600, textDecoration: "none", transition: "color 0.2s" }}>
-              Connexion
-            </Link>
-            <Link 
-              href="/signup" 
-              style={{ 
-                background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, 
-                color: "white", 
-                padding: "10px 24px", 
-                borderRadius: 20, 
-                fontSize: 14, 
-                fontWeight: 700, 
-                textDecoration: "none", 
-                transition: "transform 0.2s", 
-                display: "inline-block" 
-              }}
-            >
-              Essai Gratuit 14j →
-            </Link>
-          </div>
-        </div>
-      </div>
+    <div style={{ minHeight: "100vh", background: "#050508", color: "#fafafa", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", overflowX: "hidden" }}>
 
-      {/* HERO SECTION - OPTIMISÉE CONVERSION */}
-      <div style={{ padding: "60px 32px 80px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        {/* Gradient background */}
-        <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 800, height: 800, background: `radial-gradient(circle, ${ORANGE}15 0%, transparent 70%)`, pointerEvents: "none" }}></div>
-        
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto" }}>
-          {/* Badge de preuve sociale */}
-          <div style={{ 
-            display: "inline-block", 
-            background: "rgba(139, 92, 246, 0.1)", 
-            border: "1px solid rgba(139, 92, 246, 0.3)",
-            padding: "8px 20px", 
-            borderRadius: 50, 
-            fontSize: 13, 
-            fontWeight: 700,
-            color: "#8B5CF6",
-            marginBottom: 24,
-            marginTop: 24
+      {/* HEADER */}
+      <header style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        padding: "0 40px", height: 64,
+        background: scrolled ? "rgba(5,5,8,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(20px)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        transition: "all 0.3s"
+      }}>
+        <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>
+          Fit<span style={{ color: ORANGE }}>Flow</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          <a href="#features" style={{ color: "#999", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>Fonctionnalités</a>
+          <a href="#pricing" style={{ color: "#999", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>Tarifs</a>
+          <a href="#faq" style={{ color: "#999", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>FAQ</a>
+          <Link href="/login" style={{ color: "#ccc", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>Connexion</Link>
+          <Link href="/signup" style={{
+            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+            color: "white", padding: "10px 24px", borderRadius: 50,
+            fontSize: 14, fontWeight: 700, textDecoration: "none",
+            boxShadow: `0 4px 20px ${ORANGE}40`
           }}>
-            ✨ Bêta Privée - Places limitées
-          </div>
-
-          <h1 style={{ fontSize: 64, fontWeight: 900, letterSpacing: -2, lineHeight: 1.1, marginBottom: 24 }}>
-            Transformez Vos Commentaires<br />
-            Instagram en <span style={{ 
-              background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text"
-            }}>Clients Payants</span>
-          </h1>
-
-          <p style={{ fontSize: 22, color: "#aaa", marginBottom: 16, lineHeight: 1.5 }}>
-            L'IA détecte automatiquement vos prospects chauds sur Instagram<br />
-            et leur envoie un DM personnalisé <strong style={{ color: "white" }}>en 30 secondes</strong>
-          </p>
-
-          <p style={{ fontSize: 16, color: "#666", marginBottom: 40 }}>
-            Sans toucher votre téléphone. Sans code. Sans compétence technique.
-          </p>
-
-          {/* CTA Principal avec indicateurs de confiance */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-            <Link 
-              href="/signup" 
-              style={{ 
-                background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
-                color: "white", 
-                padding: "20px 48px", 
-                borderRadius: 24, 
-                fontSize: 18, 
-                fontWeight: 700, 
-                textDecoration: "none", 
-                display: "inline-flex", 
-                alignItems: "center", 
-                gap: 12, 
-                boxShadow: `0 20px 60px ${ORANGE}40`,
-                transition: "all 0.3s"
-              }}
-            >
-              🚀 Démarrer Gratuitement (14 jours)
-              <ArrowRight style={{ width: 20, height: 20 }} />
-            </Link>
-            
-            <div style={{ display: "flex", gap: 20, fontSize: 13, color: "#888" }}>
-              <span>✅ Aucune carte bancaire</span>
-              <span>✅ Setup en 10 min</span>
-              <span>✅ Support 7j/7</span>
-            </div>
-          </div>
-
-          {/* STATS - Plus visibles */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, maxWidth: 1000, margin: "60px auto 0" }}>
-            {stats.map((stat, i) => (
-              <div key={i} style={{ 
-                background: "rgba(255,255,255,0.03)", 
-                border: "1px solid rgba(255,255,255,0.08)", 
-                borderRadius: 16, 
-                padding: 24, 
-                textAlign: "center",
-                transition: "all 0.3s"
-              }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>{stat.icon}</div>
-                <div style={{ fontSize: 32, fontWeight: 800, color: ORANGE, marginBottom: 4 }}>{stat.value}</div>
-                <div style={{ fontSize: 13, color: "#888", lineHeight: 1.4 }}>{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* VIDEO DEMO SECTION - NOUVEAU */}
-      <div style={{ padding: "60px 32px", background: "rgba(255,255,255,0.02)" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontSize: 42, fontWeight: 900, marginBottom: 16 }}>
-            Voyez FitFlow en Action
-          </h2>
-          <p style={{ fontSize: 18, color: "#888", marginBottom: 40 }}>
-            Découvrez comment FitFlow transforme un simple commentaire en client payant
-          </p>
-          
-          <Link
-            href="/demo-video"
-            style={{
-              position: "relative",
-              display: "block",
-              background: "rgba(255,255,255,0.05)",
-              border: "2px solid rgba(255, 92, 0, 0.3)",
-              borderRadius: 24,
-              overflow: "hidden",
-              aspectRatio: "16/9",
-              cursor: "pointer",
-              transition: "all 0.3s"
-            }}
-          >
-            <div style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 80,
-              height: 80,
-              background: ORANGE,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: `0 10px 40px ${ORANGE}60`
-            }}>
-              <Play style={{ width: 32, height: 32, color: "white", marginLeft: 4 }} fill="white" />
-            </div>
-            
-            <div style={{
-              position: "absolute",
-              bottom: 24,
-              left: 24,
-              textAlign: "left"
-            }}>
-              <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>
-                Du Commentaire au Client en 3 Minutes
-              </div>
-              <div style={{ fontSize: 14, color: "#aaa" }}>
-                Démo interactive • 3:42 min
-              </div>
-            </div>
+            Essai Gratuit →
           </Link>
-
-          <div style={{ marginTop: 24, display: "flex", justifyContent: "center", gap: 32, fontSize: 14, color: "#888" }}>
-            <span>✨ Pas de fluff marketing</span>
-            <span>🎯 Démonstration réelle</span>
-            <span>⏱️ Moins de 4 minutes</span>
-          </div>
         </div>
-      </div>
+      </header>
 
-      {/* COMPARISON TABLE - Avant/Après */}
-      <div style={{ padding: "80px 32px" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <h2 style={{ fontSize: 48, fontWeight: 900, marginBottom: 16 }}>
-              Avec ou Sans FitFlow ?
-            </h2>
-            <p style={{ fontSize: 18, color: "#888" }}>
-              La différence est flagrante
-            </p>
+      {/* HERO */}
+      <section style={{ paddingTop: 140, paddingBottom: 100, textAlign: "center", position: "relative" }}>
+        <div style={{
+          position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)",
+          width: 700, height: 700,
+          background: `radial-gradient(circle, ${ORANGE}12 0%, transparent 70%)`,
+          pointerEvents: "none"
+        }} />
+        <div style={{ position: "relative", maxWidth: 800, margin: "0 auto", padding: "0 24px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "rgba(255,92,0,0.08)", border: "1px solid rgba(255,92,0,0.2)",
+            padding: "8px 20px", borderRadius: 50, fontSize: 13, fontWeight: 600,
+            color: ORANGE, marginBottom: 32
+          }}>
+            <span style={{ width: 6, height: 6, background: GREEN, borderRadius: "50%", display: "inline-block" }} />
+            Bêta Privée — Places limitées
           </div>
-
-          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, overflow: "hidden" }}>
-            {/* Header */}
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1.5fr", padding: "20px 32px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-              <div style={{ fontWeight: 700, color: "#888" }}></div>
-              <div style={{ fontWeight: 700, color: "#888", textAlign: "center" }}>Sans FitFlow</div>
-              <div style={{ fontWeight: 700, color: ORANGE, textAlign: "center" }}>Avec FitFlow</div>
-              <div style={{ fontWeight: 700, color: GREEN, textAlign: "center" }}>Résultat</div>
+          <h1 style={{ fontSize: 60, fontWeight: 900, letterSpacing: -2, lineHeight: 1.08, marginBottom: 24 }}>
+            Transformez Vos<br />Commentaires Instagram en{" "}
+            <span style={{
+              background: `linear-gradient(135deg, ${ORANGE}, #FFB347)`,
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+            }}>
+              Clients Payants
+            </span>
+          </h1>
+          <p style={{ fontSize: 20, color: "#999", lineHeight: 1.6, marginBottom: 12, maxWidth: 600, margin: "0 auto 12px" }}>
+            L&apos;IA détecte vos prospects chauds et leur envoie un DM personnalisé <strong style={{ color: "white" }}>en 30 secondes</strong>. Sans toucher votre téléphone.
+          </p>
+          <p style={{ fontSize: 15, color: "#555", marginBottom: 40 }}>
+            Sans code. Sans compétence technique. Setup en 10 minutes.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+            <Link href="/signup" style={{
+              background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+              color: "white", padding: "18px 48px", borderRadius: 16,
+              fontSize: 17, fontWeight: 700, textDecoration: "none",
+              display: "inline-flex", alignItems: "center", gap: 10,
+              boxShadow: `0 16px 48px ${ORANGE}35`
+            }}>
+              Démarrer Gratuitement (14 jours)
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+            <div style={{ display: "flex", gap: 24, fontSize: 13, color: "#666" }}>
+              <span>✓ Aucune carte bancaire</span>
+              <span>✓ Setup en 10 min</span>
+              <span>✓ Support 7j/7</span>
             </div>
-
-            {/* Rows */}
-            {comparisonData.map((row, i) => (
-              <div key={i} style={{ 
-                display: "grid", 
-                gridTemplateColumns: "2fr 1fr 1fr 1.5fr", 
-                padding: "24px 32px", 
-                borderBottom: i < comparisonData.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none"
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 72, maxWidth: 700, margin: "72px auto 0" }}>
+            {[
+              { val: "3-5", label: "Nouveaux clients/semaine" },
+              { val: "30s", label: "Temps de réponse" },
+              { val: "85%", label: "Taux de réponse" },
+              { val: "24/7", label: "Automatisation active" },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 16, padding: "24px 16px", textAlign: "center"
               }}>
-                <div style={{ fontWeight: 600 }}>{row.feature}</div>
-                <div style={{ textAlign: "center", color: "#666" }}>{row.manual}</div>
-                <div style={{ textAlign: "center", color: ORANGE, fontWeight: 700 }}>{row.fitflow}</div>
-                <div style={{ textAlign: "center", color: GREEN, fontWeight: 700 }}>{row.multiplier}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: ORANGE, marginBottom: 4 }}>{s.val}</div>
+                <div style={{ fontSize: 12, color: "#777", lineHeight: 1.4 }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* PAIN POINT - 30,000€ */}
+      <section style={{ padding: "80px 24px", position: "relative" }}>
+        <div style={{
+          maxWidth: 900, margin: "0 auto", textAlign: "center",
+          background: "linear-gradient(180deg, rgba(255,92,0,0.06) 0%, rgba(255,92,0,0) 100%)",
+          borderRadius: 32, padding: "64px 48px",
+          border: "1px solid rgba(255,92,0,0.1)"
+        }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16 }}>
+            Ce que ça vous coûte de ne rien faire
+          </p>
+          <div style={{ fontSize: 80, fontWeight: 900, color: ORANGE, letterSpacing: -3, marginBottom: 8 }}>
+            {count.toLocaleString()} €
+          </div>
+          <p style={{ fontSize: 18, color: "#888", marginBottom: 32 }}>de revenus perdus chaque année</p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            {["💬 Commentaires non lus", "⏰ 2h/jour gaspillées", "👻 Leads fantômes"].map((t, i) => (
+              <span key={i} style={{
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                padding: "10px 20px", borderRadius: 50, fontSize: 14, fontWeight: 500, color: "#ccc"
+              }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Comment ça marche</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>3 Étapes. Zéro Effort.</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+            {steps.map((step, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 20, padding: 32, position: "relative", overflow: "hidden"
+              }}>
+                <div style={{
+                  position: "absolute", top: -10, right: -10, fontSize: 100, fontWeight: 900,
+                  color: "rgba(255,92,0,0.04)", lineHeight: 1
+                }}>{step.num}</div>
+                <div style={{ fontSize: 48, marginBottom: 20 }}>{step.visual}</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Étape {step.num}</div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10, color: "white" }}>{step.title}</h3>
+                <p style={{ fontSize: 14, color: "#888", lineHeight: 1.7 }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DASHBOARD PREVIEW */}
+      <section style={{ padding: "80px 24px", background: "rgba(255,255,255,0.01)" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Aperçu du Dashboard</p>
+          <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1, marginBottom: 48 }}>Tout sous contrôle</h2>
+          <div style={{
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 20, padding: 32, textAlign: "left"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+              <span style={{ fontWeight: 800, fontSize: 18 }}>Fit<span style={{ color: ORANGE }}>Flow</span></span>
+              {["Vue d'ensemble", "Leads", "Auto-DM", "Content AI"].map((t, i) => (
+                <span key={i} style={{
+                  padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  background: i === 0 ? "rgba(255,92,0,0.15)" : "transparent",
+                  color: i === 0 ? ORANGE : "#666"
+                }}>{t}</span>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+              {[
+                { label: "Leads", val: "—", color: ORANGE },
+                { label: "Score moyen", val: "—", color: BLUE },
+                { label: "DMs envoyés", val: "—", color: "#fff" },
+                { label: "Conversions", val: "—", color: GREEN },
+              ].map((c, i) => (
+                <div key={i} style={{
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 12, padding: 16
+                }}>
+                  <div style={{ fontSize: 11, color: "#666", marginBottom: 8 }}>{c.label}</div>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: c.color }}>{c.val}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{
+              background: "rgba(255,255,255,0.02)", borderRadius: 12, height: 140,
+              display: "flex", alignItems: "flex-end", padding: "16px 16px 0", gap: 8
+            }}>
+              {[35, 52, 28, 65, 44, 78, 58, 90, 72, 85, 95, 68].map((h, i) => (
+                <div key={i} style={{
+                  flex: 1, height: `${h}%`, borderRadius: "4px 4px 0 0",
+                  background: `linear-gradient(180deg, ${ORANGE}, ${ORANGE}30)`
+                }} />
+              ))}
+            </div>
+            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#555" }}>
+              Aperçu — Les données réelles apparaissent dans votre dashboard
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* FEATURES */}
-      <div style={{ padding: "80px 32px", background: "rgba(255,255,255,0.02)" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <h2 style={{ fontSize: 48, fontWeight: 900, letterSpacing: -1, marginBottom: 16 }}>
-              Tout Ce Dont Vous Avez Besoin
-            </h2>
-            <p style={{ fontSize: 18, color: "#888" }}>
-              Une plateforme complète pour automatiser votre croissance Instagram
-            </p>
+      <section id="features" style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Fonctionnalités</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Tout Ce Dont Vous Avez Besoin</h2>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-            {features.map((feature, i) => (
-              <div 
-                key={i} 
-                style={{ 
-                  background: "rgba(255,255,255,0.03)", 
-                  border: "1px solid rgba(255,255,255,0.08)", 
-                  borderRadius: 20, 
-                  padding: 32, 
-                  transition: "all 0.3s",
-                  cursor: "pointer"
-                }} 
-              >
-                <div style={{ fontSize: 48, marginBottom: 16 }}>{feature.icon}</div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12, color: "white" }}>{feature.title}</h3>
-                <p style={{ fontSize: 15, color: "#888", lineHeight: 1.7 }}>{feature.desc}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+            {features.map((f, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 20, padding: 32
+              }}>
+                <div style={{
+                  width: 52, height: 52, borderRadius: 14,
+                  background: "rgba(255,92,0,0.08)", display: "flex",
+                  alignItems: "center", justifyContent: "center", fontSize: 26, marginBottom: 20
+                }}>{f.icon}</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: "#888", lineHeight: 1.7 }}>{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* SOCIAL PROOF BANNER */}
-      <div style={{ padding: "40px 32px", background: `linear-gradient(135deg, ${ORANGE}10, transparent)`, borderTop: "1px solid rgba(255, 92, 0, 0.2)", borderBottom: "1px solid rgba(255, 92, 0, 0.2)" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-around", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
-          {socialProof.map((item, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 24 }}>{item.icon}</span>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>{item.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* FAQ SECTION */}
-      <div style={{ padding: "80px 32px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      {/* COMPARISON */}
+      <section style={{ padding: "80px 24px", background: "rgba(255,255,255,0.01)" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <h2 style={{ fontSize: 48, fontWeight: 900, marginBottom: 16 }}>
-              Questions Fréquentes
-            </h2>
-            <p style={{ fontSize: 18, color: "#888" }}>
-              Toutes les réponses à vos interrogations
-            </p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Comparaison</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Avant vs Après FitFlow</h2>
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {objections.map((faq, i) => (
-              <details 
-                key={i}
-                style={{ 
-                  background: "rgba(255,255,255,0.03)", 
-                  border: "1px solid rgba(255,255,255,0.08)", 
-                  borderRadius: 16, 
-                  padding: 24,
-                  cursor: "pointer"
-                }}
-              >
-                <summary style={{ 
-                  fontSize: 18, 
-                  fontWeight: 700, 
-                  listStyle: "none",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
-                }}>
-                  {faq.q}
-                  <span style={{ color: ORANGE, fontSize: 24 }}>+</span>
-                </summary>
-                <p style={{ 
-                  marginTop: 16, 
-                  paddingTop: 16,
-                  borderTop: "1px solid rgba(255,255,255,0.05)",
-                  color: "#aaa", 
-                  lineHeight: 1.7,
-                  fontSize: 15
-                }}>
-                  {faq.a}
-                </p>
-              </details>
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, overflow: "hidden" }}>
+            <div style={{
+              display: "grid", gridTemplateColumns: "2fr 1fr 1fr 80px",
+              padding: "16px 28px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.02)"
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 1 }}></span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>Sans</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: ORANGE, textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>FitFlow</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: GREEN, textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>Gain</span>
+            </div>
+            {comparisons.map((c, i) => (
+              <div key={i} style={{
+                display: "grid", gridTemplateColumns: "2fr 1fr 1fr 80px",
+                padding: "20px 28px", borderBottom: i < comparisons.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none"
+              }}>
+                <span style={{ fontSize: 15, fontWeight: 600 }}>{c.label}</span>
+                <span style={{ fontSize: 14, color: "#555", textAlign: "center" }}>{c.before}</span>
+                <span style={{ fontSize: 14, color: ORANGE, fontWeight: 700, textAlign: "center" }}>{c.after}</span>
+                <span style={{ fontSize: 13, color: GREEN, fontWeight: 800, textAlign: "center", background: "rgba(0,210,106,0.08)", borderRadius: 20, padding: "4px 0" }}>{c.gain}</span>
+              </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CTA FINAL - OPTIMISÉ */}
-      <div style={{ padding: "100px 32px", textAlign: "center", position: "relative", overflow: "hidden", background: "rgba(255,255,255,0.02)" }}>
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 600, height: 600, background: `${ORANGE}10`, borderRadius: "50%", filter: "blur(100px)" }}></div>
-        
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto" }}>
-          <div style={{ 
-            display: "inline-block", 
-            background: "rgba(0, 210, 106, 0.1)", 
-            border: "1px solid rgba(0, 210, 106, 0.3)",
-            padding: "8px 20px", 
-            borderRadius: 50, 
-            fontSize: 13, 
-            fontWeight: 700,
-            color: GREEN,
-            marginBottom: 24
-          }}>
-            ⚡ Offre de lancement - 14 jours gratuits
+      {/* PRICING */}
+      <section id="pricing" style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Tarifs</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Simple et Transparent</h2>
           </div>
-
-          <h2 style={{ fontSize: 56, fontWeight: 900, letterSpacing: -1.5, marginBottom: 24, lineHeight: 1.1 }}>
-            Pendant Que Vous Hésitez,<br />
-            Vos Concurrents <span style={{ color: ORANGE }}>Automatisent</span>
-          </h2>
-          
-          <p style={{ fontSize: 20, color: "#aaa", marginBottom: 40, lineHeight: 1.6 }}>
-            Chaque jour sans FitFlow = des dizaines de leads perdus.<br />
-            <strong style={{ color: "white" }}>Commencez maintenant, gratuitement.</strong>
-          </p>
-
-          <Link 
-            href="/signup" 
-            style={{ 
-              background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
-              color: "white", 
-              padding: "20px 56px", 
-              borderRadius: 24, 
-              fontSize: 18, 
-              fontWeight: 700, 
-              textDecoration: "none", 
-              display: "inline-flex", 
-              alignItems: "center", 
-              gap: 12, 
-              boxShadow: `0 20px 60px ${ORANGE}50`,
-              transition: "all 0.3s"
-            }}
-          >
-            🚀 Transformer Mon Instagram Maintenant
-            <ArrowRight style={{ width: 22, height: 22 }} />
-          </Link>
-
-          <p style={{ marginTop: 24, fontSize: 14, color: "#666" }}>
-            ✨ Installation en 10 min • Aucun engagement • Support inclus
-          </p>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div style={{ padding: "40px 32px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
-          <div style={{ color: "#666", fontSize: 14 }}>
-            © 2026 FitFlow. Tous droits réservés.
-          </div>
-          <div style={{ display: "flex", gap: 24, fontSize: 14 }}>
-            <Link href="/privacy" style={{ color: "#666", textDecoration: "none" }}>Confidentialité</Link>
-            <Link href="/terms" style={{ color: "#666", textDecoration: "none" }}>CGU</Link>
-            <Link href="/contact" style={{ color: "#666", textDecoration: "none" }}>Contact</Link>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, alignItems: "start" }}>
+            {plans.map((plan, i) => (
+              <div key={i} style={{
+                background: plan.popular ? "rgba(255,92,0,0.04)" : "rgba(255,255,255,0.02)",
+                border: `1px solid ${plan.popular ? "rgba(255,92,0,0.3)" : "rgba(255,255,255,0.06)"}`,
+                borderRadius: 20, padding: 36, position: "relative",
+                transform: plan.popular ? "scale(1.03)" : "none"
+              }}>
+                {plan.popular && (
+                  <div style={{
+                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
+                    background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+                    color: "white", padding: "5px 16px", borderRadius: 50,
+                    fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase"
+                  }}>Populaire</div>
+                )}
+                <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{plan.name}</h3>
+                <div style={{ marginBottom: 24 }}>
+                  <span style={{ fontSize: 48, fontWeight: 900, color: plan.popular ? ORANGE : "white" }}>{plan.price}€</span>
+                  <span style={{ fontSize: 14, color: "#666" }}>/mois</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
+                  {plan.features.map((f, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#ccc" }}>
+                      <span style={{ color: GREEN, fontSize: 16 }}>✓</span>
+                      {f}
+                    </div>
+                  ))}
+                </div>
+                <Link href={plan.href} style={{
+                  display: "block", width: "100%", padding: "14px", borderRadius: 12, border: "none",
+                  fontSize: 15, fontWeight: 700, cursor: "pointer", textAlign: "center", textDecoration: "none",
+                  background: plan.popular ? `linear-gradient(135deg, ${ORANGE}, #FF8A00)` : "rgba(255,255,255,0.06)",
+                  color: "white",
+                  boxShadow: plan.popular ? `0 8px 24px ${ORANGE}30` : "none"
+                }}>
+                  {plan.cta}
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* EXIT INTENT POPUP */}
-      {showPopup && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(0,0,0,0.9)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 999,
-          padding: 20
-        }}>
-          <div style={{
-            background: "#0a0a0a",
-            border: `2px solid ${ORANGE}`,
-            borderRadius: 24,
-            padding: 48,
-            maxWidth: 600,
-            position: "relative",
-            textAlign: "center"
-          }}>
-            <button 
-              onClick={() => setShowPopup(false)}
-              style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                background: "rgba(255,255,255,0.1)",
-                border: "none",
-                color: "white",
-                borderRadius: "50%",
-                width: 32,
-                height: 32,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
-            <h3 style={{ fontSize: 32, fontWeight: 900, marginBottom: 16 }}>
-              Attendez ! Offre Spéciale 🎁
-            </h3>
-            <p style={{ fontSize: 18, color: "#aaa", marginBottom: 24 }}>
-              Rejoignez notre liste VIP et recevez un <strong style={{ color: ORANGE }}>guide exclusif</strong><br />
-              "10 Stratégies Instagram pour Générer 50+ Leads/Semaine"
-            </p>
-
-            <form onSubmit={(e) => { e.preventDefault(); setShowPopup(false); }} style={{ marginBottom: 16 }}>
-              <input 
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre@email.com"
-                required
+      {/* FAQ */}
+      <section id="faq" style={{ padding: "80px 24px", background: "rgba(255,255,255,0.01)" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>FAQ</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Questions Fréquentes</h2>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {faqs.map((faq, i) => (
+              <div key={i}
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 style={{
-                  width: "100%",
-                  padding: "16px 24px",
-                  borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "rgba(255,255,255,0.05)",
-                  color: "white",
-                  fontSize: 16,
-                  marginBottom: 12
-                }}
-              />
-              <button 
-                type="submit"
-                style={{
-                  width: "100%",
-                  padding: "16px 24px",
-                  background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
-                  border: "none",
-                  borderRadius: 12,
-                  color: "white",
-                  fontSize: 16,
-                  fontWeight: 700,
-                  cursor: "pointer"
+                  background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 16, padding: "20px 24px", cursor: "pointer"
                 }}
               >
-                📥 Recevoir Le Guide Gratuit
-              </button>
-            </form>
-
-            <p style={{ fontSize: 12, color: "#666" }}>
-              + Accès prioritaire aux nouvelles fonctionnalités
-            </p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 16, fontWeight: 700 }}>{faq.q}</span>
+                  <span style={{
+                    color: ORANGE, fontSize: 20, fontWeight: 300,
+                    transform: openFaq === i ? "rotate(45deg)" : "none",
+                    transition: "transform 0.2s"
+                  }}>+</span>
+                </div>
+                {openFaq === i && (
+                  <p style={{
+                    marginTop: 16, paddingTop: 16,
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    color: "#999", lineHeight: 1.7, fontSize: 15
+                  }}>{faq.a}</p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
-      )}
+      </section>
+
+      {/* FINAL CTA */}
+      <section style={{ padding: "100px 24px", textAlign: "center", position: "relative" }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+          width: 500, height: 500, background: `radial-gradient(circle, ${ORANGE}10, transparent 70%)`,
+          pointerEvents: "none"
+        }} />
+        <div style={{ position: "relative", maxWidth: 700, margin: "0 auto" }}>
+          <h2 style={{ fontSize: 48, fontWeight: 900, letterSpacing: -1.5, lineHeight: 1.1, marginBottom: 20 }}>
+            Pendant Que Vous Hésitez,<br />
+            Vos Concurrents{" "}
+            <span style={{ color: ORANGE }}>Automatisent</span>
+          </h2>
+          <p style={{ fontSize: 18, color: "#888", marginBottom: 40 }}>
+            Chaque jour sans FitFlow = des dizaines de leads perdus.
+          </p>
+          <Link href="/signup" style={{
+            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+            color: "white", padding: "18px 56px", borderRadius: 16,
+            fontSize: 17, fontWeight: 700, textDecoration: "none",
+            display: "inline-flex", alignItems: "center", gap: 10,
+            boxShadow: `0 16px 48px ${ORANGE}40`
+          }}>
+            Transformer Mon Instagram Maintenant
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </Link>
+          <p style={{ marginTop: 20, fontSize: 13, color: "#555" }}>
+            ✓ 14 jours gratuits · ✓ Aucune carte bancaire · ✓ Annulation en 1 clic
+          </p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{
+        padding: "32px 40px", borderTop: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", justifyContent: "space-between", alignItems: "center"
+      }}>
+        <span style={{ color: "#444", fontSize: 13 }}>© 2026 FitFlow. Tous droits réservés.</span>
+        <div style={{ display: "flex", gap: 24 }}>
+          <Link href="/privacy" style={{ color: "#444", fontSize: 13, textDecoration: "none" }}>Confidentialité</Link>
+          <Link href="/terms" style={{ color: "#444", fontSize: 13, textDecoration: "none" }}>CGU</Link>
+          <Link href="/contact" style={{ color: "#444", fontSize: 13, textDecoration: "none" }}>Contact</Link>
+        </div>
+      </footer>
     </div>
   )
 }
