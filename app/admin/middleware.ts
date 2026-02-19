@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server'
 
 // Liste des emails admin autorisés
 const ADMIN_EMAILS = [
-  'votre-email@gmail.com', // À REMPLACER par votre vrai email
+  'soujunior94@gmail.com',
 ]
 
 export async function middleware(req: NextRequest) {
