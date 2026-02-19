@@ -41,3 +41,15 @@ Allez sur: https://supabase.com/dashboard/project/lryjyzqrhtepsvqlzzdy/auth/prov
 **Cause**: L'URL callback n'est pas dans la whitelist Facebook
 
 **Fix**: Faire Étapes 1-2 ci-dessus
+
+---
+
+## ✅ AUTH EMAIL - SUPABASE CONFIG
+
+Pour que l'auth email marche SANS confirmation:
+
+1. Supabase Dashboard → **Authentication** → **Email Auth**
+2. **Confirm email**: DISABLED
+3. **Save**
+
+Sinon, l'utilisateur doit confirmer son email avant de se connecter.
