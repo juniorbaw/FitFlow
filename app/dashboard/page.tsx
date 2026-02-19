@@ -12,9 +12,6 @@ import Link from 'next/link'
 import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
 import { RevenueTab } from './components/tabs/RevenueTab'
 import { AutoDMTab } from './components/tabs/AutoDMTab'
-import { VideoAnalyzerTab } from './components/tabs/VideoAnalyzerTab'
-import { CompetitorSpyTab } from './components/tabs/CompetitorSpyTab'
-import { SmartCalendarTab } from './components/tabs/SmartCalendarTab'
 import { StatCard } from '@/components/ui/stat-card'
 import { MessageSquare, Target, Send, TrendingUp, DollarSign } from 'lucide-react'
 
@@ -145,14 +142,11 @@ export default function FitFlowDashboard() {
   const revenue = realLeads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
 
   const tabs = [
-    { id: "overview", label: "Vue d'ensemble", icon: "📊", locked: false },
-    { id: "leads", label: "Leads", icon: "👥", locked: false },
-    { id: "autodm", label: "Auto-DM", icon: "🤖", locked: false, requiredPlan: "pro" },
-    { id: "content", label: "Content AI", icon: "🎨", locked: false },
-    { id: "video", label: "Video Analyzer", icon: "🎥", locked: false, requiredPlan: "pro" },
-    { id: "competitor", label: "Competitor Spy", icon: "🔍", locked: true, requiredPlan: "elite" },
-    { id: "calendar", label: "Smart Calendar", icon: "📅", locked: true, requiredPlan: "elite" },
-    { id: "revenue", label: "Revenue", icon: "💰", locked: false },
+    { id: "overview", label: "Vue d'ensemble", icon: "📊" },
+    { id: "leads", label: "Leads", icon: "👥" },
+    { id: "autodm", label: "Auto-DM", icon: "🤖" },
+    { id: "content", label: "Content AI", icon: "🎨" },
+    { id: "revenue", label: "Revenue", icon: "💰" },
   ]
 
   return (
@@ -503,12 +497,6 @@ export default function FitFlowDashboard() {
         {activeTab === "autodm" && <AutoDMTab />}
 
         {activeTab === "content" && <ContentAnalyzerTab />}
-
-        {activeTab === "video" && <VideoAnalyzerTab />}
-
-        {activeTab === "competitor" && <CompetitorSpyTab />}
-
-        {activeTab === "calendar" && <SmartCalendarTab />}
 
         {activeTab === "revenue" && <RevenueTab />}
       </div>
