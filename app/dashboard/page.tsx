@@ -239,7 +239,17 @@ export default function FitFlowDashboard() {
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           {coach && !coach?.instagram_username ? (
             <button
-              onClick={() => window.location.href = '/api/auth/instagram-oauth'}
+              onClick={async () => {
+                const supabase = createClient()
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: 'facebook',
+                  options: {
+                    redirectTo: `${window.location.origin}/auth/callback?redirectTo=/dashboard`,
+                    scopes: 'email,public_profile,instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_show_list,pages_read_engagement'
+                  }
+                })
+                if (error) console.error('OAuth error:', error)
+              }}
               style={{
                 background: "linear-gradient(135deg, #E1306C, #FD1D1D, #F77737)",
                 border: "none",
