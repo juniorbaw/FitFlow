@@ -1,18 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState } from "react";
 
-const ORANGE = "#FF5C00"
-const GREEN = "#00D26A"
-const BLUE = "#3B82F6"
-const YELLOW = "#FFB800"
-const RED = "#FF4D4D"
+const ORANGE = "#FF5C00";
+const GREEN = "#00D26A";
+const BLUE = "#3B82F6";
+const YELLOW = "#FFB800";
+const RED = "#FF4D4D";
 
-export function ContentAnalyzerTab() {
-  const [postContent, setPostContent] = useState("")
-  const [analyzing, setAnalyzing] = useState(false)
-  const [showResult, setShowResult] = useState(false)
-  const [analysis, setAnalysis] = useState<any>(null)
+export default function ContentAnalyzerTab() {
+  const [postContent, setPostContent] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [showResult, setShowResult] = useState(true);
 
   const mockResult = {
     score: 82,
@@ -37,54 +36,38 @@ export function ContentAnalyzerTab() {
     bestTime: "Mardi ou Jeudi, 12h-13h ou 18h-19h",
     reach: "2 500 - 4 000 comptes",
     engagement: "high"
-  }
+  };
 
   const verdictMap: Record<string, { label: string; color: string; emoji: string }> = {
     excellent: { label: "Excellent", color: GREEN, emoji: "🔥" },
     good: { label: "Bon", color: BLUE, emoji: "👍" },
     average: { label: "Moyen", color: YELLOW, emoji: "⚠️" },
     poor: { label: "Faible", color: RED, emoji: "❌" },
-  }
+  };
 
-  const displayResult = analysis || mockResult
-  const v = verdictMap[displayResult.verdict] || verdictMap['good']
-  const scoreColor = displayResult.score >= 80 ? GREEN : displayResult.score >= 60 ? BLUE : displayResult.score >= 40 ? YELLOW : RED
+  const v = verdictMap[mockResult.verdict];
+  const scoreColor = mockResult.score >= 80 ? GREEN : mockResult.score >= 60 ? BLUE : mockResult.score >= 40 ? YELLOW : RED;
 
-  const handleAnalyze = async () => {
-    if (!postContent.trim()) return
-    setAnalyzing(true)
-    setShowResult(false)
-
-    try {
-      const response = await fetch('/api/analyze-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: postContent })
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setAnalysis(data)
-      } else {
-        setAnalysis(mockResult)
-      }
-    } catch {
-      setAnalysis(mockResult)
-    } finally {
-      setTimeout(() => {
-        setAnalyzing(false)
-        setShowResult(true)
-      }, 500)
-    }
-  }
+  const handleAnalyze = () => {
+    if (!postContent.trim()) return;
+    setAnalyzing(true);
+    setShowResult(false);
+    setTimeout(() => {
+      setAnalyzing(false);
+      setShowResult(true);
+    }, 2000);
+  };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px" }}>
+
+      {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 28 }}>✨</span> Analyseur de Contenu IA
         </h1>
         <p style={{ fontSize: 15, color: "#888" }}>
-          Optimise tes posts Instagram avant de publier. L'IA analyse et te donne des conseils personnalisés.
+          Optimise tes posts Instagram avant de publier. L&apos;IA analyse et te donne des conseils personnalisés.
         </p>
       </div>
 
@@ -112,10 +95,10 @@ export function ContentAnalyzerTab() {
                 background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
                 color: "white", fontSize: 14, lineHeight: 1.7, resize: "none",
                 outline: "none", fontFamily: "inherit",
-                transition: "border-color 0.2s", boxSizing: "border-box"
+                transition: "border-color 0.2s"
               }}
-              onFocus={(e) => e.target.style.borderColor = `${ORANGE}50`}
-              onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.06)"}
+              onFocus={(e) => { e.target.style.borderColor = `${ORANGE}50`; }}
+              onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.06)"; }}
             />
 
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
@@ -124,7 +107,9 @@ export function ContentAnalyzerTab() {
                 disabled={!postContent.trim() || analyzing}
                 style={{
                   flex: 1, padding: "14px",
-                  background: postContent.trim() ? `linear-gradient(135deg, ${ORANGE}, #FF8A00)` : "rgba(255,255,255,0.04)",
+                  background: postContent.trim()
+                    ? `linear-gradient(135deg, ${ORANGE}, #FF8A00)`
+                    : "rgba(255,255,255,0.04)",
                   border: "none", borderRadius: 12, color: "white",
                   fontSize: 15, fontWeight: 700, cursor: postContent.trim() ? "pointer" : "not-allowed",
                   boxShadow: postContent.trim() ? `0 8px 24px ${ORANGE}25` : "none",
@@ -137,16 +122,17 @@ export function ContentAnalyzerTab() {
                     <span style={{
                       width: 16, height: 16, border: "2px solid white",
                       borderTopColor: "transparent", borderRadius: "50%",
-                      animation: "spin 0.8s linear infinite", display: "inline-block"
+                      animation: "spin 0.8s linear infinite",
+                      display: "inline-block"
                     }} />
                     Analyse en cours...
                   </>
                 ) : (
-                  <>✨ Analyser avec l'IA</>
+                  <>✨ Analyser avec l&apos;IA</>
                 )}
               </button>
               <button
-                onClick={() => { setPostContent(""); setShowResult(false); setAnalysis(null) }}
+                onClick={() => { setPostContent(""); setShowResult(false); }}
                 style={{
                   padding: "14px 20px", background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12,
@@ -188,18 +174,21 @@ export function ContentAnalyzerTab() {
                 borderRadius: 20, padding: 28, textAlign: "center"
               }}>
                 <div style={{ marginBottom: 20 }}>
-                  <svg width="140" height="140" viewBox="0 0 140 140">
-                    <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="10" />
-                    <circle cx="70" cy="70" r="58" fill="none" stroke={scoreColor} strokeWidth="10"
-                      strokeDasharray={`${(displayResult.score / 100) * 364} 364`}
-                      strokeDashoffset="0" strokeLinecap="round"
-                      transform="rotate(-90 70 70)"
-                    />
-                    <text x="70" y="64" textAnchor="middle" fill="white" fontSize="36" fontWeight="900">
-                      {displayResult.score}
-                    </text>
-                    <text x="70" y="84" textAnchor="middle" fill="#666" fontSize="12">/100</text>
-                  </svg>
+                  <div style={{ position: "relative", display: "inline-block" }}>
+                    <svg width="140" height="140" viewBox="0 0 140 140">
+                      <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="10" />
+                      <circle cx="70" cy="70" r="58" fill="none" stroke={scoreColor} strokeWidth="10"
+                        strokeDasharray={`${(mockResult.score / 100) * 364} 364`}
+                        strokeDashoffset="0" strokeLinecap="round"
+                        transform="rotate(-90 70 70)"
+                        style={{ transition: "stroke-dasharray 1s" }}
+                      />
+                      <text x="70" y="64" textAnchor="middle" fill="white" fontSize="36" fontWeight="900">
+                        {mockResult.score}
+                      </text>
+                      <text x="70" y="84" textAnchor="middle" fill="#666" fontSize="12">/100</text>
+                    </svg>
+                  </div>
                 </div>
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
@@ -214,9 +203,9 @@ export function ContentAnalyzerTab() {
               {/* Quick stats */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                 {[
-                  { icon: "🕐", label: "Meilleur créneau", value: displayResult.bestTime },
-                  { icon: "👁️", label: "Portée estimée", value: displayResult.reach },
-                  { icon: "📈", label: "Engagement", value: displayResult.engagement === "high" ? "Élevé" : displayResult.engagement === "medium" ? "Moyen" : "Faible" },
+                  { icon: "🕐", label: "Meilleur créneau", value: mockResult.bestTime },
+                  { icon: "👁️", label: "Portée estimée", value: mockResult.reach },
+                  { icon: "📈", label: "Engagement", value: mockResult.engagement === "high" ? "Élevé" : mockResult.engagement === "medium" ? "Moyen" : "Faible" },
                 ].map((s, i) => (
                   <div key={i} style={{
                     background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
@@ -230,11 +219,14 @@ export function ContentAnalyzerTab() {
               </div>
 
               {/* Strengths */}
-              <div style={{ background: "rgba(0,210,106,0.03)", border: "1px solid rgba(0,210,106,0.1)", borderRadius: 16, padding: 22 }}>
+              <div style={{
+                background: "rgba(0,210,106,0.03)", border: "1px solid rgba(0,210,106,0.1)",
+                borderRadius: 16, padding: 22
+              }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: GREEN, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                   <span>✅</span> Points forts
                 </div>
-                {displayResult.strengths.map((s: string, i: number) => (
+                {mockResult.strengths.map((s, i) => (
                   <div key={i} style={{
                     fontSize: 13, color: "#aaa", padding: "8px 0",
                     borderTop: i > 0 ? "1px solid rgba(0,210,106,0.06)" : "none",
@@ -246,11 +238,14 @@ export function ContentAnalyzerTab() {
               </div>
 
               {/* Weaknesses */}
-              <div style={{ background: "rgba(255,77,77,0.03)", border: "1px solid rgba(255,77,77,0.1)", borderRadius: 16, padding: 22 }}>
+              <div style={{
+                background: "rgba(255,77,77,0.03)", border: "1px solid rgba(255,77,77,0.1)",
+                borderRadius: 16, padding: 22
+              }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: RED, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                   <span>⚠️</span> Points à améliorer
                 </div>
-                {displayResult.weaknesses.map((w: string, i: number) => (
+                {mockResult.weaknesses.map((w, i) => (
                   <div key={i} style={{
                     fontSize: 13, color: "#aaa", padding: "8px 0",
                     borderTop: i > 0 ? "1px solid rgba(255,77,77,0.06)" : "none",
@@ -262,11 +257,14 @@ export function ContentAnalyzerTab() {
               </div>
 
               {/* Suggestions */}
-              <div style={{ background: "rgba(255,92,0,0.03)", border: "1px solid rgba(255,92,0,0.1)", borderRadius: 16, padding: 22 }}>
+              <div style={{
+                background: "rgba(255,92,0,0.03)", border: "1px solid rgba(255,92,0,0.1)",
+                borderRadius: 16, padding: 22
+              }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: ORANGE, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                   <span>💡</span> Suggestions
                 </div>
-                {displayResult.suggestions.map((s: string, i: number) => (
+                {mockResult.suggestions.map((s, i) => (
                   <div key={i} style={{
                     fontSize: 13, color: "#aaa", padding: "10px 0",
                     borderTop: i > 0 ? "1px solid rgba(255,92,0,0.06)" : "none",
@@ -298,14 +296,14 @@ export function ContentAnalyzerTab() {
                     animation: "spin 0.8s linear infinite"
                   }} />
                   <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Analyse en cours...</p>
-                  <p style={{ fontSize: 13, color: "#666" }}>L'IA examine votre contenu</p>
+                  <p style={{ fontSize: 13, color: "#666" }}>L&apos;IA examine votre contenu</p>
                 </div>
               ) : (
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 56, marginBottom: 16 }}>✍️</div>
                   <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Prêt à analyser</p>
                   <p style={{ fontSize: 14, color: "#666", maxWidth: 300, lineHeight: 1.6 }}>
-                    Collez votre caption Instagram à gauche et cliquez sur "Analyser" pour obtenir un score et des suggestions.
+                    Collez votre caption Instagram à gauche et cliquez sur &quot;Analyser&quot; pour obtenir un score et des suggestions.
                   </p>
                 </div>
               )}
@@ -313,7 +311,8 @@ export function ContentAnalyzerTab() {
           )}
         </div>
       </div>
+
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
-  )
+  );
 }

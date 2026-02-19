@@ -1,220 +1,216 @@
 'use client'
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react'
+import { useState } from "react";
 
-const ORANGE = "#FF5C00"
+const ORANGE = "#FF5C00";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const supabase = createClient()
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
-      router.push('/dashboard')
-    } catch (error: any) {
-      setError(error.message || 'Erreur lors de la connexion')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleFacebookLogin = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          scopes: 'email,public_profile,instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_show_list,pages_read_engagement',
-        },
-      })
-
-      if (error) throw error
-    } catch (error: any) {
-      setError(error.message || 'Erreur lors de la connexion Facebook')
-      setLoading(false)
-    }
-  }
+  const [isSignup, setIsSignup] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(12px, 3vw, 16px)", position: "relative", overflow: "hidden", width: "100%", maxWidth: "100vw" }}>
-      
-      {/* Background gradients */}
-      <div style={{ position: "absolute", top: "10%", left: "10%", width: "min(500px, 80vw)", height: "min(500px, 80vw)", background: `${ORANGE}08`, borderRadius: "50%", filter: "blur(120px)" }}></div>
-      <div style={{ position: "absolute", bottom: "10%", right: "10%", width: "min(500px, 80vw)", height: "min(500px, 80vw)", background: "#3B82F608", borderRadius: "50%", filter: "blur(120px)" }}></div>
+    <div style={{
+      minHeight: "100vh", background: "#050508", color: "#fafafa",
+      fontFamily: "'Inter', -apple-system, sans-serif",
+      display: "flex"
+    }}>
+      {/* LEFT - Form */}
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        justifyContent: "center", alignItems: "center", padding: 40
+      }}>
+        <div style={{ width: "100%", maxWidth: 420 }}>
 
-      <div style={{ width: "100%", maxWidth: "min(480px, 100%)", position: "relative", zIndex: 1 }}>
-        
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: -1, marginBottom: 12 }}>
-            Fit<span style={{ color: ORANGE }}>Flow</span>
-          </div>
-          <div style={{ fontSize: 15, color: "#888" }}>
-            Connectez-vous à votre dashboard
-          </div>
-        </div>
-
-        {/* Card */}
-        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "clamp(16px, 4vw, 20px)", padding: "clamp(20px, 5vw, 48px)", backdropFilter: "blur(20px)", width: "100%", boxSizing: "border-box" }}>
-          
-          <div style={{ marginBottom: 32 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, marginBottom: 8 }}>
-              Bon retour ! 👋
-            </h1>
-            <p style={{ fontSize: 14, color: "#888" }}>
-              Connectez-vous pour accéder à vos leads et analytics
-            </p>
+          {/* Logo */}
+          <div style={{ marginBottom: 48 }}>
+            <span style={{ fontSize: 28, fontWeight: 900, letterSpacing: -1 }}>
+              Fit<span style={{ color: ORANGE }}>Flow</span>
+            </span>
           </div>
 
-          {error && (
-            <div style={{ background: "rgba(255,77,77,0.1)", border: "1px solid rgba(255,77,77,0.2)", borderRadius: 12, padding: 16, marginBottom: 24 }}>
-              <div style={{ fontSize: 13, color: "#ff6b6b", fontWeight: 600 }}>{error}</div>
-            </div>
-          )}
+          {/* Title */}
+          <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>
+            {isSignup ? "Créer un compte" : "Bon retour"} 👋
+          </h1>
+          <p style={{ fontSize: 15, color: "#888", marginBottom: 36 }}>
+            {isSignup
+              ? "Commencez à convertir vos commentaires en clients"
+              : "Connectez-vous pour accéder à votre dashboard"
+            }
+          </p>
 
-          <form onSubmit={handleLogin} style={{ marginBottom: 24 }}>
-            
-            {/* Email */}
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>
-                Email
-              </label>
-              <div style={{ position: "relative" }}>
-                <Mail style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="coach@fitflow.com"
-                  required
-                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s", boxSizing: "border-box" }}
-                  onFocus={(e) => e.target.style.borderColor = ORANGE}
-                  onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#ccc", marginBottom: 8 }}>
-                Mot de passe
-              </label>
-              <div style={{ position: "relative" }}>
-                <Lock style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, color: "#555" }} />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  style={{ width: "100%", padding: "14px 16px 14px 48px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none", transition: "all 0.2s", boxSizing: "border-box" }}
-                  onFocus={(e) => e.target.style.borderColor = ORANGE}
-                  onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
-                />
-              </div>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ width: "100%", padding: 16, background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`, border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 8px 24px ${ORANGE}30`, transition: "transform 0.2s", opacity: loading ? 0.7 : 1, boxSizing: "border-box" }}
-              onMouseEnter={(e) => !loading && (e.currentTarget.style.transform = "scale(1.02)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            >
-              {loading ? (
-                <>
-                  <div style={{ width: 16, height: 16, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }}></div>
-                  Connexion...
-                </>
-              ) : (
-                <>
-                  Se connecter <ArrowRight style={{ width: 18, height: 18 }} />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider OR */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "24px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }}></div>
-            <span style={{ color: "#666", fontSize: 13, fontWeight: 600 }}>OU</span>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }}></div>
-          </div>
-
-          {/* Facebook Login Button */}
-          <button
-            onClick={handleFacebookLogin}
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: 16,
-              background: "#1877F2",
-              border: "none",
-              borderRadius: 12,
-              color: "white",
-              fontSize: 15,
-              fontWeight: 700,
-              cursor: loading ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              transition: "all 0.2s",
-              opacity: loading ? 0.7 : 1,
-              boxSizing: "border-box",
-              marginBottom: 24
-            }}
-            onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#166FE5")}
-            onMouseLeave={(e) => e.currentTarget.style.background = "#1877F2"}
-          >
+          {/* Facebook OAuth */}
+          <button style={{
+            width: "100%", padding: "14px", borderRadius: 12,
+            background: "#1877F2", border: "none", color: "white",
+            fontSize: 15, fontWeight: 700, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+            marginBottom: 24
+          }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
-            {loading ? "Connexion..." : "Se connecter avec Facebook"}
+            Continuer avec Facebook
           </button>
 
           {/* Divider */}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24 }}>
-            <div style={{ textAlign: "center", fontSize: 13, color: "#888" }}>
-              Pas encore de compte ?{' '}
-              <Link href="/signup" style={{ color: ORANGE, fontWeight: 700, textDecoration: "none" }}>
-                Créer un compte →
-              </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
+            <span style={{ fontSize: 12, color: "#555", fontWeight: 500 }}>ou par email</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
+          </div>
+
+          {/* Form */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {isSignup && (
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#888", display: "block", marginBottom: 8 }}>Nom complet</label>
+                <input
+                  type="text" value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Votre nom"
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 12,
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                    color: "white", fontSize: 14, outline: "none", fontFamily: "inherit",
+                    transition: "border-color 0.2s"
+                  }}
+                  onFocus={(e) => { e.target.style.borderColor = `${ORANGE}50`; }}
+                  onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; }}
+                />
+              </div>
+            )}
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 600, color: "#888", display: "block", marginBottom: 8 }}>Email</label>
+              <input
+                type="email" value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="vous@exemple.com"
+                style={{
+                  width: "100%", padding: "14px 18px", borderRadius: 12,
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "white", fontSize: 14, outline: "none", fontFamily: "inherit",
+                  transition: "border-color 0.2s"
+                }}
+                onFocus={(e) => { e.target.style.borderColor = `${ORANGE}50`; }}
+                onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; }}
+              />
+            </div>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#888" }}>Mot de passe</label>
+                {!isSignup && (
+                  <a href="#" style={{ fontSize: 12, color: ORANGE, textDecoration: "none", fontWeight: 600 }}>
+                    Mot de passe oublié ?
+                  </a>
+                )}
+              </div>
+              <input
+                type="password" value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                style={{
+                  width: "100%", padding: "14px 18px", borderRadius: 12,
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "white", fontSize: 14, outline: "none", fontFamily: "inherit",
+                  transition: "border-color 0.2s"
+                }}
+                onFocus={(e) => { e.target.style.borderColor = `${ORANGE}50`; }}
+                onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; }}
+              />
             </div>
           </div>
-        </div>
 
-        {/* Back link */}
-        <div style={{ textAlign: "center", marginTop: 24 }}>
-          <Link href="/" style={{ fontSize: 13, color: "#666", textDecoration: "none", transition: "color 0.2s" }}>
-            ← Retour à l'accueil
-          </Link>
+          {/* Submit */}
+          <button style={{
+            width: "100%", padding: "15px", borderRadius: 12, border: "none",
+            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+            color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer",
+            marginTop: 24, boxShadow: `0 8px 32px ${ORANGE}30`
+          }}>
+            {isSignup ? "Créer mon compte" : "Se connecter"}
+          </button>
+
+          {/* Toggle signup/login */}
+          <p style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: "#666" }}>
+            {isSignup ? "Déjà un compte ? " : "Pas encore de compte ? "}
+            <span
+              onClick={() => setIsSignup(!isSignup)}
+              style={{ color: ORANGE, cursor: "pointer", fontWeight: 700 }}
+            >
+              {isSignup ? "Se connecter →" : "Créer un compte →"}
+            </span>
+          </p>
         </div>
       </div>
 
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      {/* RIGHT - Visual */}
+      <div style={{
+        flex: 1, background: "linear-gradient(135deg, rgba(255,92,0,0.04), rgba(255,92,0,0.01))",
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+        padding: 60, position: "relative", overflow: "hidden",
+        borderLeft: "1px solid rgba(255,255,255,0.04)"
+      }}>
+        <div style={{
+          position: "absolute", top: "20%", right: "-10%",
+          width: 500, height: 500,
+          background: `radial-gradient(circle, ${ORANGE}08, transparent 70%)`,
+          pointerEvents: "none"
+        }} />
+
+        <div style={{ position: "relative", textAlign: "center" }}>
+          <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: -1, lineHeight: 1.15, marginBottom: 16 }}>
+            +3 à 5 clients<br />
+            <span style={{ color: ORANGE }}>par semaine</span><br />
+            en automatique
+          </h2>
+          <p style={{ fontSize: 15, color: "#666", marginBottom: 40 }}>
+            Rejoignez les coachs qui ont déjà transformé<br />leur Instagram en machine à clients.
+          </p>
+
+          {/* Stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, maxWidth: 340, margin: "0 auto" }}>
+            {[
+              { val: "30s", label: "Temps de réponse" },
+              { val: "85%", label: "Taux de réponse" },
+              { val: "24/7", label: "Automatisation" },
+              { val: "890%", label: "ROI moyen" },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 14, padding: "18px 12px"
+              }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: ORANGE, marginBottom: 2 }}>{s.val}</div>
+                <div style={{ fontSize: 11, color: "#666" }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Testimonial */}
+          <div style={{
+            marginTop: 40, background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 16, padding: 24, textAlign: "left", maxWidth: 360, margin: "40px auto 0"
+          }}>
+            <p style={{ fontSize: 14, color: "#aaa", lineHeight: 1.7, marginBottom: 16, fontStyle: "italic" }}>
+              &ldquo;FitFlow a changé ma façon de prospecter. Je signe 4-5 clients par semaine juste avec mes posts Instagram.&rdquo;
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: "50%", background: "rgba(255,92,0,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: 800, fontSize: 14, color: ORANGE
+              }}>M</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>Marc D.</div>
+                <div style={{ fontSize: 11, color: "#555" }}>Coach Fitness · 32K followers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
