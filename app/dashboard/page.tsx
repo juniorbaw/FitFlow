@@ -321,23 +321,56 @@ export default function FitFlowDashboard() {
               <StatCard label="Conversions" value={conversions} icon={TrendingUp} delay={0.3} />
               <StatCard label="Revenue estimé" value={`${revenue}€`} icon={DollarSign} delay={0.4} />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 32 }}>
-              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Leads par jour</div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 32 }}
+            >
+              <div style={{ 
+                background: "rgba(255,255,255,0.03)", 
+                border: "1px solid rgba(255,255,255,0.07)", 
+                borderRadius: 20, 
+                padding: 24,
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+              }}>
+                <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, background: "linear-gradient(135deg, #fff, #aaa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  Leads par jour
+                </div>
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={[]} barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="day" stroke="#555" fontSize={12} />
-                    <YAxis stroke="#555" fontSize={12} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="vip" name="VIP" fill={ORANGE} radius={[4,4,0,0]} />
-                    <Bar dataKey="standard" name="Standard" fill={BLUE} radius={[4,4,0,0]} />
-                    <Bar dataKey="low" name="Low" fill="#333" radius={[4,4,0,0]} />
+                    <defs>
+                      <linearGradient id="orangeGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={ORANGE} stopOpacity={0.8}/>
+                        <stop offset="100%" stopColor={ORANGE} stopOpacity={0.3}/>
+                      </linearGradient>
+                      <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={BLUE} stopOpacity={0.8}/>
+                        <stop offset="100%" stopColor={BLUE} stopOpacity={0.3}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                    <XAxis dataKey="day" stroke="#666" fontSize={12} fontWeight={600} />
+                    <YAxis stroke="#666" fontSize={12} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255,255,255,0.02)" }} />
+                    <Bar dataKey="vip" name="VIP" fill="url(#orangeGradient)" radius={[8,8,0,0]} />
+                    <Bar dataKey="standard" name="Standard" fill="url(#blueGradient)" radius={[8,8,0,0]} />
+                    <Bar dataKey="low" name="Low" fill="rgba(255,255,255,0.05)" radius={[8,8,0,0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Répartition des leads</div>
+              <div style={{ 
+                background: "rgba(255,255,255,0.03)", 
+                border: "1px solid rgba(255,255,255,0.07)", 
+                borderRadius: 20, 
+                padding: 24,
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+              }}>
+                <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, background: "linear-gradient(135deg, #fff, #aaa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  Répartition des leads
+                </div>
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
                     <Pie data={[]} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value">
