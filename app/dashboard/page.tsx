@@ -26,24 +26,6 @@ const BLUE = "#3B82F6"
 
 // ALL FAKE DATA REMOVED - Using real Supabase data only
 
-function StatCard({ label, value, change, icon, color = "white" }: any) {
-  const isPositive = change && change.startsWith("+")
-  return (
-    <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "24px", flex: 1, minWidth: 200 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-        <span style={{ fontSize: 13, color: "#888", fontWeight: 500 }}>{label}</span>
-        <span style={{ fontSize: 20 }}>{icon}</span>
-      </div>
-      <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: -1, color }}>{value}</div>
-      {change && (
-        <div style={{ marginTop: 8, fontSize: 13, fontWeight: 600, color: isPositive ? GREEN : RED, display: "flex", alignItems: "center", gap: 4 }}>
-          {isPositive ? "↑" : "↓"} {change} vs semaine dernière
-        </div>
-      )}
-    </div>
-  )
-}
-
 function ScoreBadge({ score }: any) {
   let bg, color, label
   if (score >= 9) { bg = "rgba(255,92,0,0.15)"; color = ORANGE; label = "VIP" }
