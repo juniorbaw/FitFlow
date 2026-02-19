@@ -10,10 +10,13 @@ interface StatCardProps {
   change?: number
   changeLabel?: string
   delay?: number
+  emptyText?: string
 }
 
-export function StatCard({ label, value, icon: Icon, change, changeLabel, delay = 0 }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, change, changeLabel, delay = 0, emptyText }: StatCardProps) {
   const isPositive = change !== undefined && change > 0
+  const isEmpty = value === 0 || value === '0' || value === '0/10' || value === '0€'
+  const displayValue = isEmpty && emptyText ? emptyText : (isEmpty ? '—' : value)
 
   return (
     <motion.div
@@ -66,9 +69,12 @@ export function StatCard({ label, value, icon: Icon, change, changeLabel, delay 
             transition={{ duration: 0.4, delay: delay + 0.15, ease: "easeOut" }}
             className="mb-3"
           >
-            <div className="text-4xl font-black bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-              {value}
+            <div className={`text-4xl font-black ${isEmpty ? 'text-gray-600' : 'bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent'}`}>
+              {displayValue}
             </div>
+            {isEmpty && emptyText && (
+              <p className="text-xs text-gray-500 mt-1 font-normal">Connectez Instagram pour voir vos stats</p>
+            )}
           </motion.div>
           
           {/* Change indicator */}
