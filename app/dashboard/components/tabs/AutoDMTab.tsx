@@ -1,120 +1,251 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Bot, Zap, MessageSquare, Settings, TrendingUp, CheckCircle2, Clock } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
-const ORANGE = "#FF5C00"
-const GREEN = "#00D26A"
-const BLUE = "#3B82F6"
-
 export function AutoDMTab() {
+  const [dmEnabled, setDmEnabled] = useState(true)
+  const [minScore, setMinScore] = useState(7)
+  const [dailyLimit, setDailyLimit] = useState(50)
   const [leads, setLeads] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const [stats, setStats] = useState({ sent: 0, replied: 0, converted: 0 })
 
   useEffect(() => {
-    fetchDMData()
+    fetchLeads()
   }, [])
 
-  const fetchDMData = async () => {
-    try {
-      const { data } = await supabase
-        .from('leads')
-        .select('*')
-        .in('status', ['dm_sent', 'replied', 'converted'])
-        .order('created_at', { ascending: false })
-        .limit(50)
-      setLeads(data || [])
-    } catch (error) {
-      console.error('Error fetching DM data:', error)
-    } finally {
-      setLoading(false)
+  const fetchLeads = async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('leads')
+      .select('*')
+      .in('status', ['dm_sent', 'replied', 'converted'])
+      .order('created_at', { ascending: false })
+      .limit(10)
+    
+    if (data) {
+      setLeads(data)
+      setStats({
+        sent: data.filter(l => ['dm_sent', 'replied', 'converted'].includes(l.status)).length,
+        replied: data.filter(l => ['replied', 'converted'].includes(l.status)).length,
+        converted: data.filter(l => l.status === 'converted').length,
+      })
     }
   }
 
-  const dmsSent = leads.filter(l => l.status === 'dm_sent').length
-  const replies = leads.filter(l => l.status === 'replied').length
-  const converted = leads.filter(l => l.status === 'converted').length
-  const replyRate = leads.length > 0 ? Math.round(((replies + converted) / leads.length) * 100) : 0
-
-  if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
-        Chargement...
-      </div>
-    )
-  }
+  const dmsSentToday = stats.sent
+  const responseRate = stats.sent > 0 ? Math.round((stats.replied / stats.sent) * 100) : 0
 
   return (
-    <div>
-      <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginBottom: 24 }}>
-        Auto-DM
-      </h2>
-
-      {/* Stats */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
-        {[
-          { label: 'DMs envoyés', value: dmsSent, icon: '✉️', color: BLUE },
-          { label: 'Réponses', value: replies, icon: '💬', color: GREEN },
-          { label: 'Convertis', value: converted, icon: '🏆', color: ORANGE },
-          { label: 'Taux de réponse', value: `${replyRate}%`, icon: '📈', color: ORANGE },
-        ].map((stat, i) => (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, flex: 1, minWidth: 180 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, color: '#888', fontWeight: 500 }}>{stat.label}</span>
-              <span style={{ fontSize: 20 }}>{stat.icon}</span>
+    <div className="space-y-6">
+      {/* SECTION 1: STATUT DU SYSTÈME */}
+      <Card className="p-6 bg-gradient-to-br from-[rgba(255,92,0,0.1)] to-[rgba(255,138,61,0.05)] border-[rgba(255,92,0,0.2)] rounded-2xl">
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-[#FF5C00] to-[#FF8A3D]">
+              <Bot className="w-8 h-8 text-white" />
             </div>
-            <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: -1, color: stat.color }}>{stat.value}</div>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">Auto-DM Intelligent</h2>
+              <div className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${dmEnabled ? 'bg-[#00D26A]' : 'bg-red-500'} animate-pulse`}></div>
+                <span className={`text-sm font-semibold ${dmEnabled ? 'text-[#00D26A]' : 'text-red-500'}`}>
+                  {dmEnabled ? '🟢 Système actif' : '🔴 Instagram non connecté'}
+                </span>
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
+          
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={dmEnabled} 
+              onChange={(e) => setDmEnabled(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00D26A]"></div>
+          </label>
+        </div>
 
-      {/* System status */}
-      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>Système d'automatisation</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,210,106,0.1)', border: '1px solid rgba(0,210,106,0.2)', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: GREEN }}>
-            <span style={{ width: 7, height: 7, background: GREEN, borderRadius: '50%' }}></span>
-            Actif
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-4">
+            <div className="text-sm text-gray-400 mb-1">DMs envoyés aujourd'hui</div>
+            <div className="text-3xl font-bold text-white">{dmsSentToday} <span className="text-gray-500 text-lg">/ {dailyLimit}</span></div>
+          </div>
+          <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-4">
+            <div className="text-sm text-gray-400 mb-1">Taux de réponse</div>
+            <div className="text-3xl font-bold text-[#00D26A]">{responseRate}%</div>
+          </div>
+          <div className="bg-[rgba(255,255,255,0.05)] rounded-xl p-4">
+            <div className="text-sm text-gray-400 mb-1">Conversions ce mois</div>
+            <div className="text-3xl font-bold text-[#3B82F6]">{stats.converted}</div>
           </div>
         </div>
-        <p style={{ fontSize: 13, color: '#888', lineHeight: 1.6 }}>
-          Les DMs sont envoyés automatiquement aux leads qualifiés. Les messages sont personnalisés en fonction du score AI et du contenu du commentaire.
-        </p>
-      </div>
+      </Card>
 
-      {/* Recent DMs */}
-      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden' }}>
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>DMs récents</div>
+      {/* SECTION 2: CONFIGURATION */}
+      <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)] rounded-2xl">
+        <div className="flex items-center gap-3 mb-6">
+          <Settings className="w-6 h-6 text-[#FF5C00]" />
+          <h3 className="text-xl font-bold text-white">Configuration</h3>
         </div>
+
+        <div className="space-y-6">
+          {/* Score minimum */}
+          <div>
+            <label className="block text-sm font-semibold text-white mb-2">
+              Score minimum pour Auto-DM
+            </label>
+            <input 
+              type="range" 
+              min="1" 
+              max="10" 
+              value={minScore}
+              onChange={(e) => setMinScore(Number(e.target.value))}
+              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-sm text-gray-400 mt-1">
+              <span>1</span>
+              <span className="text-[#FF5C00] font-bold text-base">{minScore}/10</span>
+              <span>10</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              → Seuls les leads avec un score ≥ {minScore} recevront un DM
+            </p>
+          </div>
+
+          {/* Limite quotidienne */}
+          <div>
+            <label className="block text-sm font-semibold text-white mb-2">
+              Limite quotidienne
+            </label>
+            <input 
+              type="number" 
+              value={dailyLimit}
+              onChange={(e) => setDailyLimit(Number(e.target.value))}
+              className="w-full px-4 py-2 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              → Recommandé : 50-100/jour pour éviter les restrictions Instagram
+            </p>
+          </div>
+
+          {/* Message par défaut */}
+          <div>
+            <label className="block text-sm font-semibold text-white mb-2">
+              Message par défaut
+            </label>
+            <textarea 
+              rows={4}
+              defaultValue="Salut ! J'ai vu ton commentaire 💪 Tu cherches à transformer ton physique ? J'ai créé un programme sur-mesure qui pourrait t'intéresser. Discutons-en !"
+              className="w-full px-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white resize-none"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              → Ce message sera personnalisé par l'IA selon le commentaire du lead
+            </p>
+          </div>
+
+          <Button className="w-full bg-gradient-to-r from-[#FF5C00] to-[#FF8A00] hover:opacity-90 text-white font-bold py-3">
+            💾 Sauvegarder la configuration
+          </Button>
+        </div>
+      </Card>
+
+      {/* SECTION 3: HISTORIQUE DMS */}
+      <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)] rounded-2xl">
+        <div className="flex items-center gap-3 mb-6">
+          <MessageSquare className="w-6 h-6 text-[#FF5C00]" />
+          <h3 className="text-xl font-bold text-white">Historique des DMs</h3>
+        </div>
+
         {leads.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>✉️</div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'white', marginBottom: 8 }}>Aucun DM envoyé pour l'instant</h3>
-            <p style={{ fontSize: 13, color: '#888' }}>Les DMs seront envoyés automatiquement dès que des leads qualifiés seront détectés.</p>
+          <div className="text-center py-8 text-gray-400">
+            Aucun DM envoyé pour l'instant
           </div>
         ) : (
-          leads.map((lead) => (
-            <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>@{lead.instagram_username || lead.username || 'unknown'}</div>
-                <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>{lead.comment_text || lead.comment || ''}</div>
-              </div>
-              <span style={{
-                background: lead.status === 'converted' ? 'rgba(0,210,106,0.15)' : lead.status === 'replied' ? 'rgba(59,130,246,0.15)' : 'rgba(255,184,0,0.15)',
-                color: lead.status === 'converted' ? GREEN : lead.status === 'replied' ? BLUE : '#FFB800',
-                padding: '4px 12px',
-                borderRadius: 20,
-                fontSize: 12,
-                fontWeight: 600
-              }}>
-                {lead.status === 'converted' ? 'Converti' : lead.status === 'replied' ? 'Répondu' : 'DM envoyé'}
-              </span>
-            </div>
-          ))
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[rgba(255,255,255,0.1)]">
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase pb-3">Lead</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase pb-3">Score</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase pb-3">Message</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase pb-3">Statut</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase pb-3">Heure</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leads.map((lead) => (
+                  <tr key={lead.id} className="border-b border-[rgba(255,255,255,0.05)]">
+                    <td className="py-3 text-white font-semibold">@{lead.username}</td>
+                    <td className="py-3">
+                      <span className="px-2 py-1 rounded-full bg-[rgba(255,92,0,0.2)] text-[#FF5C00] text-xs font-bold">
+                        {lead.ai_score}/10
+                      </span>
+                    </td>
+                    <td className="py-3 text-sm text-gray-400 max-w-xs truncate">
+                      {lead.dm_content || "Salut ! J'ai vu ton com..."}
+                    </td>
+                    <td className="py-3">
+                      {lead.status === 'converted' && <span className="text-[#00D26A]">✅ Converti</span>}
+                      {lead.status === 'replied' && <span className="text-[#3B82F6]">💬 Répondu</span>}
+                      {lead.status === 'dm_sent' && <span className="text-gray-400">⏳ En attente</span>}
+                    </td>
+                    <td className="py-3 text-sm text-gray-500">
+                      {new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </Card>
+
+      {/* SECTION 4: TEMPLATES */}
+      <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)] rounded-2xl">
+        <div className="flex items-center gap-3 mb-6">
+          <Zap className="w-6 h-6 text-[#FF5C00]" />
+          <h3 className="text-xl font-bold text-white">Templates de messages</h3>
+        </div>
+
+        <div className="space-y-4">
+          {/* Template VIP */}
+          <div className="p-4 bg-[rgba(255,92,0,0.1)] border border-[rgba(255,92,0,0.2)] rounded-xl">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-[#FF5C00] uppercase">Template VIP (Score 9-10)</span>
+              <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">
+                ✏️ Modifier
+              </Button>
+            </div>
+            <p className="text-white text-sm">
+              "Salut <strong>{'{username}'}</strong> ! 🔥 J'ai lu ton commentaire et je sens que tu es vraiment motivé(e). 
+              J'ai un programme qui pourrait te correspondre parfaitement. On en discute ?"
+            </p>
+          </div>
+
+          {/* Template Standard */}
+          <div className="p-4 bg-[rgba(59,130,246,0.1)] border border-[rgba(59,130,246,0.2)] rounded-xl">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-[#3B82F6] uppercase">Template Standard (Score 7-8)</span>
+              <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">
+                ✏️ Modifier
+              </Button>
+            </div>
+            <p className="text-white text-sm">
+              "Hey <strong>{'{username}'}</strong> ! 👋 Merci pour ton commentaire. 
+              Si tu cherches à progresser, j'ai peut-être quelque chose pour toi. Ça t'intéresse ?"
+            </p>
+          </div>
+
+          <p className="text-xs text-gray-500">
+            💡 Les templates sont personnalisés automatiquement selon le score et le commentaire du lead.
+          </p>
+        </div>
+      </Card>
     </div>
   )
 }

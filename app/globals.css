@@ -2,6 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   FITFLOW DESIGN SYSTEM
+   ============================================ */
+
+/* --- TYPOGRAPHIE --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+* {
+  font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+body {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* --- COULEURS --- */
+:root {
+  /* Palette FitFlow */
+  --orange-primary: #FF5C00;
+  --orange-gradient-start: #FF5C00;
+  --orange-gradient-end: #FF8A00;
+  --green-success: #00D26A;
+  --blue-info: #3B82F6;
+  --red-error: #FF4D4D;
+  --yellow-warning: #FFB800;
+  
+  /* Backgrounds */
+  --bg-primary: #0a0a0a;
+  --bg-card: rgba(255,255,255,0.03);
+  --bg-card-hover: rgba(255,255,255,0.05);
+  
+  /* Borders */
+  --border-card: rgba(255,255,255,0.07);
+  --border-input: rgba(255,255,255,0.1);
+  
+  /* Textes */
+  --text-primary: #fafafa;
+  --text-secondary: #888888;
+  --text-tertiary: #555555;
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+/* --- INPUTS --- */
+input, textarea, select {
+  color: var(--text-primary) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-input) !important;
+  border-radius: 12px !important;
+  padding: 10px 16px !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: var(--orange-primary) !important;
+  box-shadow: 0 0 0 3px rgba(255, 92, 0, 0.1) !important;
+}
+
+/* --- CARDS --- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+}
+
+/* --- BOUTONS --- */
+.btn-primary {
+  background: linear-gradient(135deg, var(--orange-gradient-start), var(--orange-gradient-end));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* --- ESPACEMENTS --- */
+.section-spacing {
+  margin-bottom: 32px;
+}
+
+.card-grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* --- LABELS --- */
+.label-header {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
 @layer base {
   :root {
     --primary: #FF5C00;

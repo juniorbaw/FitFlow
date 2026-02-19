@@ -1,57 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export async function POST(request: NextRequest) {
   try {
     const { content } = await request.json()
-    if (!content?.trim()) {
-      return NextResponse.json({ error: 'Content required' }, { status: 400 })
+    
+    if (!content || content.trim().length === 0) {
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
+    // Vérifier que la clé API existe
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY is not set')
+      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
     }
 
-    const prompt = `Tu es un expert marketing Instagram fitness.
-Analyse ce post et retourne UNIQUEMENT un JSON valide (pas de markdown) :
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
+
+    const prompt = `Tu es un expert en marketing Instagram spécialisé dans le fitness coaching.
+
+Analyse le post Instagram suivant et retourne un JSON valide (UNIQUEMENT du JSON, pas de markdown, pas de backticks) avec cette structure exacte :
+
 {
-  "score": <0-100>,
+  "score": <nombre entre 0 et 100>,
   "verdict": "<excellent|good|average|poor>",
-  "strengths": ["..."],
-  "weaknesses": ["..."],
-  "suggestions": ["..."],
-  "bestTimeToPost": "<créneau>",
-  "estimatedReach": "<estimation>",
+  "strengths": ["<point fort 1>", "<point fort 2>", ...],
+  "weaknesses": ["<point faible 1>", "<point faible 2>", ...],
+  "suggestions": ["<suggestion concrète 1>", "<suggestion concrète 2>", ...],
+  "bestTimeToPost": "<créneau horaire recommandé>",
+  "estimatedReach": "<estimation de portée>",
   "engagementPotential": "<high|medium|low>"
 }
-Sois HONNÊTE. Un post court/vide/SMS = score bas.
-Post à analyser : """${content}"""`
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7 }
-        })
-      }
-    )
+Règles de scoring :
+- 90-100 : Post exceptionnel, viral potential, CTA parfait, hashtags stratégiques
+- 70-89 : Bon post avec quelques optimisations possibles
+- 50-69 : Post moyen, manque d'éléments clés (CTA, hashtags, hook)
+- 0-49 : Post faible, besoin d'une refonte complète
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Gemini API error:', errorText)
-      return NextResponse.json({ error: 'Erreur API Gemini' }, { status: 500 })
-    }
+Sois HONNÊTE et PRÉCIS. Un post vide ou très court (< 20 caractères) doit avoir un score bas.
+Un post sans CTA, sans question, sans hashtags doit être pénalisé.
+Un post en langage SMS ou incompréhensible doit avoir un score très bas.
 
-    const data = await response.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-    const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+Voici le post à analyser :
+"""
+${content}
+"""
 
-    return NextResponse.json(JSON.parse(cleanedText))
+Retourne UNIQUEMENT le JSON, rien d'autre.`
+
+    const result = await model.generateContent(prompt)
+    const response = result.response
+    const text = response.text()
+    
+    // Parse le JSON (enlever les backticks si Gemini en ajoute)
+    const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const analysis = JSON.parse(cleanText)
+
+    return NextResponse.json(analysis)
   } catch (error: any) {
-    console.error('Analyze content error:', error)
-    return NextResponse.json({ error: 'Erreur analyse' }, { status: 500 })
+    console.error('Gemini API error:', error)
+    console.error('Error details:', error.message, error.stack)
+    return NextResponse.json(
+      { error: `Erreur: ${error.message || 'Erreur inconnue'}` },
+      { status: 500 }
+    )
   }
 }

@@ -203,7 +203,7 @@ export default function OnboardingPage() {
                   Choisir Starter
                 </button>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {["100 leads/mois", "Scoring IA basique", "Automatisation DM", "Support email"].map((f, i) => (
+                  {["100 leads/mois", "Scoring IA basique", "Auto-DM personnalisés", "Support email"].map((f, i) => (
                     <li key={i} style={{ display: "flex", gap: 8, marginBottom: 12, fontSize: 14, color: "#ccc" }}>
                       <Check style={{ width: 16, height: 16, color: ORANGE, flexShrink: 0 }} />
                       {f}
@@ -269,7 +269,7 @@ export default function OnboardingPage() {
               Configuration en cours...
             </h2>
             <p style={{ fontSize: 16, color: "#888", marginBottom: 40 }}>
-              Nous configurons l'automatisation pour votre compte
+              Nous configurons l'automatisation complète pour votre compte
             </p>
             <div style={{ width: 64, height: 64, border: `4px solid ${ORANGE}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto" }}></div>
           </div>

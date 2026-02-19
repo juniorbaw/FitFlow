@@ -40,7 +40,8 @@ export function ContentAnalyzerTab() {
     if (!postContent.trim()) return
 
     setAnalyzing(true)
-
+    setAnalysis(null)
+    
     try {
       const response = await fetch('/api/analyze-content', {
         method: 'POST',
@@ -52,21 +53,11 @@ export function ContentAnalyzerTab() {
         throw new Error('Erreur API')
       }
 
-      const result = await response.json()
-      setAnalysis(result)
+      const data = await response.json()
+      setAnalysis(data)
     } catch (error) {
       console.error('Analysis error:', error)
-      // Fallback if API fails
-      setAnalysis({
-        score: 0,
-        verdict: 'poor',
-        strengths: [],
-        weaknesses: ['Impossible de contacter le service d\'analyse. Réessaie plus tard.'],
-        suggestions: ['Vérifie ta connexion et réessaie.'],
-        bestTimeToPost: '—',
-        estimatedReach: '—',
-        engagementPotential: 'low'
-      })
+      alert('Erreur lors de l\'analyse. Vérifiez votre connexion et réessayez.')
     } finally {
       setAnalyzing(false)
     }
