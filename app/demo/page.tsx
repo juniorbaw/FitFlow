@@ -1,264 +1,237 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Play, 
-  Pause, 
-  CheckCircle2, 
-  Sparkles, 
-  TrendingUp, 
-  MessageSquare,
-  Instagram,
-  Zap,
-  Target,
-  ArrowRight,
-  BarChart3,
-  Clock
-} from 'lucide-react'
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { MessageSquare, Target, Send, TrendingUp, DollarSign, ArrowLeft, Sparkles } from 'lucide-react'
 
-const DEMO_STEPS = [
-  {
-    id: 1,
-    time: '0:00',
-    title: '1. Instagram commente ton post',
-    description: '@marie_fit92 : "Combien coûte ton programme ?"',
-    icon: Instagram,
-    color: 'from-[#E1306C] to-[#C13584]'
+const ORANGE = '#FF5C00'
+const GREEN = '#00D26A'
+const BLUE = '#3B82F6'
+
+// Données de démonstration réalistes
+const demoData = {
+  stats: {
+    leads: 47,
+    avgScore: 7.8,
+    dmsSent: 28,
+    conversions: 12,
+    revenue: 2840
   },
-  {
-    id: 2,
-    time: '0:03',
-    title: '2. IA FitFlow analyse le lead',
-    description: 'Score: 9/10 | Intent: Achat | Budget: Confirmé',
-    icon: Sparkles,
-    color: 'from-[#8B5CF6] to-[#6366F1]'
-  },
-  {
-    id: 3,
-    time: '0:05',
-    title: '3. DM automatique personnalisé',
-    description: '"Salut Marie ! Mon programme est à 197€..."',
-    icon: MessageSquare,
-    color: 'from-[#3B82F6] to-[#2563EB]'
-  },
-  {
-    id: 4,
-    time: '0:12',
-    title: '4. Marie répond positivement',
-    description: '"Ok parfait, comment je m\'inscris ?"',
-    icon: TrendingUp,
-    color: 'from-[#10B981] to-[#059669]'
-  },
-  {
-    id: 5,
-    time: '0:15',
-    title: '5. Conversion = +197€',
-    description: 'Nouveau client ajouté au dashboard',
-    icon: Target,
-    color: 'from-[#00D26A] to-[#00B85C]'
-  }
-]
+  dailyChart: [
+    { day: 'Lun', vip: 8, standard: 12, low: 5 },
+    { day: 'Mar', vip: 5, standard: 15, low: 8 },
+    { day: 'Mer', vip: 12, standard: 10, low: 3 },
+    { day: 'Jeu', vip: 9, standard: 14, low: 6 },
+    { day: 'Ven', vip: 15, standard: 18, low: 4 },
+    { day: 'Sam', vip: 11, standard: 13, low: 7 },
+    { day: 'Dim', vip: 7, standard: 11, low: 9 },
+  ],
+  pieData: [
+    { name: 'VIP (9-10)', value: 35, color: ORANGE },
+    { name: 'Standard (7-8)', value: 45, color: BLUE },
+    { name: 'Low (<7)', value: 20, color: '#666' },
+  ],
+  recentLeads: [
+    { id: 1, username: '@marie_fit92', comment: 'Trop motivant ce post ! 💪', score: 9.2, status: 'converted' },
+    { id: 2, username: '@thomas_coach', comment: 'Comment tu fais pour rester aussi régulier ?', score: 8.5, status: 'dm_sent' },
+    { id: 3, username: '@julie.transform', comment: 'J\'ai besoin de conseils nutrition 🙏', score: 9.8, status: 'converted' },
+    { id: 4, username: '@fit_sarah', comment: 'Incroyable transformation !', score: 7.3, status: 'replied' },
+  ]
+}
 
-const STATS = [
-  { label: 'Temps économisé', value: '12h/semaine', icon: Clock },
-  { label: 'Taux de conversion', value: '37%', icon: TrendingUp },
-  { label: 'Leads détectés', value: '+250%', icon: BarChart3 },
-  { label: 'Vitesse de réponse', value: '< 30s', icon: Zap }
-]
+function StatCard({ label, value, icon: Icon, color = 'white' }: any) {
+  return (
+    <div className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 hover:bg-[rgba(255,255,255,0.06)] transition-all duration-300">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm text-gray-400 font-medium">{label}</span>
+        <Icon className="w-5 h-5" style={{ color }} />
+      </div>
+      <div className="text-3xl font-bold" style={{ color }}>{value}</div>
+    </div>
+  )
+}
 
-export default function DemoPage() {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-
-  const handlePlayDemo = () => {
-    if (isPlaying) {
-      setIsPlaying(false)
-      return
-    }
-
-    setIsPlaying(true)
-    setCurrentStep(0)
-
-    // Auto-play through steps
-    let step = 0
-    const interval = setInterval(() => {
-      step++
-      if (step >= DEMO_STEPS.length) {
-        clearInterval(interval)
-        setIsPlaying(false)
-        return
-      }
-      setCurrentStep(step)
-    }, 3000)
-  }
+function ScoreBadge({ score }: any) {
+  const isVIP = score >= 9
+  const isStandard = score >= 7 && score < 9
+  const bg = isVIP ? 'rgba(255,92,0,0.15)' : isStandard ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.08)'
+  const color = isVIP ? ORANGE : isStandard ? BLUE : '#666'
+  const label = isVIP ? 'VIP' : isStandard ? 'Standard' : 'Low'
   
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="flex items-center gap-2">
+      <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ background: bg, color }}>{label}</span>
+      <span className="text-sm font-bold" style={{ color }}>{score}/10</span>
+    </div>
+  )
+}
+
+export default function DemoPage() {
+  const [activeTab, setActiveTab] = useState('overview')
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-['DM_Sans']">
       {/* Header */}
-      <div className="border-b border-[rgba(255,255,255,0.07)] bg-[rgba(0,0,0,0.3)] backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold">
-            Fit<span className="text-[#FF5C00]">Flow</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/support">
-              <Button variant="outline" className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)] text-white hover:bg-[rgba(255,255,255,0.05)]">
-                Support
-              </Button>
+      <div className="border-b border-[rgba(255,255,255,0.06)] px-8 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-3 group">
+              <button className="p-2 rounded-lg border border-[rgba(255,255,255,0.1)] hover:border-[#FF5C00] transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <span className="text-2xl font-bold">
+                Fit<span style={{ color: ORANGE }}>Flow</span>
+              </span>
             </Link>
-            <Link href="/signup">
-              <Button className="bg-gradient-to-r from-[#FF5C00] to-[#FF8A3D] hover:from-[#FF7A2D] hover:to-[#FFA05A] text-white">
-                Commencer gratuitement
-              </Button>
-            </Link>
+            <div className="px-4 py-2 rounded-lg bg-[rgba(255,92,0,0.1)] border border-[rgba(255,92,0,0.2)]">
+              <span className="text-[#FF5C00] font-semibold text-sm flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Mode Aperçu
+              </span>
+            </div>
           </div>
+          <Link href="/signup">
+            <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF5C00] to-[#FF8A3D] font-bold hover:opacity-90 transition-opacity shadow-lg shadow-[rgba(255,92,0,0.3)]">
+              Démarrer gratuitement
+            </button>
+          </Link>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        {/* Hero */}
-        <div className="text-center mb-16">
-          <Badge className="bg-[rgba(255,92,0,0.1)] text-[#FF5C00] border-[rgba(255,92,0,0.3)] mb-6">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Démo interactive
-          </Badge>
-          <h1 className="text-6xl font-black mb-6 bg-gradient-to-r from-white via-white to-[#888] bg-clip-text text-transparent">
-            De Commentaire à Client
-            <br />
-            <span className="text-[#FF5C00]">En 15 Secondes</span>
-          </h1>
-          <p className="text-xl text-[#888] max-w-2xl mx-auto mb-8">
-            Regarde comment FitFlow transforme un simple commentaire Instagram en client payant, sans que tu lèves le petit doigt
-          </p>
-
-          {/* Play Button */}
-          <Button
-            onClick={handlePlayDemo}
-            className="bg-gradient-to-r from-[#FF5C00] to-[#FF8A3D] hover:from-[#FF7A2D] hover:to-[#FFA05A] text-white h-14 px-8 text-lg font-semibold"
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="w-5 h-5 mr-2" />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play className="w-5 h-5 mr-2" />
-                Lancer la démo
-              </>
-            )}
-          </Button>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8 p-1 bg-[rgba(255,255,255,0.04)] rounded-xl inline-flex">
+          {[
+            { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
+            { id: 'leads', label: 'Leads', icon: '👥' },
+            { id: 'analytics', label: 'Analytics', icon: '📈' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                activeTab === tab.id
+                  ? 'bg-[rgba(255,92,0,0.15)] text-[#FF5C00]'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Demo Steps */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-16">
-          {DEMO_STEPS.map((step, idx) => {
-            const Icon = step.icon
-            const isActive = idx === currentStep && isPlaying
-            const isCompleted = idx < currentStep
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <StatCard label="Leads cette semaine" value={demoData.stats.leads} icon={MessageSquare} color={ORANGE} />
+          <StatCard label="Score moyen" value={`${demoData.stats.avgScore}/10`} icon={Target} color={BLUE} />
+          <StatCard label="DMs envoyés" value={demoData.stats.dmsSent} icon={Send} color="white" />
+          <StatCard label="Conversions" value={demoData.stats.conversions} icon={TrendingUp} color={GREEN} />
+          <StatCard label="Revenue estimé" value={`${demoData.stats.revenue}€`} icon={DollarSign} color={ORANGE} />
+        </div>
 
-            return (
-              <Card
-                key={step.id}
-                className={`p-6 transition-all duration-500 ${
-                  isActive
-                    ? 'bg-gradient-to-br ' + step.color + ' border-transparent scale-105 shadow-2xl'
-                    : isCompleted
-                    ? 'bg-[rgba(0,210,106,0.05)] border-[rgba(0,210,106,0.2)]'
-                    : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)]'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    isActive
-                      ? 'bg-white/20'
-                      : isCompleted
-                      ? 'bg-[#00D26A]'
-                      : 'bg-[rgba(255,255,255,0.05)]'
-                  }`}>
-                    {isCompleted ? (
-                      <CheckCircle2 className="w-5 h-5 text-white" />
-                    ) : (
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#888]'}`} />
-                    )}
+        {/* Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Bar Chart */}
+          <div className="lg:col-span-2 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-2xl p-6">
+            <h3 className="text-lg font-bold mb-6">Leads par jour</h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={demoData.dailyChart}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="day" stroke="#666" fontSize={12} />
+                <YAxis stroke="#666" fontSize={12} />
+                <Tooltip
+                  contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Bar dataKey="vip" fill={ORANGE} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="standard" fill={BLUE} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="low" fill="#333" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Pie Chart */}
+          <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-2xl p-6">
+            <h3 className="text-lg font-bold mb-6">Répartition</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={demoData.pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {demoData.pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="space-y-2 mt-4">
+              {demoData.pieData.map((d, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded" style={{ background: d.color }}></div>
+                    <span className="text-gray-400">{d.name}</span>
                   </div>
-                  <span className={`text-xs font-mono ${isActive || isCompleted ? 'text-white' : 'text-[#666]'}`}>
-                    {step.time}
+                  <span className="font-bold">{d.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Leads */}
+        <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold">Derniers leads</h3>
+            <span className="text-sm text-gray-400">Données de démonstration</span>
+          </div>
+          <div className="space-y-4">
+            {demoData.recentLeads.map((lead) => (
+              <div key={lead.id} className="flex items-center justify-between p-4 rounded-xl bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)] transition-colors">
+                <div className="flex-1">
+                  <div className="font-bold text-white mb-1">{lead.username}</div>
+                  <div className="text-sm text-gray-400">{lead.comment}</div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <ScoreBadge score={lead.score} />
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    lead.status === 'converted' ? 'bg-[rgba(0,210,106,0.15)] text-[#00D26A]' :
+                    lead.status === 'dm_sent' ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]' :
+                    'bg-[rgba(255,184,0,0.15)] text-[#FFB800]'
+                  }`}>
+                    {lead.status === 'converted' ? 'Converti ✓' : lead.status === 'dm_sent' ? 'DM envoyé' : 'Répondu'}
                   </span>
                 </div>
-                <h3 className={`font-bold mb-2 text-sm ${isActive || isCompleted ? 'text-white' : 'text-[#888]'}`}>
-                  {step.title}
-                </h3>
-                <p className={`text-xs ${isActive ? 'text-white/80' : isCompleted ? 'text-[#00D26A]' : 'text-[#666]'}`}>
-                  {step.description}
-                </p>
-              </Card>
-            )
-          })}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {STATS.map((stat) => {
-            const Icon = stat.icon
-            return (
-              <Card key={stat.label} className="bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)] p-6 text-center">
-                <Icon className="w-8 h-8 text-[#FF5C00] mx-auto mb-3" />
-                <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-                <p className="text-sm text-[#888]">{stat.label}</p>
-              </Card>
-            )
-          })}
-        </div>
-
-        {/* Video */}
-        <Card className="bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)] p-8 mb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF5C00] to-[#FF8A3D] flex items-center justify-center">
-              <Play className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Démo vidéo complète</h2>
-              <p className="text-sm text-[#888]">5 min pour tout comprendre</p>
-            </div>
-          </div>
-          <div className="aspect-video bg-[#000] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.1)]">
-            <iframe 
-              src="/videos/explainer.html" 
-              className="w-full h-full"
-              title="FitFlow Explainer"
-            />
-          </div>
-        </Card>
-
-        {/* CTA */}
-        <Card className="bg-gradient-to-r from-[rgba(255,92,0,0.1)] to-[rgba(255,138,61,0.05)] border-[rgba(255,92,0,0.2)] p-12 text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Prêt à automatiser ton business ?
-          </h2>
-          <p className="text-xl text-[#888] mb-8 max-w-2xl mx-auto">
-            Rejoins les coachs qui génèrent +3-5 clients/semaine avec FitFlow
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* CTA Bottom */}
+        <div className="mt-12 text-center">
+          <div className="inline-block p-8 rounded-2xl bg-gradient-to-br from-[rgba(255,92,0,0.1)] to-[rgba(255,138,61,0.05)] border border-[rgba(255,92,0,0.2)]">
+            <h2 className="text-3xl font-bold mb-3">Prêt à automatiser vos leads ?</h2>
+            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+              Transformez vos commentaires Instagram en clients payants avec l'IA
+            </p>
             <Link href="/signup">
-              <Button className="bg-gradient-to-r from-[#FF5C00] to-[#FF8A3D] hover:from-[#FF7A2D] hover:to-[#FFA05A] text-white h-14 px-8 text-lg font-semibold">
-                Commencer gratuitement
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/support">
-              <Button variant="outline" className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)] text-white hover:bg-[rgba(255,255,255,0.05)] h-14 px-8">
-                Poser une question
-              </Button>
+              <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#FF5C00] to-[#FF8A3D] font-bold text-lg hover:opacity-90 transition-opacity shadow-lg shadow-[rgba(255,92,0,0.3)]">
+                Commencer maintenant - Gratuit
+              </button>
             </Link>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )
