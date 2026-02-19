@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
 import { createClient } from '@/lib/supabase/client'
+import { motion, AnimatePresence } from 'framer-motion'
 import InstagramOnboarding from './components/InstagramOnboarding'
 import UserMenu from '@/components/UserMenu'
 import NotificationCenter from '@/components/NotificationCenter'
@@ -14,6 +15,8 @@ import { AutoDMTab } from './components/tabs/AutoDMTab'
 import { VideoAnalyzerTab } from './components/tabs/VideoAnalyzerTab'
 import { CompetitorSpyTab } from './components/tabs/CompetitorSpyTab'
 import { SmartCalendarTab } from './components/tabs/SmartCalendarTab'
+import { StatCard } from '@/components/ui/stat-card'
+import { MessageSquare, Target, Send, TrendingUp, DollarSign } from 'lucide-react'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -287,12 +290,12 @@ export default function FitFlowDashboard() {
       <div style={{ padding: "clamp(16px, 4vw, 32px)", maxWidth: "1400px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
         {activeTab === "overview" && (
           <>
-            <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
-              <StatCard label="Leads cette semaine" value={totalLeads} icon="👥" color={ORANGE} />
-              <StatCard label="Score moyen" value={avgScore} icon="🎯" color={BLUE} />
-              <StatCard label="DMs envoyés" value={dmsSent} icon="✉️" />
-              <StatCard label="Conversions" value={conversions} icon="🏆" color={GREEN} />
-              <StatCard label="Revenue estimé" value={`${revenue}€`} icon="💰" color={ORANGE} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 32 }}>
+              <StatCard label="Leads cette semaine" value={totalLeads} icon={MessageSquare} delay={0} />
+              <StatCard label="Score moyen" value={`${avgScore}/10`} icon={Target} delay={0.1} />
+              <StatCard label="DMs envoyés" value={dmsSent} icon={Send} delay={0.2} />
+              <StatCard label="Conversions" value={conversions} icon={TrendingUp} delay={0.3} />
+              <StatCard label="Revenue estimé" value={`${revenue}€`} icon={DollarSign} delay={0.4} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 32 }}>
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
