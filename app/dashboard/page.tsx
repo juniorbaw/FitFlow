@@ -160,14 +160,14 @@ export default function FitFlowDashboard() {
   const revenue = realLeads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
 
   const tabs = [
-    { id: "overview", label: "Vue d'ensemble", icon: "📊" },
-    { id: "leads", label: "Leads", icon: "👥" },
-    { id: "autodm", label: "Auto-DM", icon: "🤖" },
-    { id: "content", label: "Content AI", icon: "🎨" },
-    { id: "video", label: "Video Analyzer", icon: "🎥" },
-    { id: "competitor", label: "Competitor Spy", icon: "🔍" },
-    { id: "calendar", label: "Smart Calendar", icon: "📅" },
-    { id: "revenue", label: "Revenue", icon: "💰" },
+    { id: "overview", label: "Vue d'ensemble", icon: "📊", locked: false },
+    { id: "leads", label: "Leads", icon: "👥", locked: false },
+    { id: "autodm", label: "Auto-DM", icon: "🤖", locked: false, requiredPlan: "pro" },
+    { id: "content", label: "Content AI", icon: "🎨", locked: false },
+    { id: "video", label: "Video Analyzer", icon: "🎥", locked: false, requiredPlan: "pro" },
+    { id: "competitor", label: "Competitor Spy", icon: "🔍", locked: true, requiredPlan: "elite" },
+    { id: "calendar", label: "Smart Calendar", icon: "📅", locked: true, requiredPlan: "elite" },
+    { id: "revenue", label: "Revenue", icon: "💰", locked: false },
   ]
 
   return (
@@ -194,8 +194,35 @@ export default function FitFlowDashboard() {
           </Link>
           <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
             {tabs.map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: activeTab === tab.id ? "rgba(255,92,0,0.15)" : "transparent", color: activeTab === tab.id ? ORANGE : "#888", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 14 }}>{tab.icon}</span>{tab.label}
+              <button 
+                key={tab.id} 
+                onClick={() => {
+                  if (tab.locked) {
+                    if (confirm(`🔒 Cette feature est réservée au plan ${tab.requiredPlan?.toUpperCase()}.\n\nRediriger vers la page pricing ?`)) {
+                      window.location.href = '/pricing'
+                    }
+                  } else {
+                    setActiveTab(tab.id)
+                  }
+                }}
+                style={{ 
+                  padding: "8px 16px", 
+                  borderRadius: 8, 
+                  border: "none", 
+                  cursor: tab.locked ? "not-allowed" : "pointer", 
+                  fontSize: 13, 
+                  fontWeight: 600, 
+                  background: activeTab === tab.id ? "rgba(255,92,0,0.15)" : "transparent", 
+                  color: activeTab === tab.id ? ORANGE : tab.locked ? "#555" : "#888", 
+                  transition: "all 0.2s", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: 6,
+                  opacity: tab.locked ? 0.5 : 1
+                }}>
+                <span style={{ fontSize: 14 }}>{tab.icon}</span>
+                {tab.label}
+                {tab.locked && <span style={{ fontSize: 12 }}>🔒</span>}
               </button>
             ))}
           </div>
@@ -203,7 +230,7 @@ export default function FitFlowDashboard() {
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           {coach && !coach?.instagram_username ? (
             <button
-              onClick={() => setShowInstagramOnboarding(true)}
+              onClick={() => window.location.href = '/api/auth/instagram-oauth'}
               style={{
                 background: "linear-gradient(135deg, #E1306C, #FD1D1D, #F77737)",
                 border: "none",
@@ -233,23 +260,6 @@ export default function FitFlowDashboard() {
               @{coach?.instagram_username}
             </div>
           )}
-          <Link href="/templates" style={{ textDecoration: 'none' }}>
-            <button style={{
-              background: "rgba(139,92,246,0.1)",
-              border: "1px solid rgba(139,92,246,0.2)",
-              color: "#8B5CF6",
-              padding: "8px 16px",
-              borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 6
-            }}>
-              💬 Templates
-            </button>
-          </Link>
           <ExportButton type="leads" />
           <button
             onClick={() => window.location.href = '/how-it-works'}

@@ -30,7 +30,7 @@ export function AutoDMTab() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgba(0,210,106,0.15)]">
                 <CheckCircle2 className="w-5 h-5 text-[#00D26A]" />
-                <span className="text-[#00D26A] font-semibold">ManyChat IA inclus dans votre abonnement</span>
+                <span className="text-[#00D26A] font-semibold">Système d'automatisation inclus</span>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@ export function AutoDMTab() {
 
       {/* Setup Guide */}
       <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
-        <h3 className="text-xl font-bold text-white mb-4">🚀 Setup ManyChat en 3 étapes</h3>
+        <h3 className="text-xl font-bold text-white mb-4">🚀 Activation en 3 étapes</h3>
         
         <div className="space-y-4">
           {/* Step 1 */}
@@ -204,7 +204,7 @@ export function AutoDMTab() {
             <Zap className="w-5 h-5 text-[#3B82F6]" />
           </div>
           <div>
-            <h4 className="font-semibold text-white mb-2">💡 Pourquoi ManyChat IA ?</h4>
+            <h4 className="font-semibold text-white mb-2">💡 Comment ça fonctionne ?</h4>
             <ul className="space-y-2 text-sm text-[#aaa]">
               <li>✅ Pas de limite d'envoi (contrairement à l'API Instagram directe)</li>
               <li>✅ Intelligence artificielle pour personnaliser les messages</li>
