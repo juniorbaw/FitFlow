@@ -10,6 +10,7 @@ import ExportButton from '@/components/ExportButton'
 import Link from 'next/link'
 import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
 import { RevenueTab } from './components/tabs/RevenueTab'
+import { AutoDMTab } from './components/tabs/AutoDMTab'
 
 const ORANGE = "#FF5C00"
 const GREEN = "#00D26A"
@@ -95,8 +96,7 @@ export default function FitFlowDashboard() {
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(20)
-      
+
       setRealLeads(leadsData || [])
       setLoading(false)
     } catch (error) {
@@ -104,6 +104,17 @@ export default function FitFlowDashboard() {
       setLoading(false)
     }
   }
+
+  // Computed stats from real data
+  const now = new Date()
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const leadsThisWeek = realLeads.filter(l => new Date(l.created_at) >= weekAgo).length
+  const avgScore = realLeads.length > 0
+    ? (realLeads.reduce((sum, l) => sum + (l.ai_score || 0), 0) / realLeads.length).toFixed(1)
+    : '—'
+  const dmsSent = realLeads.filter(l => ['dm_sent', 'converted', 'replied'].includes(l.status)).length
+  const conversions = realLeads.filter(l => l.status === 'converted').length
+  const totalRevenue = realLeads.reduce((sum, l) => sum + (l.revenue || 0), 0)
 
   const checkInstagramConnection = async () => {
     try {
@@ -149,6 +160,7 @@ export default function FitFlowDashboard() {
   const tabs = [
     { id: "overview", label: "Vue d'ensemble", icon: "📊" },
     { id: "leads", label: "Leads", icon: "👥" },
+    { id: "autodm", label: "Auto-DM", icon: "✉️" },
     { id: "content", label: "Content AI", icon: "🎨" },
     { id: "revenue", label: "Revenue", icon: "💰" },
   ]
@@ -225,66 +237,36 @@ export default function FitFlowDashboard() {
         {activeTab === "overview" && (
           <>
             <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
-              <StatCard label="Leads cette semaine" value="150" change="+23%" icon="👥" color={ORANGE} />
-              <StatCard label="Score moyen" value="7.4" change="+0.8" icon="🎯" color={BLUE} />
-              <StatCard label="DMs envoyés" value="67" change="+31%" icon="✉️" />
-              <StatCard label="Conversions" value="18" change="+44%" icon="🏆" color={GREEN} />
-              <StatCard label="Revenue estimé" value="3 200€" change="+38%" icon="💰" color={ORANGE} />
+              <StatCard label="Leads cette semaine" value={leadsThisWeek || 0} icon="👥" color={ORANGE} />
+              <StatCard label="Score moyen" value={avgScore} icon="🎯" color={BLUE} />
+              <StatCard label="DMs envoyés" value={dmsSent} icon="✉️" />
+              <StatCard label="Conversions" value={conversions} icon="🏆" color={GREEN} />
+              <StatCard label="Revenue estimé" value={`${totalRevenue}€`} icon="💰" color={ORANGE} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 32 }}>
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Leads par jour</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={[]} barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="day" stroke="#555" fontSize={12} />
-                    <YAxis stroke="#555" fontSize={12} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="vip" name="VIP" fill={ORANGE} radius={[4,4,0,0]} />
-                    <Bar dataKey="standard" name="Standard" fill={BLUE} radius={[4,4,0,0]} />
-                    <Bar dataKey="low" name="Low" fill="#333" radius={[4,4,0,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div style={{ textAlign: "center", padding: "48px 20px" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>📊</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, color: "white", marginBottom: 8 }}>Pas encore de données</h3>
+                  <p style={{ fontSize: 13, color: "#888" }}>Le graphique se remplira avec vos premiers leads.</p>
+                </div>
               </div>
               <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Répartition des leads</div>
-                <ResponsiveContainer width="100%" height={180}>
-                  <PieChart>
-                    <Pie data={[]} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value">
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-                  {[].map((d: any, i: number) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ width: 10, height: 10, borderRadius: 3, background: d.color }}></span>
-                        <span style={{ color: "#aaa" }}>{d.name}</span>
-                      </div>
-                      <span style={{ fontWeight: 700 }}>{d.value}%</span>
-                    </div>
-                  ))}
+                <div style={{ textAlign: "center", padding: "48px 20px" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>🎯</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, color: "white", marginBottom: 8 }}>Aucune donnée</h3>
+                  <p style={{ fontSize: 13, color: "#888" }}>La répartition VIP / Standard / Low apparaîtra ici.</p>
                 </div>
               </div>
             </div>
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24, marginBottom: 32 }}>
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Funnel de conversion</div>
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
-                {[].map((step: any, i: number) => {
-                  const maxCount = 1
-                  const height = 0
-                  const rate = 0
-                  return (
-                    <div key={i} style={{ flex: 1, textAlign: "center" }}>
-                      {i > 0 && <div style={{ fontSize: 11, color: GREEN, fontWeight: 700, marginBottom: 6 }}>{rate}%</div>}
-                      <div style={{ height, background: `linear-gradient(180deg, ${ORANGE}, ${ORANGE}15)`, borderRadius: "8px 8px 4px 4px", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 8, minHeight: 40 }}>
-                        <span style={{ fontWeight: 800, fontSize: 18 }}>{step.count}</span>
-                      </div>
-                      <div style={{ fontSize: 11, color: "#888", marginTop: 8, lineHeight: 1.3 }}>{step.stage}</div>
-                    </div>
-                  )
-                })}
+              <div style={{ textAlign: "center", padding: "48px 20px" }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>🔄</div>
+                <h3 style={{ fontSize: 16, fontWeight: 600, color: "white", marginBottom: 8 }}>Funnel vide</h3>
+                <p style={{ fontSize: 13, color: "#888" }}>Le funnel de conversion se remplira avec vos premiers leads.</p>
               </div>
             </div>
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
@@ -292,17 +274,25 @@ export default function FitFlowDashboard() {
                 <div style={{ fontSize: 15, fontWeight: 700 }}>Derniers leads</div>
                 <button onClick={() => setActiveTab("leads")} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", color: ORANGE, padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Voir tout →</button>
               </div>
-              {realLeads.slice(0, 4).map((lead: any) => (
-                <div key={lead.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", gap: 16 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</div>
-                    <div style={{ fontSize: 12, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment}</div>
-                  </div>
-                  <ScoreBadge score={lead.score} />
-                  <StatusBadge status={lead.status} />
-                  <span style={{ fontSize: 12, color: "#555", minWidth: 80, textAlign: "right" }}>{lead.time}</span>
+              {realLeads.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "48px 20px" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>👥</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, color: "white", marginBottom: 8 }}>Aucun lead pour l'instant</h3>
+                  <p style={{ fontSize: 13, color: "#888" }}>Vos premiers leads apparaîtront ici dès que l'automatisation sera active.</p>
                 </div>
-              ))}
+              ) : (
+                realLeads.slice(0, 4).map((lead: any) => (
+                  <div key={lead.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", gap: 16 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>@{lead.username || lead.instagram_username || 'unknown'}</div>
+                      <div style={{ fontSize: 12, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment || lead.comment_text || ''}</div>
+                    </div>
+                    <ScoreBadge score={lead.ai_score || lead.score || 0} />
+                    <StatusBadge status={lead.status} />
+                    <span style={{ fontSize: 12, color: "#555", minWidth: 80, textAlign: "right" }}>{lead.created_at ? new Date(lead.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''}</span>
+                  </div>
+                ))
+              )}
             </div>
           </>
         )}
@@ -318,22 +308,34 @@ export default function FitFlowDashboard() {
               </div>
             </div>
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "14px 24px", fontSize: 12, fontWeight: 600, color: "#555", textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                <span>Username</span><span>Commentaire</span><span>Score</span><span>Post</span><span>Status</span><span style={{ textAlign: "right" }}>Temps</span>
-              </div>
-              {filteredLeads.map(lead => (
-                <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "16px 24px", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.04)", transition: "background 0.2s", cursor: "pointer" }}>
-                  <span style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</span>
-                  <span style={{ fontSize: 13, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment}</span>
-                  <ScoreBadge score={lead.score} />
-                  <span style={{ fontSize: 12, color: "#666" }}>{lead.post.slice(0, 12)}...</span>
-                  <StatusBadge status={lead.status} />
-                  <span style={{ fontSize: 12, color: "#555", textAlign: "right" }}>{lead.time}</span>
+              {filteredLeads.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "48px 20px" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>👥</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, color: "white", marginBottom: 8 }}>Aucun lead pour l'instant</h3>
+                  <p style={{ fontSize: 13, color: "#888" }}>Vos premiers leads apparaîtront ici dès que l'automatisation sera active.</p>
                 </div>
-              ))}
+              ) : (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "14px 24px", fontSize: 12, fontWeight: 600, color: "#555", textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                    <span>Username</span><span>Commentaire</span><span>Score</span><span>Post</span><span>Status</span><span style={{ textAlign: "right" }}>Temps</span>
+                  </div>
+                  {filteredLeads.map(lead => (
+                    <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "16px 24px", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.04)", transition: "background 0.2s", cursor: "pointer" }}>
+                      <span style={{ fontWeight: 700, fontSize: 14 }}>@{lead.username || lead.instagram_username || 'unknown'}</span>
+                      <span style={{ fontSize: 13, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment || lead.comment_text || ''}</span>
+                      <ScoreBadge score={lead.ai_score || lead.score || 0} />
+                      <span style={{ fontSize: 12, color: "#666" }}>{(lead.post_url || lead.post || '').slice(0, 12)}...</span>
+                      <StatusBadge status={lead.status} />
+                      <span style={{ fontSize: 12, color: "#555", textAlign: "right" }}>{lead.created_at ? new Date(lead.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''}</span>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </>
         )}
+
+        {activeTab === "autodm" && <AutoDMTab />}
 
         {activeTab === "content" && <ContentAnalyzerTab />}
 

@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         );
         const analysisData = await analyzeResponse.json();
 
-        if (analysisData.success && analysisData.analysis.score >= 6) {
+        if (analysisData.success && analysisData.analysis.score >= 6 && comment.instagram_username?.trim()) {
           // Create lead
           await supabase.from('leads').insert({
             user_id: user.id,

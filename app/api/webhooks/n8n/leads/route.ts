@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     for (const lead of leads) {
       try {
         // Validate lead data
-        if (!lead.instagram_username) {
+        if (!lead.instagram_username || !lead.instagram_username.trim()) {
           errors.push({ lead, error: 'Missing instagram_username' })
           continue
         }

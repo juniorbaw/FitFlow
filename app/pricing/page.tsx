@@ -19,7 +19,7 @@ const PLANS = [
     features: [
       { text: '100 leads/mois', included: true },
       { text: 'Scoring IA basique', included: true },
-      { text: 'Flows ManyChat standard', included: true },
+      { text: 'Automatisation DM standard', included: true },
       { text: 'Dashboard analytics', included: true },
       { text: 'Support email', included: true },
       { text: 'Automatisation avancée', included: false },
@@ -38,7 +38,7 @@ const PLANS = [
     features: [
       { text: 'Leads illimités', included: true },
       { text: 'Scoring IA avancé', included: true },
-      { text: 'Flows ManyChat premium', included: true },
+      { text: 'Automatisation DM premium', included: true },
       { text: 'Dashboard analytics avancé', included: true },
       { text: 'Automatisation complète', included: true },
       { text: 'Instagram API', included: true },

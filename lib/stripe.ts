@@ -18,7 +18,7 @@ export const STRIPE_PLANS = {
     features: [
       '100 leads/mois',
       'Scoring IA basique',
-      'Flows ManyChat standard',
+      'Automatisation DM standard',
       'Dashboard analytics',
       'Support email',
     ],
@@ -31,7 +31,7 @@ export const STRIPE_PLANS = {
     features: [
       'Leads illimités',
       'Scoring IA avancé',
-      'Flows ManyChat premium',
+      'Automatisation DM premium',
       'Dashboard analytics avancé',
       'Automatisation complète',
       'Support prioritaire',

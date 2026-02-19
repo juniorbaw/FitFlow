@@ -78,12 +78,19 @@ async function handleComment(data: any, supabase: any) {
     return
   }
 
+  // Validation: skip leads with empty username
+  const instagramUsername = data.from?.username || ''
+  if (!instagramUsername.trim()) {
+    console.log('⚠️ Lead ignoré: username vide')
+    return
+  }
+
   // Créer un lead
   const { error } = await supabase
     .from('leads')
     .insert({
       coach_id: coach.id,
-      instagram_username: data.from?.username || '',
+      instagram_username: instagramUsername,
       instagram_user_id: data.from?.id || '',
       comment_text: data.text || '',
       post_url: `https://instagram.com/p/${data.media?.id}`,

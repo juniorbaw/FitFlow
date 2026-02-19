@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { DollarSign, TrendingUp, TrendingDown, Target, Plus, Edit2, Trash2, Calendar, Check, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { DollarSign, TrendingUp, Target, Plus, Trash2, Calendar, Check, X } from 'lucide-react'
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { StatCard } from '@/components/ui/stat-card'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { mockDailyStats, mockLeads } from '@/lib/mock-data'
+import { createClient } from '@/lib/supabase/client'
 
 interface RevenueEntry {
   id: string
@@ -20,55 +20,76 @@ interface RevenueEntry {
 }
 
 export function RevenueTab() {
-  // Mock manual revenue entries
-  const [manualRevenues, setManualRevenues] = useState<RevenueEntry[]>([
-    {
-      id: '1',
-      amount: 297,
-      date: new Date(Date.now() - 86400000 * 2),
-      source: 'manual',
-      description: 'Programme 12 semaines - Client Instagram direct'
-    },
-    {
-      id: '2',
-      amount: 497,
-      date: new Date(Date.now() - 86400000 * 5),
-      source: 'manual',
-      description: 'Coaching premium 3 mois'
-    }
-  ])
+  const [leads, setLeads] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
+  useEffect(() => {
+    fetchLeads()
+  }, [])
+
+  const fetchLeads = async () => {
+    try {
+      const { data } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false })
+      setLeads(data || [])
+    } catch (error) {
+      console.error('Error fetching leads:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const [manualRevenues, setManualRevenues] = useState<RevenueEntry[]>([])
   const [isAddingRevenue, setIsAddingRevenue] = useState(false)
   const [newAmount, setNewAmount] = useState('')
   const [newDescription, setNewDescription] = useState('')
 
-  // Calculate revenue metrics
-  const fitflowRevenue = mockLeads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
+  // Calculate revenue metrics from real data
+  const fitflowRevenue = leads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
   const manualRevenueTotal = manualRevenues.reduce((sum, entry) => sum + entry.amount, 0)
   const totalRevenue = fitflowRevenue + manualRevenueTotal
-  
-  const conversions = mockLeads.filter(l => l.status === 'converted').length
-  const totalConversions = conversions + manualRevenues.length
-  
-  const revenuePerLead = totalConversions > 0 ? (totalRevenue / totalConversions).toFixed(0) : 0
-  const costPerLead = 15 // Example cost
-  const roi = ((totalRevenue - (costPerLead * mockLeads.length)) / (costPerLead * mockLeads.length) * 100).toFixed(0)
 
-  // Prepare data for 6 weeks
+  const conversions = leads.filter(l => l.status === 'converted').length
+  const totalConversions = conversions + manualRevenues.length
+
+  const revenuePerLead = totalConversions > 0 ? (totalRevenue / totalConversions).toFixed(0) : '0'
+  const totalLeadCount = leads.length || 1
+  const costPerLead = 15
+  const roi = totalLeadCount > 0 ? ((totalRevenue - (costPerLead * totalLeadCount)) / (costPerLead * totalLeadCount) * 100).toFixed(0) : '0'
+
+  // Prepare data for 6 weeks chart
   const weeklyData = Array.from({ length: 6 }, (_, i) => {
-    const weekRevenue = Math.floor(Math.random() * 3000) + 1000
+    const weekStart = new Date()
+    weekStart.setDate(weekStart.getDate() - (5 - i) * 7)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekEnd.getDate() + 7)
+    const weekRevenue = leads
+      .filter(l => {
+        const created = new Date(l.created_at)
+        return created >= weekStart && created < weekEnd && l.revenue
+      })
+      .reduce((sum, l) => sum + (l.revenue || 0), 0)
     return {
       week: `S${i + 1}`,
       revenue: weekRevenue,
     }
   })
 
-  // Dual axis data (leads vs revenue)
-  const dualAxisData = mockDailyStats.map(stat => ({
-    date: new Date(stat.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
-    leads: stat.total_leads,
-    revenue: stat.revenue,
-  }))
+  // Dual axis data (leads vs revenue) - group by day for the last 7 days
+  const dualAxisData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (6 - i))
+    const dateStr = date.toISOString().split('T')[0]
+    const dayLeads = leads.filter(l => l.created_at?.startsWith(dateStr))
+    return {
+      date: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
+      leads: dayLeads.length,
+      revenue: dayLeads.reduce((sum, l) => sum + (l.revenue || 0), 0),
+    }
+  })
 
   const handleAddRevenue = () => {
     if (!newAmount || parseFloat(newAmount) <= 0) return
@@ -91,6 +112,12 @@ export function RevenueTab() {
     setManualRevenues(manualRevenues.filter(entry => entry.id !== id))
   }
 
+  if (loading) {
+    return (
+      <div className="text-center py-12 text-[#888]">Chargement...</div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Stat Cards */}
@@ -99,26 +126,26 @@ export function RevenueTab() {
           label="Revenue total"
           value={`${totalRevenue}€`}
           icon={DollarSign}
-          change={25}
+          change={0}
           changeLabel="vs mois dernier"
         />
         <StatCard
           label="Revenue / client"
           value={`${revenuePerLead}€`}
           icon={TrendingUp}
-          change={12}
+          change={0}
         />
         <StatCard
           label="Clients totaux"
           value={`${totalConversions}`}
           icon={Target}
-          change={8}
+          change={0}
         />
         <StatCard
           label="ROI"
           value={`${roi}%`}
           icon={Target}
-          change={Number(roi)}
+          change={0}
         />
       </div>
 
@@ -222,7 +249,7 @@ export function RevenueTab() {
         {/* Revenue List */}
         <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
           {/* FitFlow automated revenues */}
-          {mockLeads.filter(l => l.status === 'converted' && l.revenue).map((lead) => (
+          {leads.filter(l => l.status === 'converted' && l.revenue).map((lead) => (
             <div
               key={lead.id}
               className="flex items-center justify-between p-4 rounded-lg bg-[rgba(255,92,0,0.05)] border border-[rgba(255,92,0,0.2)]"
@@ -230,11 +257,11 @@ export function RevenueTab() {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF5C00] to-[#FF8A3D] flex items-center justify-center">
                   <span className="text-white text-sm font-bold">
-                    {lead.username.charAt(0).toUpperCase()}
+                    {(lead.username || lead.instagram_username || '?').charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <p className="text-white font-semibold">@{lead.username}</p>
+                  <p className="text-white font-semibold">@{lead.username || lead.instagram_username || 'unknown'}</p>
                   <div className="flex items-center gap-2 text-xs text-[#888]">
                     <Calendar className="w-3 h-3" />
                     <span>{new Date(lead.created_at).toLocaleDateString('fr-FR')}</span>
@@ -286,10 +313,10 @@ export function RevenueTab() {
           ))}
 
           {manualRevenues.length === 0 && conversions === 0 && (
-            <div className="text-center py-12 text-[#888]">
-              <DollarSign className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p className="font-semibold mb-1">Aucun revenu pour l'instant</p>
-              <p className="text-sm">Ajoute ton premier revenu manuellement pour commencer à tracker</p>
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">💰</div>
+              <h3 className="text-lg font-semibold text-white mb-2">Aucun revenu pour l'instant</h3>
+              <p className="text-sm text-[#888]">Vos premiers revenus apparaîtront ici dès qu'un lead sera converti.</p>
             </div>
           )}
         </div>
@@ -298,78 +325,80 @@ export function RevenueTab() {
       {/* Charts */}
       <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
         <h3 className="text-lg font-semibold text-white mb-4">Évolution du revenue (6 semaines)</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={weeklyData}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#00D26A" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#00D26A" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-            <XAxis dataKey="week" stroke="#888" />
-            <YAxis stroke="#888" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(10,10,10,0.95)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                color: '#fff',
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#00D26A"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorRevenue)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {weeklyData.every(d => d.revenue === 0) ? (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">📈</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Pas encore de données</h3>
+            <p className="text-sm text-[#888]">Le graphique se remplira au fur et à mesure des conversions.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={weeklyData}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#00D26A" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#00D26A" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="week" stroke="#888" />
+              <YAxis stroke="#888" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(10,10,10,0.95)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="#00D26A"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorRevenue)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </Card>
 
       <Card className="p-6 bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.07)]">
         <h3 className="text-lg font-semibold text-white mb-4">Leads vs Revenue</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={dualAxisData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-            <XAxis dataKey="date" stroke="#888" />
-            <YAxis yAxisId="left" stroke="#888" />
-            <YAxis yAxisId="right" orientation="right" stroke="#888" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(10,10,10,0.95)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                color: '#fff',
-              }}
-            />
-            <Legend />
-            <Line
-              yAxisId="left"
-              type="monotone"
-              dataKey="leads"
-              stroke="#FF5C00"
-              strokeWidth={2}
-              name="Leads"
-            />
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="revenue"
-              stroke="#00D26A"
-              strokeWidth={2}
-              name="Revenue (€)"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        {dualAxisData.every(d => d.leads === 0 && d.revenue === 0) ? (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Pas encore de données</h3>
+            <p className="text-sm text-[#888]">Ce graphique comparera vos leads et revenus.</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={dualAxisData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="date" stroke="#888" />
+              <YAxis yAxisId="left" stroke="#888" />
+              <YAxis yAxisId="right" orientation="right" stroke="#888" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(10,10,10,0.95)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+              />
+              <Legend />
+              <Line yAxisId="left" type="monotone" dataKey="leads" stroke="#FF5C00" strokeWidth={2} name="Leads" />
+              <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="#00D26A" strokeWidth={2} name="Revenue (€)" />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </Card>
 
       {/* Help Card */}
       <Card className="bg-[rgba(255,92,0,0.05)] border-[rgba(255,92,0,0.2)] p-5">
         <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
-          💡 Comment ça marche ?
+          Comment ça marche ?
         </h3>
         <div className="space-y-2 text-sm text-[#888]">
           <p>• <strong className="text-white">Revenus FitFlow :</strong> Générés automatiquement quand tu marques un lead comme "converti"</p>

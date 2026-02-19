@@ -15,7 +15,7 @@ export function PricingSection() {
       monthly: 47,
       annual: 38,
       features: [
-        { text: 'ManyChat + IA pour détecter les commentaires', included: true },
+        { text: 'IA pour détecter les commentaires', included: true },
         { text: 'DMs automatiques personnalisés', included: true },
         { text: 'Setup en 1-2h par coach', included: true },
         { text: 'Support email', included: true },
