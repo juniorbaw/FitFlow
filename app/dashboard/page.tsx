@@ -477,9 +477,9 @@ export default function FitFlowDashboard() {
                   <ScoreBadge score={lead.ai_score || 0} />
                   <StatusBadge status={lead.status} />
                   <span style={{ fontSize: 12, color: "#555", minWidth: 80, textAlign: "right" }}>{new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </>
         )}
 
