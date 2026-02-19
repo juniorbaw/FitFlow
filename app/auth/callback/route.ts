@@ -20,29 +20,30 @@ export async function GET(request: Request) {
         .eq('user_id', data.user.id)
         .single()
 
-      // If no coach profile, this might be first login
-      // Check if they came from Facebook OAuth
+      // If no coach profile, create one (first login)
       const provider = data.user.app_metadata.provider
       
-      if (!coach && provider === 'facebook') {
-        // Get Instagram data from user metadata
+      if (!coach) {
+        // Get Instagram data from user metadata (if OAuth)
         const instagramUsername = data.user.user_metadata.instagram_username
         const instagramId = data.user.user_metadata.instagram_id
         const accessToken = data.session?.provider_token
+        const name = data.user.user_metadata.name || data.user.email?.split('@')[0]
         
-        // Create coach profile
+        // Create coach profile for ANY auth method (email or OAuth)
         await supabase.from('coaches').insert({
           user_id: data.user.id,
           email: data.user.email,
+          name: name,
           instagram_username: instagramUsername || null,
           instagram_id: instagramId || null,
           access_token: accessToken || null,
-          subscription_tier: 'free',
+          plan: 'free',
           subscription_status: 'trial',
         })
 
-        // Redirect to onboarding instead of dashboard
-        return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
+        // Redirect to dashboard for first login
+        return NextResponse.redirect(new URL('/dashboard?welcome=true', requestUrl.origin))
       }
     }
   }
