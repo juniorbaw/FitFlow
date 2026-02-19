@@ -391,8 +391,24 @@ export default function FitFlowDashboard() {
                 </div>
               </div>
             </div>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24, marginBottom: 32 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Funnel de conversion</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              style={{ 
+                background: "rgba(255,255,255,0.03)", 
+                border: "1px solid rgba(255,255,255,0.07)", 
+                borderRadius: 20, 
+                padding: 24, 
+                marginBottom: 32,
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, background: "linear-gradient(135deg, #fff, #aaa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                Funnel de conversion
+              </div>
               <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
                 {[].map((step: any, i: number) => {
                   const maxCount = 1
@@ -409,14 +425,51 @@ export default function FitFlowDashboard() {
                   )
                 })}
               </div>
+            </motion.div>
+              </div>
             </div>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 24 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1 }}
+              style={{ 
+                background: "rgba(255,255,255,0.03)", 
+                border: "1px solid rgba(255,255,255,0.07)", 
+                borderRadius: 20, 
+                padding: 24,
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+              }}
+            >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>Derniers leads</div>
+                <div style={{ fontSize: 16, fontWeight: 800, background: "linear-gradient(135deg, #fff, #aaa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  Derniers leads
+                </div>
                 <button onClick={() => setActiveTab("leads")} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", color: ORANGE, padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Voir tout →</button>
               </div>
-              {realLeads.slice(0, 4).map((lead: any) => (
-                <div key={lead.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", gap: 16 }}>
+              {realLeads.slice(0, 4).map((lead: any, index: number) => (
+                <motion.div 
+                  key={lead.id} 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 1.1 + index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.01, 
+                    backgroundColor: "rgba(255,255,255,0.05)",
+                    boxShadow: "0 4px 20px rgba(255,92,0,0.1)"
+                  }}
+                  style={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center", 
+                    padding: "16px", 
+                    borderBottom: index < 3 ? "1px solid rgba(255,255,255,0.04)" : "none", 
+                    gap: 16,
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</div>
                     <div style={{ fontSize: 12, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment_text || lead.comment || '—'}</div>
