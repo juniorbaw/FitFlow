@@ -3,6 +3,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Disable INP warnings in production
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+  experimental: {
+    webVitalsAttribution: [],
+  },
   images: {
     remotePatterns: [
       {
