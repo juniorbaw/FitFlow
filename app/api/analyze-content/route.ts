@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
 
     const prompt = `Tu es un expert en marketing Instagram spécialisé dans le fitness coaching.
 
