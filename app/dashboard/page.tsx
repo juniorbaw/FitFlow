@@ -195,9 +195,9 @@ export default function FitFlowDashboard() {
           <Link href="/" style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5, textDecoration: "none", color: "inherit", cursor: "pointer", transition: "opacity 0.2s" }} onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.opacity = "0.7"} onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.opacity = "1"}>
             Fit<span style={{ color: ORANGE }}>Flow</span>
           </Link>
-          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
-            {tabs.map(tab => (
-              <button 
+          <div style={{ position: "relative", display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4, backdropFilter: "blur(10px)" }}>
+            {tabs.map((tab, index) => (
+              <motion.button 
                 key={tab.id} 
                 onClick={() => {
                   if (tab.locked) {
@@ -208,25 +208,49 @@ export default function FitFlowDashboard() {
                     setActiveTab(tab.id)
                   }
                 }}
+                whileHover={{ scale: tab.locked ? 1 : 1.05 }}
+                whileTap={{ scale: tab.locked ? 1 : 0.95 }}
                 style={{ 
-                  padding: "8px 16px", 
-                  borderRadius: 8, 
+                  position: "relative",
+                  padding: "10px 16px", 
+                  borderRadius: 10, 
                   border: "none", 
                   cursor: tab.locked ? "not-allowed" : "pointer", 
                   fontSize: 13, 
                   fontWeight: 600, 
-                  background: activeTab === tab.id ? "rgba(255,92,0,0.15)" : "transparent", 
-                  color: activeTab === tab.id ? ORANGE : tab.locked ? "#555" : "#888", 
-                  transition: "all 0.2s", 
+                  background: "transparent",
+                  color: activeTab === tab.id ? "#fff" : tab.locked ? "#555" : "#888", 
+                  transition: "color 0.3s", 
                   display: "flex", 
                   alignItems: "center", 
                   gap: 6,
-                  opacity: tab.locked ? 0.5 : 1
+                  opacity: tab.locked ? 0.5 : 1,
+                  zIndex: activeTab === tab.id ? 2 : 1
                 }}>
-                <span style={{ fontSize: 14 }}>{tab.icon}</span>
-                {tab.label}
-                {tab.locked && <span style={{ fontSize: 12 }}>🔒</span>}
-              </button>
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "linear-gradient(135deg, rgba(255,92,0,0.2), rgba(255,138,61,0.15))",
+                      borderRadius: 10,
+                      border: "1px solid rgba(255,92,0,0.3)",
+                      boxShadow: "0 0 20px rgba(255,92,0,0.2)"
+                    }}
+                  />
+                )}
+                <motion.span 
+                  animate={{ rotate: activeTab === tab.id ? [0, -10, 10, 0] : 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ fontSize: 14, position: "relative", zIndex: 3 }}
+                >
+                  {tab.icon}
+                </motion.span>
+                <span style={{ position: "relative", zIndex: 3 }}>{tab.label}</span>
+                {tab.locked && <span style={{ fontSize: 12, position: "relative", zIndex: 3 }}>🔒</span>}
+              </motion.button>
             ))}
           </div>
         </div>
