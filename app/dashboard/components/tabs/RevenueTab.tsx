@@ -6,7 +6,7 @@ const ORANGE = "#FF5C00";
 const GREEN = "#00D26A";
 const BLUE = "#3B82F6";
 
-export default function RevenueTab() {
+export function RevenueTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [period, setPeriod] = useState("month");
 

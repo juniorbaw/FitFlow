@@ -8,7 +8,7 @@ const BLUE = "#3B82F6";
 const YELLOW = "#FFB800";
 const RED = "#FF4D4D";
 
-export default function ContentAnalyzerTab() {
+export function ContentAnalyzerTab() {
   const [postContent, setPostContent] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [showResult, setShowResult] = useState(true);
