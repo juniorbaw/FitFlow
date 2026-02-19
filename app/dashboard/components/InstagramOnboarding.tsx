@@ -129,7 +129,7 @@ export default function InstagramOnboarding({ onClose, onSkip }: InstagramOnboar
               {
                 icon: '💬',
                 title: 'Envoi de DMs personnalisés',
-                description: 'Messages automatiques et personnalisés via ManyChat'
+                description: 'Messages automatiques et personnalisés par l\'IA'
               },
               {
                 icon: '📊',
