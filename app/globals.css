@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Police uniforme - DM Sans partout */
+* {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Couleurs texte par défaut (dark theme) */
+body {
+  color: #fafafa;
+  background: #0a0a0a;
+}
+
+/* Éviter texte noir sur fond noir */
+input, textarea, select {
+  color: #fafafa !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #666 !important;
+}
+
 @layer base {
   :root {
     --primary: #FF5C00;
