@@ -1,14 +1,73 @@
 'use client'
 
 import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 
 const ORANGE = "#FF5C00";
+const GREEN = "#00D26A";
 
 export default function LoginPage() {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const supabase = createClientComponentClient();
+  const router = useRouter();
+
+  const handleEmailAuth = async () => {
+    if (!email || !password) {
+      setError("Veuillez remplir tous les champs.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      if (isSignup) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+        if (error) throw error;
+        setSuccess("Vérifiez votre email pour confirmer votre compte !");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err.message || "Une erreur est survenue.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebook = async () => {
+    setLoading(true);
+    setError("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "facebook",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: "email,public_profile",
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={{
@@ -41,14 +100,35 @@ export default function LoginPage() {
             }
           </p>
 
+          {/* Error / Success */}
+          {error && (
+            <div style={{
+              background: "rgba(255,77,77,0.08)", border: "1px solid rgba(255,77,77,0.2)",
+              borderRadius: 12, padding: "12px 16px", marginBottom: 20,
+              fontSize: 13, color: "#FF4D4D", fontWeight: 500
+            }}>{error}</div>
+          )}
+          {success && (
+            <div style={{
+              background: "rgba(0,210,106,0.08)", border: "1px solid rgba(0,210,106,0.2)",
+              borderRadius: 12, padding: "12px 16px", marginBottom: 20,
+              fontSize: 13, color: GREEN, fontWeight: 500
+            }}>{success}</div>
+          )}
+
           {/* Facebook OAuth */}
-          <button style={{
-            width: "100%", padding: "14px", borderRadius: 12,
-            background: "#1877F2", border: "none", color: "white",
-            fontSize: 15, fontWeight: 700, cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-            marginBottom: 24
-          }}>
+          <button
+            onClick={handleFacebook}
+            disabled={loading}
+            style={{
+              width: "100%", padding: "14px", borderRadius: 12,
+              background: loading ? "#1877F290" : "#1877F2",
+              border: "none", color: "white",
+              fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              marginBottom: 24, transition: "opacity 0.2s"
+            }}
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
@@ -88,6 +168,7 @@ export default function LoginPage() {
                 type="email" value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vous@exemple.com"
+                onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
                 style={{
                   width: "100%", padding: "14px 18px", borderRadius: 12,
                   background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
@@ -111,6 +192,7 @@ export default function LoginPage() {
                 type="password" value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
                 style={{
                   width: "100%", padding: "14px 18px", borderRadius: 12,
                   background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
@@ -124,20 +206,40 @@ export default function LoginPage() {
           </div>
 
           {/* Submit */}
-          <button style={{
-            width: "100%", padding: "15px", borderRadius: 12, border: "none",
-            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
-            color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer",
-            marginTop: 24, boxShadow: `0 8px 32px ${ORANGE}30`
-          }}>
-            {isSignup ? "Créer mon compte" : "Se connecter"}
+          <button
+            onClick={handleEmailAuth}
+            disabled={loading}
+            style={{
+              width: "100%", padding: "15px", borderRadius: 12, border: "none",
+              background: loading
+                ? "rgba(255,92,0,0.5)"
+                : `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+              color: "white", fontSize: 16, fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              marginTop: 24, boxShadow: `0 8px 32px ${ORANGE}30`,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "all 0.2s"
+            }}
+          >
+            {loading ? (
+              <>
+                <span style={{
+                  width: 16, height: 16, border: "2px solid white",
+                  borderTopColor: "transparent", borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite", display: "inline-block"
+                }} />
+                Chargement...
+              </>
+            ) : (
+              isSignup ? "Créer mon compte" : "Se connecter"
+            )}
           </button>
 
           {/* Toggle signup/login */}
           <p style={{ textAlign: "center", marginTop: 24, fontSize: 14, color: "#666" }}>
             {isSignup ? "Déjà un compte ? " : "Pas encore de compte ? "}
             <span
-              onClick={() => setIsSignup(!isSignup)}
+              onClick={() => { setIsSignup(!isSignup); setError(""); setSuccess(""); }}
               style={{ color: ORANGE, cursor: "pointer", fontWeight: 700 }}
             >
               {isSignup ? "Se connecter →" : "Créer un compte →"}
@@ -211,6 +313,8 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
