@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 const ORANGE = "#FF5C00";
@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
 
   const handleEmailAuth = async () => {
