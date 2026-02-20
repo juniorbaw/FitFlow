@@ -13,7 +13,7 @@ export function ContentAnalyzerTab() {
   const [analyzing, setAnalyzing] = useState(false);
   const [showResult, setShowResult] = useState(true);
 
-  const mockResult = {
+  const [mockResult, setMockResult] = useState({
     score: 82,
     verdict: "good",
     strengths: [
@@ -48,14 +48,26 @@ export function ContentAnalyzerTab() {
   const v = verdictMap[mockResult.verdict];
   const scoreColor = mockResult.score >= 80 ? GREEN : mockResult.score >= 60 ? BLUE : mockResult.score >= 40 ? YELLOW : RED;
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!postContent.trim()) return;
     setAnalyzing(true);
     setShowResult(false);
-    setTimeout(() => {
-      setAnalyzing(false);
+    try {
+      const response = await fetch('/api/analyze-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: postContent })
+      });
+      if (!response.ok) throw new Error('Erreur API');
+      const data = await response.json();
+      setMockResult(data);
       setShowResult(true);
-    }, 2000);
+    } catch (error) {
+      console.error('Analysis error:', error);
+      alert('Erreur lors de l\'analyse. Réessayez.');
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (
