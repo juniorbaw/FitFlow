@@ -36,7 +36,7 @@ export function ContentAnalyzerTab() {
     bestTime: "Mardi ou Jeudi, 12h-13h ou 18h-19h",
     reach: "2 500 - 4 000 comptes",
     engagement: "high"
-  };
+  });
 
   const verdictMap: Record<string, { label: string; color: string; emoji: string }> = {
     excellent: { label: "Excellent", color: GREEN, emoji: "🔥" },
