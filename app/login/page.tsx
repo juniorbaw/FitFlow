@@ -19,19 +19,20 @@ export default function LoginPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  // Si l'utilisateur arrive sur /login avec des params Instagram, on le redirige vers /settings
+  // Si l'utilisateur arrive sur /login avec des params Instagram, on le redirige vers /instagram-success
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const igParam = params.get('instagram');
     const igUser = params.get('ig_user') || params.get('username');
     const errorParam = params.get('error');
     
-    if (igParam === 'connected' && igUser) {
-      router.replace(`/settings?instagram=connected&username=${encodeURIComponent(igUser)}`);
+    if (igUser || igParam === 'connected') {
+      const username = igUser || '';
+      router.replace(`/instagram-success?instagram=connected&username=${encodeURIComponent(username)}`);
       return;
     }
-    if (igParam || igUser) {
-      router.replace(`/settings?instagram=connected&username=${encodeURIComponent(igUser || '')}`);
+    if (errorParam) {
+      router.replace(`/instagram-success?error=${encodeURIComponent(errorParam)}`);
       return;
     }
   }, [router]);

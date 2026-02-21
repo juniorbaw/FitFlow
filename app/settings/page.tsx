@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ORANGE = "#FF5C00";
 const GREEN = "#00D26A";
@@ -11,6 +11,7 @@ const RED = "#FF4D4D";
 
 export default function SettingsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [activeTab, setActiveTab] = useState("instagram");
@@ -30,40 +31,31 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const init = async () => {
-      // Lire les params URL après callback Instagram
-      const params = new URLSearchParams(window.location.search);
-      const igParam = params.get('instagram');
-      const usernameParam = params.get('username');
-      const errorParam = params.get('error');
+      const igParam = searchParams.get('instagram');
+      const usernameParam = searchParams.get('username');
+      const tabParam = searchParams.get('tab');
+      const errorParam = searchParams.get('error');
+
+      if (tabParam) setActiveTab(tabParam);
 
       if (igParam === 'connected' && usernameParam) {
-        window.history.replaceState({}, '', '/settings');
-        // Sauvegarder dans Supabase EN PREMIER (await)
-        try {
-          await fetch('/api/instagram/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ig_user: usernameParam }),
-          });
-        } catch (e) { console.error(e); }
-        // Puis mettre à jour l'UI
         setIgConnected(true);
         setIgUsername(usernameParam);
         setIgSuccess(`✅ Instagram connecté : @${usernameParam}`);
         setActiveTab("instagram");
+        window.history.replaceState({}, '', '/settings');
       }
 
       if (errorParam) {
         setIgError(decodeURIComponent(errorParam));
-        window.history.replaceState({}, '', '/settings');
         setActiveTab("instagram");
+        window.history.replaceState({}, '', '/settings');
       }
 
-      // Charger les données (mais ne pas écraser si déjà connecté via URL)
       await loadUserData(igParam === 'connected' ? usernameParam : null);
     };
     init();
-  }, []);
+  }, [searchParams]);
 
   const loadUserData = async (skipIgUsername: string | null = null) => {
     const { data: { user } } = await supabase.auth.getUser();
