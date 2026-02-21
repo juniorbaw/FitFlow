@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -9,7 +9,7 @@ const GREEN = "#00D26A";
 const BLUE = "#3B82F6";
 const RED = "#FF4D4D";
 
-export default function SettingsPage() {
+function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -508,5 +508,24 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: "100vh", background: "#050508", color: "#fafafa",
+        fontFamily: "'Inter', -apple-system, sans-serif",
+        display: "flex", alignItems: "center", justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>⚙️</div>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "#888" }}>Chargement...</p>
+        </div>
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   );
 }
