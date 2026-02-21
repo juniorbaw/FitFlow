@@ -26,10 +26,44 @@ function InstagramSuccessContent() {
         // Sauvegarder dans Supabase
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          await supabase
+          // Vérifier si le coach existe
+          const { data: existing } = await supabase
             .from('coaches')
-            .update({ instagram_username: igUser })
-            .eq('user_id', user.id);
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+          if (existing) {
+            // Mettre à jour
+            const { error: updateError } = await supabase
+              .from('coaches')
+              .update({
+                instagram_username: igUser,
+                instagram_id: igUser,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('user_id', user.id);
+            if (updateError) {
+              console.error('Update error:', updateError);
+              router.replace(`/settings?tab=instagram&error=${encodeURIComponent(updateError.message)}`);
+              return;
+            }
+          } else {
+            // Créer le coach
+            const { error: insertError } = await supabase
+              .from('coaches')
+              .insert({
+                user_id: user.id,
+                email: user.email || '',
+                instagram_username: igUser,
+                instagram_id: igUser,
+              });
+            if (insertError) {
+              console.error('Insert error:', insertError);
+              router.replace(`/settings?tab=instagram&error=${encodeURIComponent(insertError.message)}`);
+              return;
+            }
+          }
         }
         router.replace(`/settings?tab=instagram&instagram=connected&username=${encodeURIComponent(igUser)}`);
         return;
