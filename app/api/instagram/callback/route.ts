@@ -105,7 +105,6 @@ export async function GET(request: NextRequest) {
         .update({
           instagram_id: instagramAccountId,
           instagram_username: instagramUsername,
-          access_token: pageAccessToken,
           facebook_page_id: pageId,
           updated_at: new Date().toISOString(),
         })
@@ -121,7 +120,6 @@ export async function GET(request: NextRequest) {
           email: user?.email || '',
           instagram_id: instagramAccountId,
           instagram_username: instagramUsername,
-          access_token: pageAccessToken,
           facebook_page_id: pageId,
         })
       dbError = error
