@@ -29,36 +29,47 @@ export default function SettingsPage() {
   const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
-    // Lire les params URL après callback Instagram
-    const params = new URLSearchParams(window.location.search);
-    const igParam = params.get('instagram');
-    const usernameParam = params.get('username');
-    const errorParam = params.get('error');
-    if (igParam === 'connected' && usernameParam) {
-      setIgConnected(true);
-      setIgUsername(usernameParam);
-      setIgSuccess(`✅ Instagram connecté : @${usernameParam}`);
-      window.history.replaceState({}, '', '/settings');
-      // Sauvegarder dans Supabase
-      fetch('/api/instagram/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ig_user: usernameParam }),
-      }).catch(console.error);
-    }
-    if (errorParam) {
-      setIgError(decodeURIComponent(errorParam));
-      window.history.replaceState({}, '', '/settings');
-    }
-    loadUserData();
+    const init = async () => {
+      // Lire les params URL après callback Instagram
+      const params = new URLSearchParams(window.location.search);
+      const igParam = params.get('instagram');
+      const usernameParam = params.get('username');
+      const errorParam = params.get('error');
+
+      if (igParam === 'connected' && usernameParam) {
+        window.history.replaceState({}, '', '/settings');
+        // Sauvegarder dans Supabase EN PREMIER (await)
+        try {
+          await fetch('/api/instagram/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ig_user: usernameParam }),
+          });
+        } catch (e) { console.error(e); }
+        // Puis mettre à jour l'UI
+        setIgConnected(true);
+        setIgUsername(usernameParam);
+        setIgSuccess(`✅ Instagram connecté : @${usernameParam}`);
+        setActiveTab("instagram");
+      }
+
+      if (errorParam) {
+        setIgError(decodeURIComponent(errorParam));
+        window.history.replaceState({}, '', '/settings');
+        setActiveTab("instagram");
+      }
+
+      // Charger les données (mais ne pas écraser si déjà connecté via URL)
+      await loadUserData(igParam === 'connected' ? usernameParam : null);
+    };
+    init();
   }, []);
 
-  const loadUserData = async () => {
+  const loadUserData = async (skipIgUsername: string | null = null) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/login'); return; }
     setUser(user);
 
-    // Charger les données du coach depuis Supabase
     const { data: coach } = await supabase
       .from('coaches')
       .select('*')
@@ -66,8 +77,11 @@ export default function SettingsPage() {
       .single();
 
     if (coach) {
-      setIgConnected(!!coach.instagram_id);
-      setIgUsername(coach.instagram_username || null);
+      // Si on vient d'un callback Instagram, ne pas écraser l'état déjà mis à jour
+      if (!skipIgUsername) {
+        setIgConnected(!!coach.instagram_id);
+        setIgUsername(coach.instagram_username || null);
+      }
       setAutoDm(coach.auto_send_enabled ?? true);
       setDmLimit(coach.daily_dm_limit ?? 50);
     }
