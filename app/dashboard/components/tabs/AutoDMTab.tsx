@@ -62,20 +62,11 @@ export function AutoDMTab() {
     }
   }
 
-  const isDemoMode = leads.length === 0
+  const dmHistory = leads
 
-  const dmHistory = isDemoMode
-    ? [
-        { username: 'fitgirl_23', ai_score: 9, dm_content: "Salut fitgirl_23 ! 🔥 J'ai lu ton commentaire...", status: "replied", created_at: new Date(Date.now() - 3600000).toISOString() },
-        { username: 'muscle_tom', ai_score: 8, dm_content: "Hey muscle_tom ! 👋 Merci pour ton commentaire...", status: "dm_sent", created_at: new Date(Date.now() - 7200000).toISOString() },
-        { username: 'yoga_sarah', ai_score: 9, dm_content: "Salut yoga_sarah ! 🔥 J'ai lu ton commentaire...", status: "converted", created_at: new Date(Date.now() - 10800000).toISOString() },
-        { username: 'run_alex', ai_score: 7, dm_content: "Hey run_alex ! 👋 Merci pour ton commentaire...", status: "dm_sent", created_at: new Date(Date.now() - 14400000).toISOString() },
-      ]
-    : leads
-
-  const dmsSentToday = isDemoMode ? 12 : stats.sent
-  const responseRate = isDemoMode ? 67 : (stats.sent > 0 ? Math.round((stats.replied / stats.sent) * 100) : 0)
-  const conversionsCount = isDemoMode ? 4 : stats.converted
+  const dmsSentToday = stats.sent
+  const responseRate = stats.sent > 0 ? Math.round((stats.replied / stats.sent) * 100) : 0
+  const conversionsCount = stats.converted
 
   const statusMap: Record<string, { label: string; color: string; bg: string }> = {
     dm_sent: { label: "Envoyé", color: BLUE, bg: "rgba(59,130,246,0.1)" },
