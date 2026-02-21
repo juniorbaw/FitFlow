@@ -16,6 +16,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("instagram");
   const [igConnected, setIgConnected] = useState(false);
   const [igUsername, setIgUsername] = useState<string | null>(null);
+  const [igSuccess, setIgSuccess] = useState<string | null>(null);
+  const [igError, setIgError] = useState<string | null>(null);
   const [autoDm, setAutoDm] = useState(true);
   const [dmLimit, setDmLimit] = useState(50);
   const [emailNotifs, setEmailNotifs] = useState(true);
@@ -27,6 +29,21 @@ export default function SettingsPage() {
   const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
+    // Lire les params URL après callback Instagram
+    const params = new URLSearchParams(window.location.search);
+    const igParam = params.get('instagram');
+    const usernameParam = params.get('username');
+    const errorParam = params.get('error');
+    if (igParam === 'connected' && usernameParam) {
+      setIgConnected(true);
+      setIgUsername(usernameParam);
+      setIgSuccess(`✅ Instagram connecté : @${usernameParam}`);
+      window.history.replaceState({}, '', '/settings');
+    }
+    if (errorParam) {
+      setIgError(decodeURIComponent(errorParam));
+      window.history.replaceState({}, '', '/settings');
+    }
     loadUserData();
   }, []);
 
@@ -226,6 +243,28 @@ export default function SettingsPage() {
           {/* INSTAGRAM */}
           {activeTab === "instagram" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+              {/* Messages succès/erreur */}
+              {igSuccess && (
+                <div style={{
+                  background: "rgba(0,210,106,0.08)", border: "1px solid rgba(0,210,106,0.2)",
+                  borderRadius: 12, padding: "14px 20px", fontSize: 14, fontWeight: 600, color: GREEN,
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  {igSuccess}
+                  <span onClick={() => setIgSuccess(null)} style={{ cursor: "pointer", color: "#888" }}>✕</span>
+                </div>
+              )}
+              {igError && (
+                <div style={{
+                  background: "rgba(255,77,77,0.08)", border: "1px solid rgba(255,77,77,0.2)",
+                  borderRadius: 12, padding: "14px 20px", fontSize: 14, fontWeight: 600, color: RED,
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  ❌ Erreur : {igError}
+                  <span onClick={() => setIgError(null)} style={{ cursor: "pointer", color: "#888" }}>✕</span>
+                </div>
+              )}
 
               {/* Connection Status */}
               <div style={{

@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get('user_id');
   
   const INSTAGRAM_APP_ID = INSTAGRAM_CONFIG.APP_ID;
-  const REDIRECT_URI = APP_CONFIG.callbacks.auth();
+  const REDIRECT_URI = APP_CONFIG.callbacks.instagram();
   
   if (!INSTAGRAM_APP_ID) {
     console.error('❌ NEXT_PUBLIC_INSTAGRAM_APP_ID not configured');
