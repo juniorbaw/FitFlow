@@ -13,6 +13,7 @@ import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
 import { RevenueTab } from './components/tabs/RevenueTab'
 import { AutoDMTab } from './components/tabs/AutoDMTab'
 import { OverviewTab } from './components/tabs/OverviewTab'
+import { VideoAnalyzerTab } from './components/tabs/VideoAnalyzerTab'
 import { StatCard } from '@/components/ui/stat-card'
 import { MessageSquare, Target, Send, TrendingUp, DollarSign } from 'lucide-react'
 
@@ -148,6 +149,7 @@ export default function FitFlowDashboard() {
     { id: "autodm", label: "Auto-DM", icon: "🤖" },
     { id: "content", label: "Content AI", icon: "🎨" },
     { id: "revenue", label: "Revenue", icon: "💰" },
+    { id: "video", label: "Video AI", icon: "🎬" },
   ]
 
   return (
@@ -334,6 +336,8 @@ export default function FitFlowDashboard() {
         {activeTab === "content" && <ContentAnalyzerTab />}
 
         {activeTab === "revenue" && <RevenueTab />}
+
+        {activeTab === "video" && <VideoAnalyzerTab />}
       </div>
     </div>
     </>
