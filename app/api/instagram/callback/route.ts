@@ -90,20 +90,47 @@ export async function GET(request: NextRequest) {
     // 5. Sauvegarder dans Supabase coaches
     const supabase = await createClient()
 
-    const { error: updateError } = await supabase
+    // Vérifier si le coach existe
+    const { data: existingCoach } = await supabase
       .from('coaches')
-      .update({
-        instagram_id: instagramAccountId,
-        instagram_username: instagramUsername,
-        access_token: pageAccessToken,
-        page_id: pageId,
-      })
+      .select('id')
       .eq('user_id', state)
+      .single()
 
-    if (updateError) {
-      console.error('❌ Supabase update error:', updateError)
+    let dbError = null
+
+    if (existingCoach) {
+      const { error } = await supabase
+        .from('coaches')
+        .update({
+          instagram_id: instagramAccountId,
+          instagram_username: instagramUsername,
+          access_token: pageAccessToken,
+          facebook_page_id: pageId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', state)
+      dbError = error
+    } else {
+      // Récupérer l'email de l'utilisateur
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase
+        .from('coaches')
+        .insert({
+          user_id: state,
+          email: user?.email || '',
+          instagram_id: instagramAccountId,
+          instagram_username: instagramUsername,
+          access_token: pageAccessToken,
+          facebook_page_id: pageId,
+        })
+      dbError = error
+    }
+
+    if (dbError) {
+      console.error('❌ Supabase error:', dbError)
       return NextResponse.redirect(
-        `${baseUrl}/settings?error=db_update_failed`
+        `${baseUrl}/settings?error=${encodeURIComponent(dbError.message)}`
       )
     }
 
