@@ -39,6 +39,12 @@ export default function SettingsPage() {
       setIgUsername(usernameParam);
       setIgSuccess(`✅ Instagram connecté : @${usernameParam}`);
       window.history.replaceState({}, '', '/settings');
+      // Sauvegarder dans Supabase
+      fetch('/api/instagram/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ig_user: usernameParam }),
+      }).catch(console.error);
     }
     if (errorParam) {
       setIgError(decodeURIComponent(errorParam));

@@ -26,7 +26,7 @@ export const APP_CONFIG = {
   
   // Callback URLs pour OAuth
   callbacks: {
-    instagram: () => `${APP_CONFIG.APP_URL}/api/auth/instagram/callback`,
+    instagram: () => `${APP_CONFIG.APP_URL}/api/instagram/callback`,
     stripe: {
       success: (plan: string) => `${APP_CONFIG.APP_URL}/dashboard?checkout=success&plan=${plan}`,
       cancel: () => `${APP_CONFIG.APP_URL}/pricing?checkout=canceled`,
