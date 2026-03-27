@@ -1,0 +1,24 @@
+Peux-tu recréer TOUTES les tables dans le schéma PUBLIC (pas app_crm) ?
+
+Tables à créer dans public :
+- coaches
+- leads  
+- conversations
+- messages
+- instagram_comments
+- message_templates
+- automations
+- analytics_daily
+- waitlist
+- instagram_posts
+- feedback
+- revenue_tracking
+
+Avec :
+- RLS activé
+- Triggers updated_at
+- Seed 1 coach démo + 3 leads
+- Trigger signup auth.users
+- Realtime sur conversations et messages
+
+Merci !

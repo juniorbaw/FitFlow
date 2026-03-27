@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     const { user_id, instagram_username, comment_text, score, dm_suggested, reasoning } = body
     
-    if (!user_id || !instagram_username || !comment_text || score === undefined || !dm_suggested || !reasoning) {
+    if (!user_id || !instagram_username || !instagram_username.trim() || !comment_text || score === undefined || !dm_suggested || !reasoning) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields: user_id, instagram_username, comment_text, score, dm_suggested, reasoning' },
         { status: 400 }

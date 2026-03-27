@@ -153,7 +153,7 @@ export default function CampaignDetailsPage() {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">C</span>
             </div>
-            <span className="font-bold text-xl">ClientWin</span>
+            <span className="font-bold text-xl">FitFlow</span>
           </div>
           <Button variant="outline" onClick={() => router.push('/campaigns')}>
             ← Retour

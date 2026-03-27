@@ -1,550 +1,345 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { supabase } from '@/lib/supabase'
+import { useState, useMemo, useEffect } from "react"
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
+import { createClient } from '@/lib/supabase/client'
+import { motion, AnimatePresence } from 'framer-motion'
+import InstagramOnboarding from './components/InstagramOnboarding'
+import UserMenu from '@/components/UserMenu'
+import NotificationCenter from '@/components/NotificationCenter'
+import ExportButton from '@/components/ExportButton'
 import Link from 'next/link'
+import { ContentAnalyzerTab } from './components/tabs/ContentAnalyzerTab'
+import { RevenueTab } from './components/tabs/RevenueTab'
+import { AutoDMTab } from './components/tabs/AutoDMTab'
+import { OverviewTab } from './components/tabs/OverviewTab'
+import { VideoAnalyzerTab } from './components/tabs/VideoAnalyzerTab'
+import { StatCard } from '@/components/ui/stat-card'
+import { MessageSquare, Target, Send, TrendingUp, DollarSign } from 'lucide-react'
 
-export default function DashboardPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [stats, setStats] = useState({ 
-    campaigns: 0, 
-    dm_sent: 0, 
-    bookings: 0, 
-    responseRate: 0,
-    conversionRate: 0,
-    weeklyGrowth: 0,
-    leadsThisWeek: 0,
-    leadsTrend: 0,
-    dmsSent: 0,
-    responseRatePercent: 0,
-    convertedThisMonth: 0
-  })
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('overview')
+const ORANGE = "#FF5C00"
+const GREEN = "#00D26A"
+const RED = "#FF4D4D"
+const YELLOW = "#FFB800"
+const BLUE = "#3B82F6"
 
-  useEffect(() => {
-    checkUser()
-  }, [])
+// ALL FAKE DATA REMOVED - Using real Supabase data only
 
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    setUser(user)
-    await loadStats(user.id)
-    setLoading(false)
-  }
-
-  const loadStats = async (userId: string) => {
-    const { count: campaignsCount } = await supabase
-      .from('campaigns')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'active')
-
-    const { data: campaigns } = await supabase
-      .from('campaigns')
-      .select('id')
-      .eq('user_id', userId)
-
-    const campaignIds = campaigns?.map(c => c.id) || []
-    
-    const { count: dmCount } = await supabase
-      .from('direct_messages')
-      .select('*', { count: 'exact', head: true })
-      .in('campaign_id', campaignIds)
-
-    // Load leads stats
-    const oneWeekAgo = new Date()
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-    
-    const { count: leadsThisWeek } = await supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .gte('created_at', oneWeekAgo.toISOString())
-
-    const { count: totalLeads } = await supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-
-    const { count: sentDMs } = await supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'sent')
-
-    const { count: repliedLeads } = await supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('reply_received', true)
-
-    const startOfMonth = new Date()
-    startOfMonth.setDate(1)
-    startOfMonth.setHours(0, 0, 0, 0)
-
-    const { count: convertedThisMonth } = await supabase
-      .from('leads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'converted')
-      .gte('created_at', startOfMonth.toISOString())
-
-    // Calculate metrics
-    const responseRate = (sentDMs || 0) > 0 ? Math.floor(((repliedLeads || 0) / (sentDMs || 1)) * 100) : 0
-    const conversionRate = (dmCount || 0) > 0 ? Math.min(25 + Math.random() * 15, 100) : 0
-    const weeklyGrowth = Math.floor(Math.random() * 30) + 10
-    const leadsTrend = (totalLeads || 0) > 0 ? Math.floor(((leadsThisWeek || 0) / (totalLeads || 1)) * 100) : 0
-
-    setStats({
-      campaigns: campaignsCount || 0,
-      dm_sent: dmCount || 0,
-      bookings: Math.floor((dmCount || 0) * 0.3) || 0,
-      responseRate: Math.floor(responseRate),
-      conversionRate: Math.floor(conversionRate),
-      weeklyGrowth,
-      leadsThisWeek: leadsThisWeek || 0,
-      leadsTrend: Math.min(leadsTrend, 100),
-      dmsSent: sentDMs || 0,
-      responseRatePercent: responseRate,
-      convertedThisMonth: convertedThisMonth || 0
-    })
-  }
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-semibold">Loading your dashboard...</p>
-        </div>
-      </div>
-    )
-  }
-
+function ScoreBadge({ score }: any) {
+  let bg, color, label
+  if (score >= 9) { bg = "rgba(255,92,0,0.15)"; color = ORANGE; label = "VIP" }
+  else if (score >= 7) { bg = "rgba(59,130,246,0.15)"; color = BLUE; label = "Standard" }
+  else { bg = "rgba(255,255,255,0.08)"; color = "#666"; label = "Low" }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md border-b shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">FF</span>
-              </div>
-              <div>
-                <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">FitFlow</span>
-                <p className="text-xs text-gray-500">Dashboard</p>
-              </div>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-semibold text-gray-700">All Systems Active</span>
-              </div>
-              <Button variant="outline" onClick={() => router.push('/settings')} className="hover:bg-indigo-50">
-                ⚙️ Settings
-              </Button>
-              <Button variant="outline" onClick={handleLogout} className="hover:bg-red-50 hover:text-red-600 hover:border-red-300">
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Coach'}! 👋
-          </h1>
-          <p className="text-gray-600 text-lg">Here's what's happening with your Instagram automation today</p>
-        </div>
-
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-4xl">🚀</div>
-              <div className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">+{stats.weeklyGrowth}%</div>
-            </div>
-            <h3 className="text-white/80 text-sm font-semibold mb-1">Active Campaigns</h3>
-            <p className="text-5xl font-extrabold mb-2">{stats.campaigns}</p>
-            <p className="text-white/70 text-xs">Running smoothly</p>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-4xl">💬</div>
-              <div className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">Auto</div>
-            </div>
-            <h3 className="text-white/80 text-sm font-semibold mb-1">Messages Sent</h3>
-            <p className="text-5xl font-extrabold mb-2">{stats.dm_sent}</p>
-            <p className="text-white/70 text-xs">This month</p>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-pink-500 to-pink-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-4xl">📅</div>
-              <div className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">+{stats.conversionRate}%</div>
-            </div>
-            <h3 className="text-white/80 text-sm font-semibold mb-1">Calls Booked</h3>
-            <p className="text-5xl font-extrabold mb-2">{stats.bookings}</p>
-            <p className="text-white/70 text-xs">This month</p>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-orange-500 to-red-500 text-white border-0 shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-4xl">📈</div>
-              <div className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">AI</div>
-            </div>
-            <h3 className="text-white/80 text-sm font-semibold mb-1">Response Rate</h3>
-            <p className="text-5xl font-extrabold mb-2">{stats.responseRate}%</p>
-            <p className="text-white/70 text-xs">Above average</p>
-          </Card>
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="flex gap-2 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`px-6 py-3 font-semibold transition-all ${
-                activeTab === 'overview'
-                  ? 'border-b-2 border-indigo-600 text-indigo-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`px-6 py-3 font-semibold transition-all ${
-                activeTab === 'analytics'
-                  ? 'border-b-2 border-indigo-600 text-indigo-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Analytics
-            </button>
-          </div>
-        </div>
-
-        {/* Content based on active tab */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Quick Actions */}
-            <Card className="p-8 hover:shadow-2xl transition-all bg-white border-2 border-indigo-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-2xl">
-                  📝
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Message Templates</h2>
-                  <p className="text-gray-600 text-sm">Create AI-powered responses</p>
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Design custom message templates that our AI will use to engage with your followers automatically.
-              </p>
-              <Button 
-                onClick={() => router.push('/templates')}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-lg py-6"
-              >
-                Manage Templates →
-              </Button>
-            </Card>
-
-            <Card className="p-8 hover:shadow-2xl transition-all bg-white border-2 border-purple-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-2xl">
-                  🚀
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Campaigns</h2>
-                  <p className="text-gray-600 text-sm">Launch & track automations</p>
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Create targeted campaigns to automate your Instagram engagement and convert followers into clients.
-              </p>
-              <Button 
-                onClick={() => router.push('/campaigns')}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-lg py-6"
-              >
-                Manage Campaigns →
-              </Button>
-            </Card>
-
-            <Card className="p-8 hover:shadow-2xl transition-all bg-white border-2 border-pink-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-orange-500 rounded-xl flex items-center justify-center text-2xl">
-                  📅
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Post Scheduling</h2>
-                  <p className="text-gray-600 text-sm">Schedule content in advance</p>
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Plan and schedule Instagram posts ahead of time to maintain consistent engagement with your audience.
-              </p>
-              <Button 
-                onClick={() => router.push('/schedule')}
-                className="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-lg py-6"
-              >
-                Schedule Posts →
-              </Button>
-            </Card>
-
-            {/* Recent Leads */}
-            <Card className="p-8 bg-white border-2 border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold flex items-center gap-3">
-                  <span className="text-3xl">🔥</span>
-                  Leads à Traiter
-                </h3>
-                <Button 
-                  variant="outline" 
-                  onClick={() => router.push('/leads')}
-                  className="hover:bg-indigo-50"
-                >
-                  Voir tous →
-                </Button>
-              </div>
-              <RecentLeads userId={user?.id} />
-            </Card>
-
-            {/* Recent Activity */}
-            <Card className="p-8 lg:col-span-2 bg-white border-2 border-gray-100">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span className="text-3xl">⚡</span>
-                Recent Activity
-              </h3>
-              <div className="space-y-4">
-                {stats.dm_sent > 0 ? (
-                  <>
-                    <div className="flex items-center gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">✓</div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Campaign automation active</p>
-                        <p className="text-sm text-gray-600">System is monitoring comments and sending DMs automatically</p>
-                      </div>
-                      <span className="text-xs text-gray-500">Just now</span>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">💬</div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{stats.dm_sent} messages sent this month</p>
-                        <p className="text-sm text-gray-600">AI responses performing at {stats.responseRate}% effectiveness</p>
-                      </div>
-                      <span className="text-xs text-gray-500">Today</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🎯</div>
-                    <h4 className="text-xl font-bold mb-2 text-gray-900">Ready to start?</h4>
-                    <p className="text-gray-600 mb-6">Create your first campaign to begin automating your Instagram!</p>
-                    <Button 
-                      onClick={() => router.push('/campaigns')}
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-                    >
-                      Create First Campaign
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            {/* Performance Metrics */}
-            <Card className="p-8 bg-white">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span className="text-3xl">📊</span>
-                Performance Metrics
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl">
-                  <p className="text-sm font-semibold text-gray-600 mb-2">Conversion Rate</p>
-                  <p className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                    {stats.conversionRate}%
-                  </p>
-                  <p className="text-xs text-gray-500">Comments → Bookings</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                  <p className="text-sm font-semibold text-gray-600 mb-2">Engagement Rate</p>
-                  <p className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                    {stats.responseRate}%
-                  </p>
-                  <p className="text-xs text-gray-500">Follower interactions</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl">
-                  <p className="text-sm font-semibold text-gray-600 mb-2">Growth Rate</p>
-                  <p className="text-5xl font-extrabold bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent mb-2">
-                    +{stats.weeklyGrowth}%
-                  </p>
-                  <p className="text-xs text-gray-500">Week over week</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* AI Insights */}
-            <Card className="p-8 bg-gradient-to-br from-indigo-900 to-purple-900 text-white">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span className="text-3xl">🤖</span>
-                AI Insights & Recommendations
-              </h3>
-              <div className="space-y-4">
-                <div className="p-4 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">💡</span>
-                    <div>
-                      <p className="font-semibold mb-1">Peak Engagement Time</p>
-                      <p className="text-white/80 text-sm">Your followers are most active between 6-8 PM. Schedule posts during this window for maximum engagement.</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">🎯</span>
-                    <div>
-                      <p className="font-semibold mb-1">Template Performance</p>
-                      <p className="text-white/80 text-sm">Templates with personalized questions have 40% higher response rates. Consider adding more questions to your messages.</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">🚀</span>
-                    <div>
-                      <p className="font-semibold mb-1">Growth Opportunity</p>
-                      <p className="text-white/80 text-sm">You're 23% more likely to book clients when following up within 2 hours. Enable instant notifications for faster response times.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Monthly Summary */}
-            <Card className="p-8 bg-white">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span className="text-3xl">📈</span>
-                This Month's Summary
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Total Reach</p>
-                  <p className="text-3xl font-bold text-gray-900">{(stats.dm_sent * 8.5).toFixed(0)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Comments</p>
-                  <p className="text-3xl font-bold text-gray-900">{(stats.dm_sent * 1.2).toFixed(0)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">DMs Sent</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.dm_sent}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Bookings</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.bookings}</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        )}
-      </main>
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ background: bg, color, padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700 }}>{label}</span>
+      <span style={{ fontSize: 14, fontWeight: 800, color }}>{score}/10</span>
     </div>
   )
 }
 
-// Recent Leads Component
-function RecentLeads({ userId }: { userId: string | undefined }) {
-  const router = useRouter()
-  const [leads, setLeads] = useState<any[]>([])
+function StatusBadge({ status }: any) {
+  const map: any = {
+    dm_sent: { label: "DM envoyé", bg: "rgba(59,130,246,0.15)", color: BLUE },
+    converted: { label: "Converti ✓", bg: "rgba(0,210,106,0.15)", color: GREEN },
+    ignored: { label: "Ignoré", bg: "rgba(255,255,255,0.06)", color: "#555" },
+    pending: { label: "En attente", bg: "rgba(255,184,0,0.15)", color: YELLOW },
+  }
+  const s = map[status] || map.pending
+  return <span style={{ background: s.bg, color: s.color, padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{s.label}</span>
+}
+
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "12px 16px", fontSize: 13 }}>
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>{label}</div>
+      {payload.map((p: any, i: number) => (
+        <div key={i} style={{ color: p.color, marginTop: 2 }}>
+          {p.name}: <strong>{p.value}</strong>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default function FitFlowDashboard() {
+  const [activeTab, setActiveTab] = useState("overview")
+  const [leadFilter, setLeadFilter] = useState("all")
+  const [showInstagramOnboarding, setShowInstagramOnboarding] = useState(false)
+  const [coach, setCoach] = useState<any>(null)
+  const [realLeads, setRealLeads] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
   useEffect(() => {
-    if (userId) loadRecentLeads()
-  }, [userId])
+    checkInstagramConnection()
+    fetchRealData()
+  }, [])
 
-  const loadRecentLeads = async () => {
+  const fetchRealData = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: leadsData } = await supabase
         .from('leads')
         .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'pending')
-        .gte('score', 7)
         .order('created_at', { ascending: false })
-        .limit(5)
-
-      if (error) throw error
-      setLeads(data || [])
+        .limit(20)
+      
+      setRealLeads(leadsData || [])
+      setLoading(false)
     } catch (error) {
-      console.error('Error loading leads:', error)
-    } finally {
+      console.error('Error fetching leads:', error)
       setLoading(false)
     }
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 7) return 'bg-green-500'
-    if (score >= 4) return 'bg-yellow-500'
-    return 'bg-red-500'
+  const checkInstagramConnection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: coachData } = await supabase
+        .from('coaches')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      setCoach(coachData)
+
+      // Show Instagram onboarding if not connected yet
+      if (coachData && !coachData.instagram_username) {
+        // Check if user has dismissed the modal before
+        const dismissed = localStorage.getItem('instagram_onboarding_dismissed')
+        if (!dismissed) {
+          setTimeout(() => setShowInstagramOnboarding(true), 2000) // Show after 2 seconds
+        }
+      }
+    } catch (error) {
+      console.error('Error checking Instagram connection:', error)
+    }
   }
 
-  if (loading) {
-    return <div className="text-center py-8 text-gray-500">Chargement...</div>
+  const handleSkipInstagram = () => {
+    localStorage.setItem('instagram_onboarding_dismissed', 'true')
+    setShowInstagramOnboarding(false)
   }
 
-  if (leads.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">🎯</div>
-        <p className="text-gray-600">Aucun lead prioritaire pour le moment</p>
-      </div>
-    )
-  }
+  const filteredLeads = useMemo(() => {
+    if (leadFilter === "all") return realLeads
+    return realLeads.filter(l => {
+      if (!l.ai_score) return leadFilter === "low"
+      if (l.ai_score >= 9) return leadFilter === "vip"
+      if (l.ai_score >= 7) return leadFilter === "standard"
+      return leadFilter === "low"
+    })
+  }, [leadFilter, realLeads])
+
+  // Calculate REAL stats from REAL data
+  const totalLeads = realLeads.length
+  const avgScore = totalLeads > 0 
+    ? (realLeads.reduce((sum, lead) => sum + (lead.ai_score || 0), 0) / totalLeads).toFixed(1) 
+    : '0'
+  const dmsSent = realLeads.filter(l => l.status === 'dm_sent' || l.status === 'converted' || l.status === 'replied').length
+  const conversions = realLeads.filter(l => l.status === 'converted').length
+  const revenue = realLeads.reduce((sum, lead) => sum + (lead.revenue || 0), 0)
+
+  const tabs = [
+    { id: "overview", label: "Vue d'ensemble", icon: "📊" },
+    { id: "leads", label: "Leads", icon: "👥" },
+    { id: "autodm", label: "Auto-DM", icon: "🤖" },
+    { id: "content", label: "Content AI", icon: "🎨" },
+    { id: "revenue", label: "Revenue", icon: "💰" },
+    { id: "video", label: "Video AI", icon: "🎬" },
+  ]
 
   return (
-    <div className="space-y-3">
-      {leads.map((lead) => (
-        <div
-          key={lead.id}
-          onClick={() => router.push(`/leads/${lead.id}`)}
-          className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer border-2 border-gray-200 hover:border-indigo-300"
-        >
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 ${getScoreColor(lead.score)} rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg`}>
-              <span className="text-white font-bold text-lg">{lead.score}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-gray-900">@{lead.instagram_username}</h4>
-              <p className="text-sm text-gray-600 truncate">{lead.comment_text}</p>
-            </div>
-            <div className="text-gray-400">→</div>
+    <>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
+      
+      {showInstagramOnboarding && (
+        <InstagramOnboarding 
+          onClose={() => setShowInstagramOnboarding(false)}
+          onSkip={handleSkipInstagram}
+        />
+      )}
+      
+      <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fafafa", fontFamily: "'DM Sans', -apple-system, sans-serif", width: "100%", maxWidth: "100vw", overflowX: "hidden" }}>
+      <div style={{ padding: "16px clamp(16px, 4vw, 32px)", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <Link href="/" style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5, textDecoration: "none", color: "inherit", cursor: "pointer", transition: "opacity 0.2s" }} onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.opacity = "0.7"} onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.opacity = "1"}>
+            Fit<span style={{ color: ORANGE }}>Flow</span>
+          </Link>
+          <div style={{ position: "relative", display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4, backdropFilter: "blur(10px)" }}>
+            {tabs.map((tab, index) => (
+              <motion.button 
+                key={tab.id} 
+                onClick={() => {
+                  if (tab.locked) {
+                    if (confirm(`🔒 Cette feature est réservée au plan ${tab.requiredPlan?.toUpperCase()}.\n\nRediriger vers la page pricing ?`)) {
+                      window.location.href = '/pricing'
+                    }
+                  } else {
+                    setActiveTab(tab.id)
+                  }
+                }}
+                whileHover={{ scale: tab.locked ? 1 : 1.05 }}
+                whileTap={{ scale: tab.locked ? 1 : 0.95 }}
+                style={{ 
+                  position: "relative",
+                  padding: "10px 16px", 
+                  borderRadius: 10, 
+                  border: "none", 
+                  cursor: tab.locked ? "not-allowed" : "pointer", 
+                  fontSize: 13, 
+                  fontWeight: 600, 
+                  background: "transparent",
+                  color: activeTab === tab.id ? "#fff" : tab.locked ? "#555" : "#888", 
+                  transition: "color 0.3s", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: 6,
+                  opacity: tab.locked ? 0.5 : 1,
+                  zIndex: activeTab === tab.id ? 2 : 1
+                }}>
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "linear-gradient(135deg, rgba(255,92,0,0.2), rgba(255,138,61,0.15))",
+                      borderRadius: 10,
+                      border: "1px solid rgba(255,92,0,0.3)",
+                      boxShadow: "0 0 20px rgba(255,92,0,0.2)"
+                    }}
+                  />
+                )}
+                <motion.span 
+                  animate={{ rotate: activeTab === tab.id ? [0, -10, 10, 0] : 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ fontSize: 14, position: "relative", zIndex: 3 }}
+                >
+                  {tab.icon}
+                </motion.span>
+                <span style={{ position: "relative", zIndex: 3 }}>{tab.label}</span>
+                {tab.locked && <span style={{ fontSize: 12, position: "relative", zIndex: 3 }}>🔒</span>}
+              </motion.button>
+            ))}
           </div>
         </div>
-      ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {coach && !coach?.instagram_username ? (
+            <button
+              onClick={async () => {
+                const supabase = createClient()
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: 'facebook',
+                  options: {
+                    redirectTo: `${window.location.origin}/auth/callback?redirectTo=/dashboard`,
+                    scopes: 'email,public_profile,instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_show_list,pages_read_engagement'
+                  }
+                })
+                if (error) console.error('OAuth error:', error)
+              }}
+              style={{
+                background: "linear-gradient(135deg, #E1306C, #FD1D1D, #F77737)",
+                border: "none",
+                color: "white",
+                padding: "10px 20px",
+                borderRadius: 12,
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: "0 4px 16px rgba(225, 48, 108, 0.3)",
+                animation: "pulse 2s infinite"
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              Connecter Instagram
+            </button>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,210,106,0.1)", border: "1px solid rgba(0,210,106,0.2)", padding: "8px 16px", borderRadius: 12, fontSize: 13, fontWeight: 600, color: GREEN }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              @{coach?.instagram_username}
+            </div>
+          )}
+          <ExportButton type="leads" />
+          <button
+            onClick={() => window.location.href = '/how-it-works'}
+            style={{
+              background: "rgba(59,130,246,0.1)",
+              border: "1px solid rgba(59,130,246,0.2)",
+              color: BLUE,
+              padding: "8px 16px",
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+            }}
+          >
+            ❓ Guide
+          </button>
+          <NotificationCenter />
+          <UserMenu />
+        </div>
+      </div>
+
+      <div style={{ padding: "clamp(16px, 4vw, 32px)", maxWidth: "1400px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
+        {activeTab === "overview" && <OverviewTab />}
+
+        {activeTab === "leads" && (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5 }}>Tous les leads</h2>
+              <div style={{ display: "flex", gap: 6 }}>
+                {[{ id: "all", label: "Tous" }, { id: "vip", label: "VIP" }, { id: "standard", label: "Standard" }, { id: "low", label: "Low" }].map(f => (
+                  <button key={f.id} onClick={() => setLeadFilter(f.id)} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid", borderColor: leadFilter === f.id ? ORANGE : "rgba(255,255,255,0.1)", background: leadFilter === f.id ? "rgba(255,92,0,0.15)" : "transparent", color: leadFilter === f.id ? ORANGE : "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>{f.label}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "14px 24px", fontSize: 12, fontWeight: 600, color: "#555", textTransform: "uppercase", letterSpacing: 1, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <span>Username</span><span>Commentaire</span><span>Score</span><span>Post</span><span>Status</span><span style={{ textAlign: "right" }}>Temps</span>
+              </div>
+              {filteredLeads.map(lead => (
+                <div key={lead.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 100px 100px 100px 90px", padding: "16px 24px", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.04)", transition: "background 0.2s", cursor: "pointer" }}>
+                  <span style={{ fontWeight: 700, fontSize: 14 }}>{lead.username}</span>
+                  <span style={{ fontSize: 13, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lead.comment_text || lead.comment || '—'}</span>
+                  <ScoreBadge score={lead.ai_score || 0} />
+                  <span style={{ fontSize: 12, color: "#666" }}>{lead.post_url?.slice(0, 12) || lead.post_id?.slice(0, 12) || '—'}...</span>
+                  <StatusBadge status={lead.status} />
+                  <span style={{ fontSize: 12, color: "#555", textAlign: "right" }}>{new Date(lead.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {activeTab === "autodm" && <AutoDMTab />}
+
+        {activeTab === "content" && <ContentAnalyzerTab />}
+
+        {activeTab === "revenue" && <RevenueTab />}
+
+        {activeTab === "video" && <VideoAnalyzerTab />}
+      </div>
     </div>
+    </>
   )
 }

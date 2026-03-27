@@ -1,490 +1,462 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 
-const content = {
-  fr: {
-    nav: {
-      login: 'Connexion',
-      signup: 'Essai gratuit',
-      language: 'FR',
-    },
-    hero: {
-      headline: 'Le studio digital des coachs fitness qui veulent des clients qualifiés chaque semaine.',
-      highlight: 'clients qualifiés',
-      subhead:
-        "FitFlow automatise vos conversations Instagram pour transformer les commentaires en rendez-vous et en ventes. Conçu pour les coachs fitness premium.",
-      primaryCta: 'Commencer gratuitement',
-      secondaryCta: 'Voir la démo',
-      trust: 'Essai 14 jours gratuit • Sans carte bancaire • Mise en place en 10 minutes',
-      badge: 'N°1 Automation Instagram pour coachs fitness',
-    },
-    stats: [
-      { value: '7.5x', label: 'Plus de conversions Instagram' },
-      { value: '10h', label: 'Gagnées chaque semaine' },
-      { value: '97%', label: 'Coach satisfaction' },
-    ],
-    logos: {
-      title: 'Adopté par les coachs et studios les plus exigeants',
-      items: ['PulseLab', 'HeroFit', 'Studio Forme', 'Athletica', 'Core+'],
-    },
-    features: {
-      title: 'Un design pensé pour convertir',
-      subtitle: 'Chaque interaction devient une opportunité de coaching premium.',
-      items: [
-        {
-          title: 'Réponses instantanées & personnalisées',
-          description:
-            "L'IA FitFlow comprend le contexte et répond avec votre voix pour nourrir la relation et guider vers la prise de rendez-vous.",
-        },
-        {
-          title: 'Scoring intelligent des leads',
-          description:
-            'Priorisez automatiquement les prospects chauds et déclenchez des séquences adaptées à leur niveau de motivation.',
-        },
-        {
-          title: 'Calendrier rempli sans effort',
-          description:
-            'Synchronisez votre agenda et laissez FitFlow proposer les créneaux parfaits pour vos séances et bilans.',
-        },
-      ],
-    },
-    workflow: {
-      title: 'Le parcours FitFlow',
-      steps: [
-        {
-          title: 'Connectez votre Instagram',
-          description: "Connexion sécurisée via l'API Meta, sans risque pour votre compte.",
-        },
-        {
-          title: 'Définissez vos offres',
-          description: "Choisissez vos messages, offres et scripts pour chaque type d'interaction.",
-        },
-        {
-          title: 'Laissez FitFlow closer',
-          description: 'L’automatisation s’occupe des relances, de la qualification et du booking.',
-        },
-      ],
-    },
-    testimonials: {
-      title: 'Ils ont transformé leur acquisition',
-      items: [
-        {
-          quote:
-            'En 3 semaines, j’ai doublé mes appels de découverte. Le style des messages est parfait.',
-          name: 'Chloé Martin',
-          role: 'Coach fitness & mobilité',
-        },
-        {
-          quote: 'FitFlow a remplacé 2 heures de DMs par jour. Je ne reviendrai jamais en arrière.',
-          name: 'Nicolas Rey',
-          role: 'Préparateur physique',
-        },
-        {
-          quote:
-            'La qualif auto me permet de prendre seulement les clients premium. Mon chiffre a explosé.',
-          name: 'Sarah Gomes',
-          role: 'Studio manager',
-        },
-      ],
-    },
-    pricing: {
-      title: 'Un plan simple pour coachs ambitieux',
-      subtitle: 'Tout ce dont vous avez besoin pour convertir Instagram en revenus récurrents.',
-      price: '€189',
-      period: '/mois',
-      cta: 'Lancer mon essai',
-      includes: [
-        'Automatisations illimitées',
-        'Scoring IA + segmentation',
-        'Synchronisation Calendly/Google',
-        'Tableaux de bord conversions',
-        'Support prioritaire coaches',
-      ],
-    },
-    finalCta: {
-      title: 'Prêt à remplir votre agenda ?',
-      subtitle: 'Rejoignez les coachs fitness qui transforment Instagram en machine à clients.',
-      button: 'Démarrer FitFlow',
-    },
-    footer: {
-      rights: '© 2026 FitFlow. Tous droits réservés.',
-      privacy: 'Politique de confidentialité',
-      terms: "Conditions d'utilisation",
-    },
-  },
-  en: {
-    nav: {
-      login: 'Sign in',
-      signup: 'Start free',
-      language: 'EN',
-    },
-    hero: {
-      headline: 'The growth studio for fitness coaches who want qualified clients every week.',
-      highlight: 'qualified clients',
-      subhead:
-        'FitFlow automates Instagram conversations to turn comments into booked sessions and revenue. Built for premium fitness coaches.',
-      primaryCta: 'Start free',
-      secondaryCta: 'Watch demo',
-      trust: '14-day free trial • No credit card • Live in 10 minutes',
-      badge: '#1 Instagram Automation for Fitness Coaches',
-    },
-    stats: [
-      { value: '7.5x', label: 'More Instagram conversions' },
-      { value: '10h', label: 'Saved every week' },
-      { value: '97%', label: 'Coach satisfaction' },
-    ],
-    logos: {
-      title: 'Trusted by elite coaches & studios',
-      items: ['PulseLab', 'HeroFit', 'Studio Forme', 'Athletica', 'Core+'],
-    },
-    features: {
-      title: 'A design built to convert',
-      subtitle: 'Every interaction becomes a premium coaching opportunity.',
-      items: [
-        {
-          title: 'Instant, personalized replies',
-          description:
-            'FitFlow AI understands context and responds in your voice to nurture trust and drive booking.',
-        },
-        {
-          title: 'Smart lead scoring',
-          description: 'Automatically prioritize hot prospects and trigger sequences based on motivation.',
-        },
-        {
-          title: 'Calendar filled effortlessly',
-          description: 'Sync your schedule and let FitFlow propose the perfect session times.',
-        },
-      ],
-    },
-    workflow: {
-      title: 'The FitFlow journey',
-      steps: [
-        {
-          title: 'Connect Instagram',
-          description: 'Secure Meta API connection without risking your account.',
-        },
-        {
-          title: 'Define your offers',
-          description: 'Choose messages, offers, and scripts for every interaction type.',
-        },
-        {
-          title: 'Let FitFlow close',
-          description: 'Automation handles follow-ups, qualification, and booking.',
-        },
-      ],
-    },
-    testimonials: {
-      title: 'They transformed acquisition',
-      items: [
-        {
-          quote:
-            'In 3 weeks I doubled discovery calls. The tone of the messages is exactly right.',
-          name: 'Chloé Martin',
-          role: 'Fitness & mobility coach',
-        },
-        {
-          quote: 'FitFlow replaced 2 hours of DMs per day. I will never go back.',
-          name: 'Nicolas Rey',
-          role: 'Performance coach',
-        },
-        {
-          quote:
-            'Auto qualification lets me focus on premium clients only. Revenue skyrocketed.',
-          name: 'Sarah Gomes',
-          role: 'Studio manager',
-        },
-      ],
-    },
-    pricing: {
-      title: 'One simple plan for ambitious coaches',
-      subtitle: 'Everything you need to convert Instagram into recurring revenue.',
-      price: '€189',
-      period: '/month',
-      cta: 'Start my trial',
-      includes: [
-        'Unlimited automations',
-        'AI scoring + segmentation',
-        'Calendly/Google sync',
-        'Conversion dashboards',
-        'Priority coach support',
-      ],
-    },
-    finalCta: {
-      title: 'Ready to fill your calendar?',
-      subtitle: 'Join fitness coaches turning Instagram into a client machine.',
-      button: 'Launch FitFlow',
-    },
-    footer: {
-      rights: '© 2026 FitFlow. All rights reserved.',
-      privacy: 'Privacy Policy',
-      terms: 'Terms of Service',
-    },
-  },
-}
+const ORANGE = "#FF5C00"
+const GREEN = "#00D26A"
+const BLUE = "#3B82F6"
 
-export default function LandingPage() {
-  const [language, setLanguage] = useState<'fr' | 'en'>('fr')
+const features = [
+  { icon: "🤖", title: "IA de Scoring", desc: "Chaque commentaire est analysé et noté de 1 à 10 selon l'intention d'achat réelle." },
+  { icon: "⚡", title: "DM en 30 Secondes", desc: "Les prospects chauds reçoivent un message personnalisé instantanément." },
+  { icon: "🎯", title: "Leads Qualifiés", desc: "Fini le tri manuel. L'IA priorise les prospects les plus susceptibles de convertir." },
+  { icon: "📊", title: "Dashboard Temps Réel", desc: "Suivez vos leads, conversions et revenus dans un tableau de bord clair." },
+  { icon: "💬", title: "Messages Adaptatifs", desc: "Chaque DM est personnalisé selon le profil et le commentaire du prospect." },
+  { icon: "🔒", title: "100% Conforme", desc: "API officielle Instagram. Votre compte est protégé, aucun risque de ban." },
+]
+
+const steps = [
+  { num: "01", title: "Un prospect commente", desc: "Quelqu'un commente votre post Instagram avec une intention d'achat.", visual: "💬" },
+  { num: "02", title: "L'IA analyse et score", desc: "En moins de 5 secondes, le commentaire est scoré de 1 à 10 par notre IA.", visual: "🧠" },
+  { num: "03", title: "DM personnalisé envoyé", desc: "Si le score est ≥ 7, un DM sur-mesure est envoyé automatiquement.", visual: "🚀" },
+]
+
+const comparisons = [
+  { label: "Temps de réponse", before: "2-24h", after: "30 sec", gain: "×48" },
+  { label: "Qualification", before: "Au feeling", after: "Score IA 1-10", gain: "+40%" },
+  { label: "Disponibilité", before: "8h/jour", after: "24/7", gain: "×3" },
+  { label: "Temps/semaine", before: "10-15h", after: "30 min", gain: "-95%" },
+]
+
+const faqs = [
+  { q: "Est-ce conforme aux règles Instagram ?", a: "Oui. FitFlow utilise uniquement l'API officielle approuvée par Meta. Votre compte est 100% sécurisé." },
+  { q: "Combien de temps avant les premiers résultats ?", a: "La plupart des utilisateurs génèrent leurs premiers leads qualifiés en 24-48h. Les premiers clients payants sous 7-10 jours." },
+  { q: "Dois-je avoir des compétences techniques ?", a: "Zéro. Notre setup guidé prend 10 minutes. Si vous savez poster sur Instagram, vous savez utiliser FitFlow." },
+  { q: "L'essai est-il vraiment gratuit ?", a: "Oui ! 14 jours complets, toutes les fonctionnalités, aucune carte bancaire requise." },
+  { q: "Combien de temps dois-je y consacrer ?", a: "5-10 minutes par jour maximum pour vérifier vos leads. Tout le reste est automatisé." },
+]
+
+const plans = [
+  { name: "Starter", price: "29", features: ["50 leads/mois", "Score IA basique", "5 Auto-DMs/jour", "Dashboard"], cta: "Commencer", popular: false, href: "/signup" },
+  { name: "Pro", price: "47", features: ["Leads illimités", "Score IA avancé", "50 Auto-DMs/jour", "Content AI", "Templates personnalisés", "Support prioritaire"], cta: "Essai Gratuit 14j", popular: true, href: "/signup" },
+  { name: "Elite", price: "97", features: ["Tout le plan Pro", "100 Auto-DMs/jour", "Analytics avancés", "Account manager dédié", "Setup personnalisé"], cta: "Nous contacter", popular: false, href: "/contact" },
+]
+
+export default function FitFlowLanding() {
+  const [scrolled, setScrolled] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
-    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('fitflow-lang') : null
-    if (stored === 'fr' || stored === 'en') {
-      setLanguage(stored)
-    }
+    const handleScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('fitflow-lang', language)
+    if (count < 30000) {
+      const timer = setTimeout(() => setCount((c) => Math.min(c + 600, 30000)), 20)
+      return () => clearTimeout(timer)
     }
-  }, [language])
-
-  const copy = useMemo(() => content[language], [language])
+  }, [count])
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-950 font-bold">
-              F
-            </div>
-            <span className="text-lg font-semibold tracking-tight">FitFlow</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              className="rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80 hover:text-white"
-              onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
-            >
-              {copy.nav.language}
-            </button>
-            <Link href="/login">
-              <Button variant="ghost" className="text-white hover:text-white">
-                {copy.nav.login}
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-white text-slate-950 hover:bg-white/90">{copy.nav.signup}</Button>
-            </Link>
-          </div>
+    <div style={{ minHeight: "100vh", background: "#050508", color: "#fafafa", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", overflowX: "hidden" }}>
+
+      {/* HEADER */}
+      <header style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        padding: "0 40px", height: 64,
+        background: scrolled ? "rgba(5,5,8,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(20px)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        transition: "all 0.3s"
+      }}>
+        <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>
+          Fit<span style={{ color: ORANGE }}>Flow</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          <a href="#features" style={{ color: "#999", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>Fonctionnalités</a>
+          <a href="#pricing" style={{ color: "#999", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>Tarifs</a>
+          <a href="#faq" style={{ color: "#999", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>FAQ</a>
+          <Link href="/login" style={{ color: "#ccc", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>Connexion</Link>
+          <Link href="/signup" style={{
+            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+            color: "white", padding: "10px 24px", borderRadius: 50,
+            fontSize: 14, fontWeight: 700, textDecoration: "none",
+            boxShadow: `0 4px 20px ${ORANGE}40`
+          }}>
+            Essai Gratuit →
+          </Link>
         </div>
       </header>
 
-      <main>
-        <section className="hero-surface">
-          <div className="container mx-auto grid items-center gap-12 px-4 py-20 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-6">
-              <span className="badge-premium">{copy.hero.badge}</span>
-              <h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl">
-                {copy.hero.headline.split(copy.hero.highlight)[0]}
-                <span className="text-white/90 underline decoration-emerald-400/80 decoration-4 underline-offset-4">
-                  {copy.hero.highlight}
-                </span>
-                {copy.hero.headline.split(copy.hero.highlight)[1]}
-              </h1>
-              <p className="text-lg text-white/70 md:text-xl">{copy.hero.subhead}</p>
-              <div className="flex flex-wrap gap-4">
-                <Button className="bg-emerald-400 text-slate-950 hover:bg-emerald-300" size="lg">
-                  {copy.hero.primaryCta}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                  size="lg"
-                >
-                  {copy.hero.secondaryCta}
-                </Button>
-              </div>
-              <p className="text-sm text-white/60">{copy.hero.trust}</p>
+      {/* HERO */}
+      <section style={{ paddingTop: 140, paddingBottom: 100, textAlign: "center", position: "relative" }}>
+        <div style={{
+          position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)",
+          width: 700, height: 700,
+          background: `radial-gradient(circle, ${ORANGE}12 0%, transparent 70%)`,
+          pointerEvents: "none"
+        }} />
+        <div style={{ position: "relative", maxWidth: 800, margin: "0 auto", padding: "0 24px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "rgba(255,92,0,0.08)", border: "1px solid rgba(255,92,0,0.2)",
+            padding: "8px 20px", borderRadius: 50, fontSize: 13, fontWeight: 600,
+            color: ORANGE, marginBottom: 32
+          }}>
+            <span style={{ width: 6, height: 6, background: GREEN, borderRadius: "50%", display: "inline-block" }} />
+            Bêta Privée — Places limitées
+          </div>
+          <h1 style={{ fontSize: 60, fontWeight: 900, letterSpacing: -2, lineHeight: 1.08, marginBottom: 24 }}>
+            Transformez Vos<br />Commentaires Instagram en{" "}
+            <span style={{
+              background: `linear-gradient(135deg, ${ORANGE}, #FFB347)`,
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+            }}>
+              Clients Payants
+            </span>
+          </h1>
+          <p style={{ fontSize: 20, color: "#999", lineHeight: 1.6, marginBottom: 12, maxWidth: 600, margin: "0 auto 12px" }}>
+            L&apos;IA détecte vos prospects chauds et leur envoie un DM personnalisé <strong style={{ color: "white" }}>en 30 secondes</strong>. Sans toucher votre téléphone.
+          </p>
+          <p style={{ fontSize: 15, color: "#555", marginBottom: 40 }}>
+            Sans code. Sans compétence technique. Setup en 10 minutes.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+            <Link href="/signup" style={{
+              background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+              color: "white", padding: "18px 48px", borderRadius: 16,
+              fontSize: 17, fontWeight: 700, textDecoration: "none",
+              display: "inline-flex", alignItems: "center", gap: 10,
+              boxShadow: `0 16px 48px ${ORANGE}35`
+            }}>
+              Démarrer Gratuitement (14 jours)
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+            <div style={{ display: "flex", gap: 24, fontSize: 13, color: "#666" }}>
+              <span>✓ Aucune carte bancaire</span>
+              <span>✓ Setup en 10 min</span>
+              <span>✓ Support 7j/7</span>
             </div>
-            <div className="relative">
-              <div className="absolute -inset-6 rounded-[36px] bg-emerald-400/20 blur-3xl" />
-              <Card className="glass-card relative overflow-hidden border-white/10 bg-white/5">
-                <div className="p-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs uppercase tracking-[0.3em] text-emerald-300">
-                      FitFlow Studio
-                    </span>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">Live</span>
-                  </div>
-                  <div className="mt-6">
-                    <Image
-                      src="/fitflow-hero.svg"
-                      alt="FitFlow premium automation"
-                      width={520}
-                      height={420}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="mt-6 grid grid-cols-3 gap-3 text-center text-xs text-white/70">
-                    {copy.stats.map((item) => (
-                      <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                        <p className="text-lg font-semibold text-white">{item.value}</p>
-                        <p>{item.label}</p>
-                      </div>
-                    ))}
-                  </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 72, maxWidth: 700, margin: "72px auto 0" }}>
+            {[
+              { val: "3-5", label: "Nouveaux clients/semaine" },
+              { val: "30s", label: "Temps de réponse" },
+              { val: "85%", label: "Taux de réponse" },
+              { val: "24/7", label: "Automatisation active" },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 16, padding: "24px 16px", textAlign: "center"
+              }}>
+                <div style={{ fontSize: 28, fontWeight: 800, color: ORANGE, marginBottom: 4 }}>{s.val}</div>
+                <div style={{ fontSize: 12, color: "#777", lineHeight: 1.4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PAIN POINT - 30,000€ */}
+      <section style={{ padding: "80px 24px", position: "relative" }}>
+        <div style={{
+          maxWidth: 900, margin: "0 auto", textAlign: "center",
+          background: "linear-gradient(180deg, rgba(255,92,0,0.06) 0%, rgba(255,92,0,0) 100%)",
+          borderRadius: 32, padding: "64px 48px",
+          border: "1px solid rgba(255,92,0,0.1)"
+        }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16 }}>
+            Ce que ça vous coûte de ne rien faire
+          </p>
+          <div style={{ fontSize: 80, fontWeight: 900, color: ORANGE, letterSpacing: -3, marginBottom: 8 }}>
+            {count.toLocaleString()} €
+          </div>
+          <p style={{ fontSize: 18, color: "#888", marginBottom: 32 }}>de revenus perdus chaque année</p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            {["💬 Commentaires non lus", "⏰ 2h/jour gaspillées", "👻 Leads fantômes"].map((t, i) => (
+              <span key={i} style={{
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                padding: "10px 20px", borderRadius: 50, fontSize: 14, fontWeight: 500, color: "#ccc"
+              }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Comment ça marche</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>3 Étapes. Zéro Effort.</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+            {steps.map((step, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 20, padding: 32, position: "relative", overflow: "hidden"
+              }}>
+                <div style={{
+                  position: "absolute", top: -10, right: -10, fontSize: 100, fontWeight: 900,
+                  color: "rgba(255,92,0,0.04)", lineHeight: 1
+                }}>{step.num}</div>
+                <div style={{ fontSize: 48, marginBottom: 20 }}>{step.visual}</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Étape {step.num}</div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10, color: "white" }}>{step.title}</h3>
+                <p style={{ fontSize: 14, color: "#888", lineHeight: 1.7 }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DASHBOARD PREVIEW */}
+      <section style={{ padding: "80px 24px", background: "rgba(255,255,255,0.01)" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Aperçu du Dashboard</p>
+          <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1, marginBottom: 48 }}>Tout sous contrôle</h2>
+          <div style={{
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 20, padding: 32, textAlign: "left"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+              <span style={{ fontWeight: 800, fontSize: 18 }}>Fit<span style={{ color: ORANGE }}>Flow</span></span>
+              {["Vue d'ensemble", "Leads", "Auto-DM", "Content AI"].map((t, i) => (
+                <span key={i} style={{
+                  padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  background: i === 0 ? "rgba(255,92,0,0.15)" : "transparent",
+                  color: i === 0 ? ORANGE : "#666"
+                }}>{t}</span>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+              {[
+                { label: "Leads", val: "—", color: ORANGE },
+                { label: "Score moyen", val: "—", color: BLUE },
+                { label: "DMs envoyés", val: "—", color: "#fff" },
+                { label: "Conversions", val: "—", color: GREEN },
+              ].map((c, i) => (
+                <div key={i} style={{
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 12, padding: 16
+                }}>
+                  <div style={{ fontSize: 11, color: "#666", marginBottom: 8 }}>{c.label}</div>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: c.color }}>{c.val}</div>
                 </div>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-slate-950 py-12">
-          <div className="container mx-auto px-4">
-            <p className="text-center text-sm uppercase tracking-[0.4em] text-white/40">
-              {copy.logos.title}
-            </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-white/70">
-              {copy.logos.items.map((logo) => (
-                <span
-                  key={logo}
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm"
-                >
-                  {logo}
-                </span>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="section-surface">
-          <div className="container mx-auto px-4 py-20">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">FitFlow</p>
-              <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">{copy.features.title}</h2>
-              <p className="mt-4 text-white/70">{copy.features.subtitle}</p>
-            </div>
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              {copy.features.items.map((item) => (
-                <Card key={item.title} className="glass-card border-white/10 bg-white/5 p-6">
-                  <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                  <p className="mt-3 text-sm text-white/70">{item.description}</p>
-                </Card>
+            <div style={{
+              background: "rgba(255,255,255,0.02)", borderRadius: 12, height: 140,
+              display: "flex", alignItems: "flex-end", padding: "16px 16px 0", gap: 8
+            }}>
+              {[35, 52, 28, 65, 44, 78, 58, 90, 72, 85, 95, 68].map((h, i) => (
+                <div key={i} style={{
+                  flex: 1, height: `${h}%`, borderRadius: "4px 4px 0 0",
+                  background: `linear-gradient(180deg, ${ORANGE}, ${ORANGE}30)`
+                }} />
               ))}
             </div>
+            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#555" }}>
+              Aperçu — Les données réelles apparaissent dans votre dashboard
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="bg-slate-950">
-          <div className="container mx-auto grid gap-10 px-4 py-20 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8">
-              <p className="text-sm uppercase tracking-[0.3em] text-white/50">Automation flow</p>
-              <h3 className="mt-4 text-3xl font-semibold text-white">{copy.workflow.title}</h3>
-              <div className="mt-6 space-y-5">
-                {copy.workflow.steps.map((step, index) => (
-                  <div key={step.title} className="flex gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400 text-slate-950 font-semibold">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-white">{step.title}</h4>
-                      <p className="text-sm text-white/70">{step.description}</p>
-                    </div>
-                  </div>
-                ))}
+      {/* FEATURES */}
+      <section id="features" style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Fonctionnalités</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Tout Ce Dont Vous Avez Besoin</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+            {features.map((f, i) => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 20, padding: 32
+              }}>
+                <div style={{
+                  width: 52, height: 52, borderRadius: 14,
+                  background: "rgba(255,92,0,0.08)", display: "flex",
+                  alignItems: "center", justifyContent: "center", fontSize: 26, marginBottom: 20
+                }}>{f.icon}</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: "#888", lineHeight: 1.7 }}>{f.desc}</p>
               </div>
-            </div>
-            <div className="grid gap-6">
-              <Card className="glass-card border-white/10 bg-white/5 p-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-emerald-300">Live playbook</p>
-                <h4 className="mt-3 text-2xl font-semibold text-white">
-                  Scripts premium, DM automation, et dashboards en temps réel.
-                </h4>
-                <p className="mt-3 text-sm text-white/70">
-                  Ajustez vos messages, visualisez vos conversions et pilotez vos campagnes comme un studio haut de
-                  gamme.
-                </p>
-              </Card>
-              <Card className="glass-card border-white/10 bg-white/5 p-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-emerald-300">Coach insights</p>
-                <h4 className="mt-3 text-2xl font-semibold text-white">Lead scoring, KPI & relances automatiques.</h4>
-                <p className="mt-3 text-sm text-white/70">
-                  L’intelligence FitFlow sélectionne vos prospects prêts et alimente votre pipeline.
-                </p>
-              </Card>
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="section-surface">
-          <div className="container mx-auto px-4 py-20">
-            <div className="flex flex-col items-center justify-between gap-6 text-center lg:flex-row lg:text-left">
-              <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Reviews</p>
-                <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">{copy.testimonials.title}</h2>
+      {/* COMPARISON */}
+      <section style={{ padding: "80px 24px", background: "rgba(255,255,255,0.01)" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Comparaison</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Avant vs Après FitFlow</h2>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, overflow: "hidden" }}>
+            <div style={{
+              display: "grid", gridTemplateColumns: "2fr 1fr 1fr 80px",
+              padding: "16px 28px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.02)"
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 1 }}></span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>Sans</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: ORANGE, textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>FitFlow</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: GREEN, textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>Gain</span>
+            </div>
+            {comparisons.map((c, i) => (
+              <div key={i} style={{
+                display: "grid", gridTemplateColumns: "2fr 1fr 1fr 80px",
+                padding: "20px 28px", borderBottom: i < comparisons.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none"
+              }}>
+                <span style={{ fontSize: 15, fontWeight: 600 }}>{c.label}</span>
+                <span style={{ fontSize: 14, color: "#555", textAlign: "center" }}>{c.before}</span>
+                <span style={{ fontSize: 14, color: ORANGE, fontWeight: 700, textAlign: "center" }}>{c.after}</span>
+                <span style={{ fontSize: 13, color: GREEN, fontWeight: 800, textAlign: "center", background: "rgba(0,210,106,0.08)", borderRadius: 20, padding: "4px 0" }}>{c.gain}</span>
               </div>
-              <Button className="bg-white text-slate-950 hover:bg-white/90">{copy.hero.secondaryCta}</Button>
-            </div>
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              {copy.testimonials.items.map((testimonial) => (
-                <Card key={testimonial.name} className="glass-card border-white/10 bg-white/5 p-6">
-                  <p className="text-base text-white/80">“{testimonial.quote}”</p>
-                  <p className="mt-6 text-sm font-semibold text-white">{testimonial.name}</p>
-                  <p className="text-xs text-white/50">{testimonial.role}</p>
-                </Card>
-              ))}
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="bg-slate-950">
-          <div className="container mx-auto px-4 py-20">
-            <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-emerald-400/20 via-white/5 to-transparent p-8">
-                <h2 className="text-3xl font-semibold text-white md:text-4xl">{copy.pricing.title}</h2>
-                <p className="mt-4 text-white/70">{copy.pricing.subtitle}</p>
-                <div className="mt-6 flex items-end gap-3">
-                  <span className="text-5xl font-semibold text-white">{copy.pricing.price}</span>
-                  <span className="text-sm text-white/60">{copy.pricing.period}</span>
+      {/* PRICING */}
+      <section id="pricing" style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Tarifs</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Simple et Transparent</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, alignItems: "start" }}>
+            {plans.map((plan, i) => (
+              <div key={i} style={{
+                background: plan.popular ? "rgba(255,92,0,0.04)" : "rgba(255,255,255,0.02)",
+                border: `1px solid ${plan.popular ? "rgba(255,92,0,0.3)" : "rgba(255,255,255,0.06)"}`,
+                borderRadius: 20, padding: 36, position: "relative",
+                transform: plan.popular ? "scale(1.03)" : "none"
+              }}>
+                {plan.popular && (
+                  <div style={{
+                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
+                    background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+                    color: "white", padding: "5px 16px", borderRadius: 50,
+                    fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase"
+                  }}>Populaire</div>
+                )}
+                <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{plan.name}</h3>
+                <div style={{ marginBottom: 24 }}>
+                  <span style={{ fontSize: 48, fontWeight: 900, color: plan.popular ? ORANGE : "white" }}>{plan.price}€</span>
+                  <span style={{ fontSize: 14, color: "#666" }}>/mois</span>
                 </div>
-                <Button className="mt-6 bg-emerald-400 text-slate-950 hover:bg-emerald-300" size="lg">
-                  {copy.pricing.cta}
-                </Button>
-              </div>
-              <Card className="glass-card border-white/10 bg-white/5 p-8">
-                <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Included</p>
-                <ul className="mt-6 space-y-3 text-sm text-white/70">
-                  {copy.pricing.includes.map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      {item}
-                    </li>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
+                  {plan.features.map((f, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#ccc" }}>
+                      <span style={{ color: GREEN, fontSize: 16 }}>✓</span>
+                      {f}
+                    </div>
                   ))}
-                </ul>
-              </Card>
-            </div>
+                </div>
+                <Link href={plan.href} style={{
+                  display: "block", width: "100%", padding: "14px", borderRadius: 12, border: "none",
+                  fontSize: 15, fontWeight: 700, cursor: "pointer", textAlign: "center", textDecoration: "none",
+                  background: plan.popular ? `linear-gradient(135deg, ${ORANGE}, #FF8A00)` : "rgba(255,255,255,0.06)",
+                  color: "white",
+                  boxShadow: plan.popular ? `0 8px 24px ${ORANGE}30` : "none"
+                }}>
+                  {plan.cta}
+                </Link>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="section-surface">
-          <div className="container mx-auto px-4 py-20">
-            <div className="rounded-[36px] border border-white/10 bg-gradient-to-r from-emerald-400/20 via-white/5 to-transparent p-10 text-center">
-              <h2 className="text-3xl font-semibold text-white md:text-4xl">{copy.finalCta.title}</h2>
-              <p className="mt-4 text-white/70">{copy.finalCta.subtitle}</p>
-              <Button className="mt-6 bg-white text-slate-950 hover:bg-white/90" size="lg">
-                {copy.finalCta.button}
-              </Button>
-            </div>
+      {/* FAQ */}
+      <section id="faq" style={{ padding: "80px 24px", background: "rgba(255,255,255,0.01)" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ORANGE, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>FAQ</p>
+            <h2 style={{ fontSize: 44, fontWeight: 900, letterSpacing: -1 }}>Questions Fréquentes</h2>
           </div>
-        </section>
-      </main>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {faqs.map((faq, i) => (
+              <div key={i}
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={{
+                  background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 16, padding: "20px 24px", cursor: "pointer"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 16, fontWeight: 700 }}>{faq.q}</span>
+                  <span style={{
+                    color: ORANGE, fontSize: 20, fontWeight: 300,
+                    transform: openFaq === i ? "rotate(45deg)" : "none",
+                    transition: "transform 0.2s"
+                  }}>+</span>
+                </div>
+                {openFaq === i && (
+                  <p style={{
+                    marginTop: 16, paddingTop: 16,
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    color: "#999", lineHeight: 1.7, fontSize: 15
+                  }}>{faq.a}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      <footer className="border-t border-white/10 bg-slate-950 py-10">
-        <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 text-sm text-white/50 md:flex-row">
-          <span>{copy.footer.rights}</span>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-white">
-              {copy.footer.privacy}
-            </Link>
-            <Link href="/terms" className="hover:text-white">
-              {copy.footer.terms}
-            </Link>
-          </div>
+      {/* FINAL CTA */}
+      <section style={{ padding: "100px 24px", textAlign: "center", position: "relative" }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+          width: 500, height: 500, background: `radial-gradient(circle, ${ORANGE}10, transparent 70%)`,
+          pointerEvents: "none"
+        }} />
+        <div style={{ position: "relative", maxWidth: 700, margin: "0 auto" }}>
+          <h2 style={{ fontSize: 48, fontWeight: 900, letterSpacing: -1.5, lineHeight: 1.1, marginBottom: 20 }}>
+            Pendant Que Vous Hésitez,<br />
+            Vos Concurrents{" "}
+            <span style={{ color: ORANGE }}>Automatisent</span>
+          </h2>
+          <p style={{ fontSize: 18, color: "#888", marginBottom: 40 }}>
+            Chaque jour sans FitFlow = des dizaines de leads perdus.
+          </p>
+          <Link href="/signup" style={{
+            background: `linear-gradient(135deg, ${ORANGE}, #FF8A00)`,
+            color: "white", padding: "18px 56px", borderRadius: 16,
+            fontSize: 17, fontWeight: 700, textDecoration: "none",
+            display: "inline-flex", alignItems: "center", gap: 10,
+            boxShadow: `0 16px 48px ${ORANGE}40`
+          }}>
+            Transformer Mon Instagram Maintenant
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </Link>
+          <p style={{ marginTop: 20, fontSize: 13, color: "#555" }}>
+            ✓ 14 jours gratuits · ✓ Aucune carte bancaire · ✓ Annulation en 1 clic
+          </p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{
+        padding: "32px 40px", borderTop: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", justifyContent: "space-between", alignItems: "center"
+      }}>
+        <span style={{ color: "#444", fontSize: 13 }}>© 2026 FitFlow. Tous droits réservés.</span>
+        <div style={{ display: "flex", gap: 24 }}>
+          <Link href="/privacy" style={{ color: "#444", fontSize: 13, textDecoration: "none" }}>Confidentialité</Link>
+          <Link href="/terms" style={{ color: "#444", fontSize: 13, textDecoration: "none" }}>CGU</Link>
+          <Link href="/contact" style={{ color: "#444", fontSize: 13, textDecoration: "none" }}>Contact</Link>
         </div>
       </footer>
     </div>

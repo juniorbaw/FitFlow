@@ -187,7 +187,8 @@ export class InstagramService {
  * Génère l'URL d'autorisation Instagram OAuth
  */
 export function getInstagramAuthUrl(redirectUri: string): string {
-  const appId = process.env.INSTAGRAM_APP_ID!
+  // ✅ FIX: Utiliser NEXT_PUBLIC_INSTAGRAM_APP_ID
+  const appId = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID!
   const scope = 'user_profile,user_media'
 
   return `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&response_type=code`
@@ -197,7 +198,8 @@ export function getInstagramAuthUrl(redirectUri: string): string {
  * Échange le code d'autorisation contre un access token
  */
 export async function exchangeCodeForToken(code: string, redirectUri: string) {
-  const appId = process.env.INSTAGRAM_APP_ID!
+  // ✅ FIX: Utiliser NEXT_PUBLIC_INSTAGRAM_APP_ID
+  const appId = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID!
   const appSecret = process.env.INSTAGRAM_APP_SECRET!
 
   const response = await fetch('https://api.instagram.com/oauth/access_token', {
