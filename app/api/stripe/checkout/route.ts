@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { APP_CONFIG, STRIPE_CONFIG } from '@/lib/config';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+const stripe = new Stripe(STRIPE_CONFIG.SECRET_KEY, {
   apiVersion: '2026-01-28.clover',
 });
-
-const PRICE_IDS = {
-  starter: process.env.STRIPE_PRICE_STARTER!,
-  pro: process.env.STRIPE_PRICE_PRO!,
-  elite: process.env.STRIPE_PRICE_ELITE!,
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +14,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS];
+    const priceId = STRIPE_CONFIG.prices[plan as keyof typeof STRIPE_CONFIG.prices];
 
     if (!priceId) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
@@ -34,8 +29,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success&plan=${plan}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?checkout=canceled`,
+      success_url: APP_CONFIG.callbacks.stripe.success(plan),
+      cancel_url: APP_CONFIG.callbacks.stripe.cancel(),
       customer_email: email,
       metadata: {
         user_id,

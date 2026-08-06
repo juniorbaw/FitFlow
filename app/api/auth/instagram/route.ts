@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
 const INSTAGRAM_APP_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://fit-flow-gamma.vercel.app'
+import { APP_CONFIG, INSTAGRAM_CONFIG } from '@/lib/config'
 const SECRET_KEY = 'fitflow-instagram-oauth-secret'
 
 export async function GET(request: NextRequest) {
@@ -29,27 +29,20 @@ export async function GET(request: NextRequest) {
       .substring(0, 16)
 
     const state = `${userId}.${timestamp}.${signature}`
-    const redirectUri = `${APP_URL}/api/auth/instagram/callback`
+    const redirectUri = `${APP_URL}/api/auth/callback`
 
-    // Build Instagram OAuth URL
-    const params = new URLSearchParams({
-      client_id: INSTAGRAM_APP_ID,
-      redirect_uri: redirectUri,
-      scope: 'user_profile,instagram_business_basic,instagram_business_content_publish',
-      response_type: 'code',
-      state
-    })
-
-    const instagramAuthUrl = `https://api.instagram.com/oauth/authorize?${params.toString()}`
+    // Build Facebook OAuth URL (Meta Business)
+    // IMPORTANT: Use facebook.com/v18.0/dialog/oauth (NOT instagram.com/oauth/authorize)
+    const appId = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID
+    const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement&response_type=code`
 
     console.log(`📱 Instagram OAuth Request:`)
-    console.log(`  ├─ App ID: ${INSTAGRAM_APP_ID}`)
+    console.log(`  ├─ App ID: ${appId}`)
     console.log(`  ├─ Redirect URI: ${redirectUri}`)
-    console.log(`  ├─ State: ${state}`)
-    console.log(`  └─ Auth URL: ${instagramAuthUrl.substring(0, 100)}...`)
+    console.log(`  ├─ Auth URL: ${authUrl.substring(0, 100)}...`)
 
     // Redirect to Instagram OAuth
-    return NextResponse.redirect(instagramAuthUrl)
+    return NextResponse.redirect(authUrl)
 
   } catch (error: any) {
     console.error('❌ Instagram auth route error:', error)

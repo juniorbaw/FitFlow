@@ -2,57 +2,58 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8">
-        <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
+        <h1 className="text-4xl font-bold mb-8">Politique de Confidentialité</h1>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Information We Collect</h2>
+          <h2 className="text-2xl font-semibold mb-4">Informations que nous collectons</h2>
           <p className="text-gray-700 mb-4">
-            When you use ClientWin and connect your Instagram account, we collect:
+            Lorsque vous utilisez FitFlow et connectez votre compte Instagram, nous collectons :
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Your Instagram username and user ID</li>
-            <li>Your Instagram posts and media</li>
-            <li>Comments on your posts</li>
-            <li>Access tokens to interact with Instagram on your behalf</li>
+            <li>Votre nom d'utilisateur et ID Instagram</li>
+            <li>Vos posts et médias Instagram</li>
+            <li>Les commentaires sur vos posts</li>
+            <li>Les tokens d'accès pour interagir avec Instagram en votre nom</li>
           </ul>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">How We Use Your Information</h2>
+          <h2 className="text-2xl font-semibold mb-4">Comment nous utilisons vos données</h2>
           <p className="text-gray-700 mb-4">
-            We use your Instagram data to:
+            Nous utilisons vos données Instagram pour :
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Display your Instagram posts and comments in our dashboard</li>
-            <li>Automate direct messages based on comments (when you create campaigns)</li>
-            <li>Provide analytics about your Instagram engagement</li>
+            <li>Afficher vos posts et commentaires Instagram dans notre dashboard</li>
+            <li>Automatiser l'envoi de messages directs basés sur les commentaires</li>
+            <li>Fournir des analytics sur votre engagement Instagram</li>
           </ul>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Data Storage</h2>
+          <h2 className="text-2xl font-semibold mb-4">Stockage des données</h2>
           <p className="text-gray-700">
-            Your data is securely stored in our database. We use industry-standard encryption
-            and security practices to protect your information.
+            Vos données sont stockées de manière sécurisée dans notre base de données. Nous utilisons 
+            des pratiques de chiffrement et de sécurité conformes aux standards de l'industrie pour 
+            protéger vos informations.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Your Rights</h2>
+          <h2 className="text-2xl font-semibold mb-4">Vos droits</h2>
           <p className="text-gray-700 mb-4">
-            You have the right to:
+            Vous avez le droit de :
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Disconnect your Instagram account at any time</li>
-            <li>Request deletion of your data</li>
-            <li>Access all data we have collected about you</li>
+            <li>Déconnecter votre compte Instagram à tout moment</li>
+            <li>Demander la suppression de vos données</li>
+            <li>Accéder à toutes les données que nous avons collectées sur vous</li>
           </ul>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+          <h2 className="text-2xl font-semibold mb-4">Nous contacter</h2>
           <p className="text-gray-700">
-            If you have questions about this Privacy Policy, please contact us.
+            Si vous avez des questions concernant cette politique de confidentialité, contactez-nous à contact@fitflow.app
           </p>
         </section>
 
